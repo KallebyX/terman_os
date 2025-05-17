@@ -21,6 +21,7 @@ theme:
     - search.suggest
     - search.highlight
     - content.code.copy
+  custom_dir: docs/overrides
 
 nav:
   - Início: index.md
@@ -31,3 +32,9 @@ nav:
   - Contribuindo: ../CONTRIBUTING.md
   - Código de Conduta: ../CODE_OF_CONDUCT.md
   - Roadmap: ../ROADMAP.md
+
+extra_css:
+  - styles/terman.css
+
+extra_javascript:
+  - scripts/extra.js
