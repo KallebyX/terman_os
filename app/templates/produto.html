@@ -5,7 +5,11 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 mb-4">
-            <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_url) }}" alt="{{ produto.nome }}" class="img-fluid rounded shadow-sm">
+            {% if produto.imagem_filename %}
+            <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}" alt="{{ produto.nome }}" class="img-fluid rounded shadow-sm">
+            {% else %}
+            <img src="{{ url_for('static', filename='placeholder.jpg') }}" alt="Imagem não disponível" class="img-fluid rounded shadow-sm">
+            {% endif %}
         </div>
         <div class="col-md-6">
             <h1 class="mb-3">{{ produto.nome }}</h1>

@@ -7,44 +7,23 @@
     <p class="text-center lead">Confira nossas mangueiras, conexões e soluções técnicas para uso agrícola, industrial e doméstico.</p>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mt-4">
-        <!-- Produto 1 -->
+        {% for produto in produtos %}
         <div class="col">
             <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/mangueira_agricola.jpg') }}" class="card-img-top" alt="Mangueira Agrícola">
+                {% if produto.imagem_filename %}
+                <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}" class="card-img-top" alt="{{ produto.nome }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top" alt="Sem imagem">
+                {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">Mangueira Agrícola 1"</h5>
-                    <p class="card-text">Ideal para sistemas de irrigação e uso intensivo. Alta resistência e flexibilidade.</p>
-                    <p class="text-success fw-bold">R$ 59,90</p>
-                    <a href="#" class="btn btn-outline-primary w-100">Ver detalhes</a>
+                    <h5 class="card-title">{{ produto.nome }}</h5>
+                    <p class="card-text">{{ produto.descricao }}</p>
+                    <p class="text-success fw-bold">R$ {{ '%.2f'|format(produto.preco) }}</p>
+                    <a href="{{ url_for('marketplace.produto_detalhado', produto_id=produto.id) }}" class="btn btn-outline-primary w-100">Ver detalhes</a>
                 </div>
             </div>
         </div>
-
-        <!-- Produto 2 -->
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/conexao_latão.jpg') }}" class="card-img-top" alt="Conexão de Latão">
-                <div class="card-body">
-                    <h5 class="card-title">Conexão de Latão 3/4"</h5>
-                    <p class="card-text">Durável, anticorrosiva e ideal para sistemas hidráulicos industriais e residenciais.</p>
-                    <p class="text-success fw-bold">R$ 12,50</p>
-                    <a href="#" class="btn btn-outline-primary w-100">Ver detalhes</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Produto 3 -->
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/kit_prensado.jpg') }}" class="card-img-top" alt="Kit Prensado Personalizado">
-                <div class="card-body">
-                    <h5 class="card-title">Kit Prensado Personalizado</h5>
-                    <p class="card-text">Prensagem técnica sob medida com os itens que você precisa. Atendimento rápido.</p>
-                    <p class="text-success fw-bold">Sob consulta</p>
-                    <a href="#" class="btn btn-outline-primary w-100">Ver detalhes</a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
