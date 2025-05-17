@@ -1,5 +1,7 @@
 # 📘 Documentação Técnica — Terman OS
 
+> **Versão da documentação:** 1.0 • Última atualização: Maio de 2025
+
 Bem-vindo à documentação oficial do sistema Terman OS, desenvolvido pela Oryum Tech para a empresa Mangueiras Terman LTDA.  
 Aqui você encontrará informações sobre arquitetura, rotas, modelos de dados, deploy e extensões futuras.
 

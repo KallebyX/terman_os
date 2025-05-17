@@ -52,3 +52,15 @@ test-db:
 create-admin:
 	@echo "👤 Acessando shell do Flask..."
 	FLASK_APP=$(FLASK_APP) flask shell
+
+docs-serve:
+	@echo "📘 Servindo documentação localmente..."
+	mkdocs serve
+
+docs-build:
+	@echo "🏗️  Construindo documentação..."
+	mkdocs build
+
+docs-deploy:
+	@echo "🚀 Publicando documentação no GitHub Pages..."
+	mkdocs gh-deploy --clean

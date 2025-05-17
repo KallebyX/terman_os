@@ -1,6 +1,8 @@
 # 🧰 Mangueiras Terman OS — Plataforma de Gestão, Vendas e Automação
 
 ![GitHub Pages](https://img.shields.io/badge/docs-online-blue?logo=github&style=flat-square)
+![Licença](https://img.shields.io/badge/licença-uso%20restrito-red?style=flat-square)
+![Segurança](https://img.shields.io/badge/segurança-reportar%20vulnerabilidades-orange?style=flat-square)
 [📘 Documentação Completa](https://kallebyx.github.io/terman_os/)
 
 Sistema web completo desenvolvido para a empresa **Mangueiras Terman LTDA**, de Caçapava do Sul/RS, especializada em soluções hidráulicas, industriais e para o agronegócio.  
@@ -156,6 +158,12 @@ Confira as diretrizes em [CONTRIBUTING.md](../main/CONTRIBUTING.md) para saber c
 
 Este projeto é distribuído sob licença de uso restrito.  
 Para detalhes, veja [LICENSE](../main/LICENSE).
+
+---
+
+## 🔐 Segurança
+
+Para reportar vulnerabilidades ou comportamentos suspeitos, consulte o [SECURITY.md](../main/SECURITY.md).
 
 ---
 
