@@ -29,7 +29,21 @@
                 <li class="nav-item"><a class="nav-link" href="/contato">Contato</a></li>
                 <li class="nav-item"><a class="nav-link" href="/loja">Loja</a></li>
                 <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/login">Entrar</a></li>
+                {% if current_user.is_authenticated %}
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      👤 {{ current_user.nome }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                      <li><a class="dropdown-item" href="{{ url_for('cliente.perfil') }}">Meu Perfil</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('cliente.editar_perfil') }}">Editar Perfil</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Sair</a></li>
+                    </ul>
+                  </li>
+                {% else %}
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Entrar</a></li>
+                {% endif %}
             </ul>
         </div>
     </nav>

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Excluir Conta{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-danger">⚠️ Excluir Conta</h2>
+  <p class="mt-3">
+    Você está prestes a excluir sua conta <strong>{{ current_user.nome }}</strong> de forma permanente. Isso irá remover:
+  </p>
+  <ul>
+    <li>Seu cadastro</li>
+    <li>Todos os seus pedidos associados</li>
+    <li>Histórico de rastreios e dados</li>
+  </ul>
+  <p><strong>Essa ação não pode ser desfeita.</strong></p>
+
+  <form method="POST">
+    <button type="submit" class="btn btn-danger">Sim, excluir minha conta</button>
+    <a href="{{ url_for('cliente.perfil') }}" class="btn btn-secondary ms-2">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

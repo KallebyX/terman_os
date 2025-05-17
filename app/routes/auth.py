@@ -16,9 +16,9 @@ def login():
             login_user(usuario, remember=form.lembrar.data)
             flash('Login realizado com sucesso!', 'success')
             if usuario.tipo_usuario == 'admin':
-                return redirect(url_for('admin.painel_admin'))
+                return redirect(url_for('admin.dashboard'))
             else:
-                return redirect(url_for('cliente.painel_cliente'))
+                return redirect(url_for('cliente.perfil'))
         else:
             flash('E-mail ou senha inválidos.', 'danger')
     return render_template('login.html', form=form)
@@ -39,7 +39,7 @@ def cadastro():
                 novo_usuario.set_senha(form.senha.data)
                 db.session.add(novo_usuario)
                 db.session.commit()
-                flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
+                flash('Cadastro realizado com sucesso. Faça o login.', 'success')
                 return redirect(url_for('auth.login'))
             except Exception as e:
                 db.session.rollback()

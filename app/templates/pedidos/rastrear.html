@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Rastreamento do Pedido{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-3">📦 Rastreamento do Pedido #{{ pedido.id }}</h2>
+
+  <div class="card p-3">
+    <p><strong>Status Atual:</strong></p>
+    <div class="alert alert-info">{{ status }}</div>
+    <p><strong>Código de Rastreio:</strong> {{ pedido.codigo_rastreio }}</p>
+  </div>
+
+  <a href="{{ url_for('cliente.visualizar_pedido', pedido_id=pedido.id) }}" class="btn btn-secondary mt-3">Voltar ao Pedido</a>
+</div>
+{% endblock %}
