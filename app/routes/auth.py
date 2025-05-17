@@ -30,16 +30,21 @@ def cadastro():
         if User.query.filter_by(email=form.email.data).first():
             flash('Este e-mail já está cadastrado.', 'warning')
         else:
-            novo_usuario = User(
-                nome=form.nome.data,
-                email=form.email.data,
-                tipo_usuario='cliente'
-            )
-            novo_usuario.set_senha(form.senha.data)
-            db.session.add(novo_usuario)
-            db.session.commit()
-            flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
-            return redirect(url_for('auth.login'))
+            try:
+                novo_usuario = User(
+                    nome=form.nome.data,
+                    email=form.email.data,
+                    tipo_usuario='cliente'
+                )
+                novo_usuario.set_senha(form.senha.data)
+                db.session.add(novo_usuario)
+                db.session.commit()
+                flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
+                return redirect(url_for('auth.login'))
+            except Exception as e:
+                db.session.rollback()
+                print(f"Erro ao cadastrar usuário: {e}")
+                flash('Erro ao cadastrar. Tente novamente mais tarde.', 'danger')
     return render_template('cadastro.html', form=form)
 
 @auth_bp.route('/logout')

@@ -10,11 +10,17 @@
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control") }}
+                    {{ form.email(class="form-control", placeholder="Digite seu e-mail") }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
                     {{ form.senha.label(class="form-label") }}
-                    {{ form.senha(class="form-control") }}
+                    {{ form.senha(class="form-control", placeholder="Digite sua senha") }}
+                    {% for error in form.senha.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3 form-check">
                     {{ form.lembrar(class="form-check-input") }}

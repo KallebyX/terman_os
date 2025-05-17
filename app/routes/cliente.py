@@ -14,3 +14,9 @@ def painel_cliente():
 def meus_pedidos():
     pedidos = Pedido.query.filter_by(usuario_id=current_user.id).order_by(Pedido.data_criacao.desc()).all()
     return render_template('pedidos/cliente_listar.html', pedidos=pedidos)
+
+@cliente_bp.route('/pedido/<int:pedido_id>')
+@login_required
+def visualizar_pedido(pedido_id):
+    pedido = Pedido.query.filter_by(id=pedido_id, usuario_id=current_user.id).first_or_404()
+    return render_template('pedidos/visualizar.html', pedido=pedido)

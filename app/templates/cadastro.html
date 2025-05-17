@@ -10,19 +10,31 @@
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{ form.nome.label(class="form-label") }}
-                    {{ form.nome(class="form-control") }}
+                    {{ form.nome(class="form-control", placeholder="Digite seu nome completo") }}
+                    {% for error in form.nome.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
                     {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control") }}
+                    {{ form.email(class="form-control", placeholder="Digite seu e-mail") }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
                     {{ form.senha.label(class="form-label") }}
-                    {{ form.senha(class="form-control") }}
+                    {{ form.senha(class="form-control", placeholder="Crie uma senha") }}
+                    {% for error in form.senha.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
                     {{ form.confirmar_senha.label(class="form-label") }}
-                    {{ form.confirmar_senha(class="form-control") }}
+                    {{ form.confirmar_senha(class="form-control", placeholder="Confirme a senha") }}
+                    {% for error in form.confirmar_senha.errors %}
+                        <div class="text-danger mt-1">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <button type="submit" class="btn btn-success w-100">Cadastrar</button>
             </form>
