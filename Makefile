@@ -1,12 +1,23 @@
-# Makefile – Terman OS
+# Makefile – Terman OS (dev + prod)
+
+FLASK_APP=run.py
+ENV_FILE=.env
 
 run:
-	@echo "🔄 Rodando servidor Flask..."
-	FLASK_APP=run.py FLASK_ENV=development flask run
+	@echo "🔄 Rodando servidor Flask (modo $(FLASK_ENV))..."
+	FLASK_APP=$(FLASK_APP) FLASK_ENV=$(FLASK_ENV) flask run
+
+env-dev:
+	@echo "🔧 Carregando .env de desenvolvimento"
+	ENV_FILE=.env FLASK_ENV=development make env
+
+env-prod:
+	@echo "🚀 Carregando .env de produção"
+	ENV_FILE=.env.production FLASK_ENV=production make env
 
 env:
-	@echo "🔄 Carregando variáveis do .env"
-	export $$(cat .env | xargs)
+	@echo "📦 Exportando variáveis do $(ENV_FILE)"
+	export $$(cat $(ENV_FILE) | xargs)
 
 install:
 	@echo "📦 Instalando dependências..."
@@ -39,5 +50,5 @@ test-db:
 	curl http://127.0.0.1:5000/test-db
 
 create-admin:
-	@echo "👤 Criando admin pelo shell interativo..."
-	FLASK_APP=run.py flask shell
+	@echo "👤 Acessando shell do Flask..."
+	FLASK_APP=$(FLASK_APP) flask shell

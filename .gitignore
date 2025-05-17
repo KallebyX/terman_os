@@ -1,8 +1,27 @@
+# Arquivos de cache Python
 __pycache__/
 *.pyc
-.env
-instance/
-.vscode/
+*.pyo
+*.pyd
+
+# Ambiente virtual
 venv/
+
+# VSCode
+.vscode/
+
+# Variáveis de ambiente
 .env
 .env.production
+.env.*
+
+# Instância do Flask
+instance/
+
+# Pasta de migrações (opcional se for recriada sempre)
+migrations/
+
+# Logs e arquivos temporários
+*.log
+*.sqlite3
+.DS_Store
