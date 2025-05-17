@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Cadastro | Mangueiras Terman{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Criar Conta</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.nome.label(class="form-label") }}
+                    {{ form.nome(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.senha.label(class="form-label") }}
+                    {{ form.senha(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.confirmar_senha.label(class="form-label") }}
+                    {{ form.confirmar_senha(class="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+            </form>
+            <div class="text-center mt-3">
+                <p>Já tem conta? <a href="/login">Entrar</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

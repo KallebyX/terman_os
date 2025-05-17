@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Meu Carrinho{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Meu Carrinho</h2>
+    {% if itens %}
+    <form method="POST" action="{{ url_for('marketplace.finalizar_pedido') }}">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Subtotal</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>R$ {{ '%.2f' | format(item.subtotal) }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('marketplace.remover_item_carrinho', produto_id=item.produto_id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h4>Total: R$ {{ '%.2f' | format(total) }}</h4>
+        <button type="submit" class="btn btn-success mt-3">Finalizar Pedido</button>
+    </form>
+    {% else %}
+    <p>Seu carrinho está vazio.</p>
+    {% endif %}
+</div>
+{% endblock %}

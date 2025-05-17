@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Detalhes do Pedido | Admin{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2>Pedido #{{ pedido.id }}</h2>
+    <p><strong>Cliente:</strong> {{ pedido.usuario.nome }}</p>
+    <p><strong>Status:</strong> {{ pedido.status }}</p>
+    <p><strong>Data:</strong> {{ pedido.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in pedido.itens %}
+            <tr>
+                <td>{{ item.produto.nome }}</td>
+                <td>{{ item.quantidade }}</td>
+                <td>R$ {{ '%.2f'|format(item.preco_unitario) }}</td>
+                <td>R$ {{ '%.2f'|format(item.subtotal()) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

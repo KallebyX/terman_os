@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Entrar | Mangueiras Terman{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Entrar na Plataforma</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.senha.label(class="form-label") }}
+                    {{ form.senha(class="form-control") }}
+                </div>
+                <div class="mb-3 form-check">
+                    {{ form.lembrar(class="form-check-input") }}
+                    {{ form.lembrar.label(class="form-check-label") }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            </form>
+            <div class="text-center mt-3">
+                <p>Ainda não tem conta? <a href="/cadastro">Cadastrar</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

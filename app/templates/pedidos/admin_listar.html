@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Pedidos Recebidos{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Pedidos Recebidos</h2>
+    <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>{{ pedido.id }}</td>
+                <td>{{ pedido.usuario.nome }}</td>
+                <td>{{ pedido.data_criacao.strftime('%d/%m/%Y') }}</td>
+                <td>{{ pedido.status }}</td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-primary">Visualizar</a>
+                    <a href="#" class="btn btn-sm btn-secondary">Alterar Status</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

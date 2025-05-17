@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Início | Mangueiras Terman{% endblock %}
+{% block content %}
+
+<div class="text-center bg-light py-5" style="background-image: url('/static/img/banner.jpg'); background-size: cover; background-position: center; background-blend-mode: overlay;">
+    <h1 class="mb-4 text-white fw-bold" style="text-shadow: 1px 1px 3px #000;">Bem-vindo à Mangueiras Terman</h1>
+    <p class="lead text-white" style="text-shadow: 1px 1px 2px #000;">Há mais de 20 anos fornecendo qualidade, resistência e confiança para o agro e a indústria gaúcha.</p>
+    <a href="/loja" class="btn btn-success btn-lg mt-3">Acessar Loja Online</a>
+</div>
+
+<section class="container mt-5">
+    <h2 class="text-center mb-4">Nossos Diferenciais</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <h5>Prensagem Especializada</h5>
+            <p>Serviço técnico com alta precisão para diversas aplicações industriais e agrícolas.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h5>Entrega Rápida e Local</h5>
+            <p>Atendimento ágil em Caçapava do Sul e região central do RS.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h5>Mais de 20 anos de história</h5>
+            <p>Confiança construída com excelência e compromisso com o cliente.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bg-light py-5 mt-5">
+    <div class="container">
+        <h3 class="text-center mb-4">O que dizem nossos clientes</h3>
+        <blockquote class="blockquote text-center">
+            <p class="mb-0">"Sempre fui atendido com agilidade. Produtos de primeira linha e suporte impecável."</p>
+            <footer class="blockquote-footer mt-2">João Pedro, Produtor Rural</footer>
+        </blockquote>
+    </div>
+</section>
+
+{% endblock %}

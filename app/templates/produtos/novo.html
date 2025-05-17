@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Cadastrar Produto{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Novo Produto</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" class="form-control" name="nome" required>
+        </div>
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea class="form-control" name="descricao" rows="4" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="preco" class="form-label">Preço</label>
+            <input type="number" step="0.01" class="form-control" name="preco" required>
+        </div>
+        <div class="mb-3">
+            <label for="estoque" class="form-label">Estoque</label>
+            <input type="number" class="form-control" name="estoque" required>
+        </div>
+        <div class="mb-3">
+            <label for="imagem" class="form-label">Imagem do Produto</label>
+            <input type="file" class="form-control" name="imagem">
+        </div>
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoria</label>
+            <select class="form-select" name="categoria_id" required>
+                {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Produto</button>
+    </form>
+</div>
+{% endblock %}

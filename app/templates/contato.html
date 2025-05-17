@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Contato | Mangueiras Terman{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Fale Conosco</h1>
+    <p class="lead text-center">Tem dúvidas, sugestões ou deseja fazer um pedido especial? Preencha o formulário abaixo ou entre em contato pelos nossos canais.</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <form method="POST" action="#">
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mensagem" class="form-label">Mensagem</label>
+                    <textarea class="form-control" id="mensagem" name="mensagem" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+            </form>
+
+            <hr class="my-5">
+
+            <div class="text-center">
+                <h5>Outros canais</h5>
+                <p>
+                    WhatsApp: <a href="https://wa.me/5555999999999" target="_blank">(55) 99999-9999</a><br>
+                    E-mail: <a href="mailto:contato@mangueirasterman.com.br">contato@mangueirasterman.com.br</a><br>
+                    Endereço: Rua das Mangueiras, 123 – Caçapava do Sul/RS
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
