@@ -9,6 +9,13 @@ from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
 
+# Rota do dashboard admin
+@admin_bp.route('/dashboard')
+@login_required
+@admin_required
+def dashboard():
+    return render_template('admin/dashboard.html')
+
 @admin_bp.route('/')
 @login_required
 @admin_required

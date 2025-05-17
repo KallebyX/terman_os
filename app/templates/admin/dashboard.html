@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4">Painel Administrativo</h1>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Produtos</h5>
+          <p class="card-text">Gerencie os produtos cadastrados no sistema.</p>
+          <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-light">Acessar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Categorias</h5>
+          <p class="card-text">Edite e crie novas categorias.</p>
+          <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-light">Acessar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card text-white bg-info mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Pedidos</h5>
+          <p class="card-text">Visualize todos os pedidos realizados.</p>
+          <a href="{{ url_for('admin.listar_pedidos_admin') }}" class="btn btn-light">Acessar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
