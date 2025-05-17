@@ -1,0 +1,64 @@
+# Arquitetura de Deploy – Render para Terman OS
+services:
+  - type: web
+    name: terman-os
+    env: python
+    plan: free
+    region: oregon
+    repo: https://github.com/KallebyX/terman_os
+    branch: main
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    healthCheckPath: /test-db
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false  # protegida, você define no painel ou CLI
+      - key: DATABASE_URL
+        fromDatabase:
+          name: terman-db
+          property: connectionString
+      - key: UPLOAD_FOLDER
+        value: app/static/produtos
+      - key: MAX_CONTENT_LENGTH
+        value: "16777216"
+      - key: RENDER
+        value: true
+
+  # Ambiente opcional de staging
+  - type: web
+    name: terman-os-staging
+    env: python
+    plan: free
+    branch: develop
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    autoDeploy: true
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_ENV
+        value: development
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: terman-db
+          property: connectionString
+      - key: UPLOAD_FOLDER
+        value: app/static/produtos
+      - key: MAX_CONTENT_LENGTH
+        value: "16777216"
+      - key: RENDER
+        value: true
+
+databases:
+  - name: terman-db
+    databaseName: terman_db
+    user: admin
+    plan: free
+    region: oregon
