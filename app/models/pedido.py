@@ -5,7 +5,7 @@ class Pedido(db.Model):
     __tablename__ = 'pedidos'
 
     id = db.Column(db.Integer, primary_key=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default='Recebido')  # Recebido, Separando, Prensando, Finalizado
 

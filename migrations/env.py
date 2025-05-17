@@ -1,6 +1,12 @@
 import logging
 from logging.config import fileConfig
-
+# IMPORTAÇÃO DOS MODELOS PARA MIGRAÇÃO FUNCIONAR
+from app.models.user import User
+from app.models.produto import Produto
+from app.models.pedido import Pedido
+from app.models.estoque import Estoque
+from app.models.categoria import Categoria
+from app.models.ordem_servico import OrdemServico
 from flask import current_app
 
 from alembic import context

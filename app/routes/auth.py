@@ -53,3 +53,28 @@ def logout():
     logout_user()
     flash('Você saiu da sua conta.', 'info')
     return redirect(url_for('auth.login'))
+
+from flask import jsonify
+from app.models.user import User  # ajuste o caminho conforme necessário
+
+@auth_bp.route('/test-db')
+def testar_conexao_banco():
+    try:
+        usuarios = User.query.limit(5).all()
+        return jsonify({
+            "status": "Conexão bem-sucedida!",
+            "usuarios_encontrados": len(usuarios)
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "Erro ao conectar",
+            "erro": str(e)
+        }), 500
+
+@auth_bp.route('/force-create')
+def force_create_tables():
+    try:
+        db.create_all()
+        return "✅ Tabelas criadas no PostgreSQL remoto com sucesso!"
+    except Exception as e:
+        return f"❌ Erro ao criar tabelas: {str(e)}"

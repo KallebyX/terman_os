@@ -1,4 +1,3 @@
-cat <<EOF > render.yaml
 services:
   - type: web
     name: terman-os
@@ -12,4 +11,3 @@ services:
         fromDatabase:
           name: terman-db
           property: connectionString
-EOF
