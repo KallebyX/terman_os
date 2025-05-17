@@ -1,127 +1,124 @@
-# 🧰 Mangueiras Terman — Sistema de Gestão e Marketplace
+# 🧰 Mangueiras Terman OS — Plataforma de Gestão, Vendas e Automação
 
-Plataforma web completa desenvolvida para a empresa **Mangueiras Terman LTDA**, especializada em soluções hidráulicas, industriais e para o agronegócio. O sistema unifica presença digital com automação operacional, integrando loja online, painel administrativo, controle de estoque, pedidos e dashboard de indicadores.
+Sistema web desenvolvido para a empresa **Mangueiras Terman LTDA**, de Caçapava do Sul/RS, especializada em soluções hidráulicas, industriais e para o agronegócio.  
+Este sistema unifica presença digital, automação operacional e relacionamento com clientes em uma plataforma única, robusta e escalável.
+
+---
+
+## 🌐 URL de Produção
+
+[https://terman-os.onrender.com](https://terman-os.onrender.com)
 
 ---
 
 ## 📦 Tecnologias Utilizadas
 
-- **Backend**: Python 3.11+, Flask, SQLAlchemy
-- **Frontend**: HTML5, Bootstrap 5, Jinja2
-- **Banco de Dados**: SQLite (dev), PostgreSQL (prod)
-- **Gerenciamento de Usuários**: Flask-Login
-- **Upload de Arquivos**: `werkzeug` com manipulação segura
-- **Templates**: `Jinja2`
-- **Deploy (sugerido)**: Render, Railway ou VPS com Gunicorn
+- **Backend**: Python 3.11+, Flask, Flask-Login, SQLAlchemy, Flask-Migrate
+- **Frontend**: HTML5, CSS3, Bootstrap 5, Jinja2
+- **Banco de Dados**: PostgreSQL (Render) e SQLite (desenvolvimento)
+- **Deploy**: Render (Web Service + PostgreSQL)
+- **Outros**: Gunicorn, Werkzeug, Pillow (upload de imagens)
 
 ---
 
 ## 🧠 Funcionalidades
 
 ### 👥 Usuários
-- Diferenciação entre **Cliente** e **Administrador**
-- Login e cadastro com validação
-- Redirecionamento dinâmico por tipo de usuário
+- Login e cadastro com diferenciação entre **Cliente** e **Administrador**
+- Redirecionamento automático com base no perfil
+- Área do cliente: pedidos, dados, acompanhamento
+- Área administrativa protegida
 
 ### 🛍️ Marketplace
-- Catálogo com imagens reais dos produtos
-- Carrinho de compras com controle de sessão
-- Finalização de pedido protegida por login
-- Visualização do pedido (cliente e admin)
+- Catálogo dinâmico com imagens reais
+- Carrinho de compras com sessão persistente
+- Visualização e acompanhamento de pedidos
+- Responsividade total para mobile e desktop
 
 ### 🧑‍💼 Painel Administrativo
 - CRUD completo de Produtos e Categorias
-- Upload de imagens diretamente pelo formulário
-- Gerenciamento de pedidos em tempo real
-- Controle de estoque automático
+- Upload de imagens com validação
+- Controle de pedidos e estoque em tempo real
+- Visualização de detalhes, edição e exclusão
 
-### 📈 Futuro (em construção)
-- Dashboard com KPIs e gráficos interativos
-- Geração de PDF dos pedidos
-- Integração com WhatsApp e pagamentos via Pix
-- Logs administrativos e notificações automáticas
+### 📈 Futuro (em desenvolvimento)
+- Dashboard com KPIs e gráficos
+- Geração de relatórios em PDF
+- Integração com Pix e WhatsApp
+- Notificações automatizadas
 
 ---
 
-## 📁 Estrutura de Pastas
+## 📁 Estrutura do Projeto
 
+```
 terman_os/
 ├── app/
 │   ├── templates/        # HTML com Jinja2
-│   ├── static/           # CSS, imagens de produtos
-│   ├── models/           # Modelos SQLAlchemy
-│   ├── routes/           # Blueprints por módulo
-│   ├── forms/            # (em breve) Flask-WTF
-├── run.py                # App launcher
-├── requirements.txt      # Dependências
+│   ├── static/           # CSS, imagens, ícones
+│   ├── models/           # SQLAlchemy Models
+│   ├── routes/           # Blueprints organizados
+│   ├── forms/            # Formulários com Flask-WTF
+├── run.py                # Entry point da aplicação
+├── requirements.txt      # Dependências do projeto
+├── README.md             # Documentação principal
+├── .env.example          # Variáveis de ambiente
+```
 
 ---
 
-## 📸 Prints (sugestão de imagens no futuro)
-
-- Painel do Cliente
-- Carrinho de Compras
-- Administração de Produtos
-- Visualização de Pedidos
-
----
-
-## 🏗️ Para rodar localmente
+## 🧪 Como rodar localmente
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/seuusuario/mangueiras_terman.git
-cd mangueiras_terman
+git clone https://github.com/KallebyX/terman_os.git
+cd terman_os
 
 # 2. Criar e ativar ambiente virtual
 python3 -m venv venv
 source venv/bin/activate  # Linux/macOS
-venv\\Scripts\\activate   # Windows
+venv\Scripts\activate     # Windows
 
 # 3. Instalar dependências
 pip install -r requirements.txt
 
-# 4. Rodar o servidor Flask
-python run.py
+# 4. Configurar o .env
+cp .env.example .env
+# Edite a DATABASE_URL conforme necessário
 
+# 5. Migrar o banco
+flask db upgrade
 
-⸻
-
-✅ Status do Projeto
-	•	✅ Funcionalidades principais concluídas
-	•	🛠️ Dashboard e relatórios em desenvolvimento
-	•	🧪 Testes automatizados em breve
-	•	📲 Integrações externas planejadas
-
-⸻
-
-## 📄 Licença
-
-Este projeto é desenvolvido pela empresa **Oryum Tech (CNPJ: 49.549.704/0001-07)** para uso exclusivo da **Mangueiras Terman LTDA**, de Caçapava do Sul - RS.  
-Seu uso está restrito a fins educacionais e corporativos internos, salvo autorização contratual.
+# 6. Rodar servidor
+flask run
+```
 
 ---
 
-## 🤝 Desenvolvedor Responsável
+## ☁️ Deploy na Render
+
+- Banco de dados PostgreSQL provisionado via Render
+- Aplicação Flask rodando com Gunicorn (`web: gunicorn run:app`)
+- Variáveis de ambiente configuradas:
+  - `FLASK_APP=run.py`
+  - `FLASK_ENV=production`
+  - `SECRET_KEY=...`
+  - `DATABASE_URL=postgresql://...`
+
+---
+
+## 📄 Licença e Direitos
+
+Este sistema é de uso exclusivo da empresa **Mangueiras Terman LTDA**  
+Desenvolvido pela **Oryum Tech (CNPJ: 49.549.704/0001-07)**.  
+Reprodução, redistribuição ou modificação só são permitidas mediante autorização contratual.
+
+---
+
+## 👨‍💻 Desenvolvedor Responsável
 
 **Kalleby Evangelho Mota**  
-👨‍💻 Estudante de Engenharia Biomédica, fundador da Biomove e CEO da Oryum Tech  
+CEO da Oryum Tech · Fundador da Biomove  
+📧 kallebyevangelho03@gmail.com  
 🌐 [kallebyevangelho.com.br](https://www.kallebyevangelho.com.br)  
-📧 kallebyevangelho03@gmail.com
-
----
-
-## 📌 Agora faça o primeiro commit
-
-```bash
-git init
-git add .
-git commit -m "🔰 Primeiro commit - base do sistema da Mangueiras Terman"
-
-Depois, conecte ao GitHub:
-
-git remote add origin https://github.com/KallebyX/mangueiras_terman.git
-git push -u origin main
-
-
-⸻
+🔗 [LinkedIn](https://www.linkedin.com/in/kalleby-evangelho)
