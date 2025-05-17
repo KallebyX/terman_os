@@ -1,0 +1,22 @@
+site_name: Terman OS
+site_url: https://kallebyx.github.io/terman_os/
+repo_url: https://github.com/KallebyX/terman_os
+repo_name: GitHub
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: cyan
+  features:
+    - navigation.instant
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Início: index.md
+  - Contribuindo: ../CONTRIBUTING.md
+  - Código de Conduta: ../CODE_OF_CONDUCT.md
+  - Roadmap: ../ROADMAP.md
