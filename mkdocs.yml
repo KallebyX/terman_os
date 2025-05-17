@@ -6,17 +6,28 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  logo: images/logo.png
+  favicon: images/logo.png
   palette:
-    primary: indigo
-    accent: cyan
+    primary: deep orange
+    accent: amber
+  font:
+    text: Roboto
+    code: Roboto Mono
   features:
     - navigation.instant
     - navigation.sections
+    - navigation.expand
     - search.suggest
     - search.highlight
+    - content.code.copy
 
 nav:
   - Início: index.md
+  - Instalação (dev): instalacao-dev.md
+  - Deploy (Render): deploy.md
+  - FAQ: faq.md
+  - Equipe & Créditos: equipe.md
   - Contribuindo: ../CONTRIBUTING.md
   - Código de Conduta: ../CODE_OF_CONDUCT.md
   - Roadmap: ../ROADMAP.md
