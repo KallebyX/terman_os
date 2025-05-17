@@ -95,18 +95,18 @@ python run.py
 
 ⸻
 
-📄 Licença
+## 📄 Licença
 
-Este projeto é privado da empresa Mangueiras Terman LTDA, de Caçapava do Sul - RS.
-Seu uso está restrito a fins educacionais e corporativos internos.
+Este projeto é desenvolvido pela empresa **Oryum Tech (CNPJ: 49.549.704/0001-07)** para uso exclusivo da **Mangueiras Terman LTDA**, de Caçapava do Sul - RS.  
+Seu uso está restrito a fins educacionais e corporativos internos, salvo autorização contratual.
 
-⸻
+---
 
-🤝 Desenvolvedor Responsável
+## 🤝 Desenvolvedor Responsável
 
-Kalleby Evangelho Mota
-👨‍💻 Estudante de Engenharia Biomédica, fundador da Biomove
-🌐 kallebyevangelho.com.br
+**Kalleby Evangelho Mota**  
+👨‍💻 Estudante de Engenharia Biomédica, fundador da Biomove e CEO da Oryum Tech  
+🌐 [kallebyevangelho.com.br](https://www.kallebyevangelho.com.br)  
 📧 kallebyevangelho03@gmail.com
 
 ---
