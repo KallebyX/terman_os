@@ -1,13 +1,16 @@
 # 🧰 Mangueiras Terman OS — Plataforma de Gestão, Vendas e Automação
 
-Sistema web desenvolvido para a empresa **Mangueiras Terman LTDA**, de Caçapava do Sul/RS, especializada em soluções hidráulicas, industriais e para o agronegócio.  
-Este sistema unifica presença digital, automação operacional e relacionamento com clientes em uma plataforma única, robusta e escalável.
+![GitHub Pages](https://img.shields.io/badge/docs-online-blue?logo=github&style=flat-square)
+[📘 Documentação Completa](https://kallebyx.github.io/terman_os/)
+
+Sistema web completo desenvolvido para a empresa **Mangueiras Terman LTDA**, de Caçapava do Sul/RS, especializada em soluções hidráulicas, industriais e para o agronegócio.  
+Este sistema unifica presença digital, automação operacional e relacionamento com clientes em uma plataforma única, robusta, escalável e moderna.
 
 ---
 
 ## 🌐 URL de Produção
 
-[https://terman-os.onrender.com](https://terman-os.onrender.com)
+🔗 [https://terman-os.onrender.com](https://terman-os.onrender.com)
 
 ---
 
@@ -17,7 +20,7 @@ Este sistema unifica presença digital, automação operacional e relacionamento
 - **Frontend**: HTML5, CSS3, Bootstrap 5, Jinja2
 - **Banco de Dados**: PostgreSQL (Render) e SQLite (desenvolvimento)
 - **Deploy**: Render (Web Service + PostgreSQL)
-- **Outros**: Gunicorn, Werkzeug, Pillow (upload de imagens)
+- **Outros**: Gunicorn, Werkzeug, Pillow (upload de imagens), MkDocs
 
 ---
 
@@ -43,9 +46,10 @@ Este sistema unifica presença digital, automação operacional e relacionamento
 
 ### 📈 Futuro (em desenvolvimento)
 - Dashboard com KPIs e gráficos
-- Geração de relatórios em PDF
+- Geração de relatórios em PDF e Excel
 - Integração com Pix e WhatsApp
 - Notificações automatizadas
+- API REST para integrações externas
 
 ---
 
@@ -59,10 +63,11 @@ terman_os/
 │   ├── models/           # SQLAlchemy Models
 │   ├── routes/           # Blueprints organizados
 │   ├── forms/            # Formulários com Flask-WTF
+├── docs/                 # Documentação MkDocs
 ├── run.py                # Entry point da aplicação
 ├── requirements.txt      # Dependências do projeto
-├── README.md             # Documentação principal
 ├── .env.example          # Variáveis de ambiente
+├── render.yaml           # Configuração do deploy
 ```
 
 ---
@@ -84,7 +89,6 @@ pip install -r requirements.txt
 
 # 4. Configurar o .env
 cp .env.example .env
-# Edite a DATABASE_URL conforme necessário
 
 # 5. Migrar o banco
 flask db upgrade
@@ -107,11 +111,51 @@ flask run
 
 ---
 
+## 📘 Documentação
+
+Documentação completa com:
+
+- Estrutura do projeto
+- Autenticação
+- Rotas e modelos
+- API interna
+- Deploy, FAQ, créditos e mais
+
+🔗 Acesse: [https://kallebyx.github.io/terman_os](https://kallebyx.github.io/terman_os)
+
+---
+
+## 📌 Changelog (resumo)
+
+- ✅ CRUD de produtos, categorias e usuários
+- ✅ Upload de imagens com Pillow
+- ✅ Carrinho de compras com sessão
+- ✅ Visualização de pedidos para cliente e admin
+- ✅ Deploy no Render com PostgreSQL
+- 🚧 Dashboard e relatórios em desenvolvimento
+- 🚧 Integração com Pix e WhatsApp (planejado)
+
+---
+
 ## 📄 Licença e Direitos
 
 Este sistema é de uso exclusivo da empresa **Mangueiras Terman LTDA**  
 Desenvolvido pela **Oryum Tech (CNPJ: 49.549.704/0001-07)**.  
 Reprodução, redistribuição ou modificação só são permitidas mediante autorização contratual.
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas!  
+Confira as diretrizes em [CONTRIBUTING.md](../main/CONTRIBUTING.md) para saber como colaborar com o projeto.
+
+---
+
+## 📜 Licença
+
+Este projeto é distribuído sob licença de uso restrito.  
+Para detalhes, veja [LICENSE](../main/LICENSE).
 
 ---
 

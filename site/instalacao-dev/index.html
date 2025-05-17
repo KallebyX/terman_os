@@ -8,22 +8,28 @@
       
       
       
+        <link rel="canonical" href="https://kallebyx.github.io/terman_os/instalacao-dev/">
       
       
+        <link rel="prev" href="..">
       
-      <link rel="icon" href="/terman_os/images/logo.png">
+      
+        <link rel="next" href="../deploy/">
+      
+      
+      <link rel="icon" href="../images/logo.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
-        <title>Terman OS</title>
+        <title>Instalação (dev) - Terman OS</title>
       
     
     
-      <link rel="stylesheet" href="/terman_os/assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="/terman_os/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -42,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="/terman_os/styles/terman.css">
+      <link rel="stylesheet" href="../styles/terman.css">
     
-    <script>__md_scope=new URL("/terman_os/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -67,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#guia-de-instalacao-ambiente-de-desenvolvimento" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -79,9 +90,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/terman_os/." title="Terman OS" class="md-header__button md-logo" aria-label="Terman OS" data-md-component="logo">
+    <a href=".." title="Terman OS" class="md-header__button md-logo" aria-label="Terman OS" data-md-component="logo">
       
-  <img src="/terman_os/images/logo.png" alt="logo">
+  <img src="../images/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -98,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Instalação (dev)
             
           </span>
         </div>
@@ -190,9 +201,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/terman_os/." title="Terman OS" class="md-nav__button md-logo" aria-label="Terman OS" data-md-component="logo">
+    <a href=".." title="Terman OS" class="md-nav__button md-logo" aria-label="Terman OS" data-md-component="logo">
       
-  <img src="/terman_os/images/logo.png" alt="logo">
+  <img src="../images/logo.png" alt="logo">
 
     </a>
     Terman OS
@@ -219,7 +230,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -238,10 +249,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/terman_os/instalacao-dev/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Instalação (dev)
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -252,6 +285,107 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧰 Pré-requisitos
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clonando-o-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      🚀 Clonando o Projeto
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#criando-ambiente-virtual" class="md-nav__link">
+    <span class="md-ellipsis">
+      🐍 Criando Ambiente Virtual
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalando-dependencias" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Instalando Dependências
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Variáveis de Ambiente
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inicializando-o-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧱 Inicializando o Banco de Dados
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rodando-localmente" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Rodando Localmente
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#criando-um-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      👤 Criando um Admin
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dicas-adicionais" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧼 Dicas Adicionais
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -263,7 +397,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/deploy/" class="md-nav__link">
+      <a href="../deploy/" class="md-nav__link">
         
   
   
@@ -285,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -307,7 +441,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/equipe/" class="md-nav__link">
+      <a href="../equipe/" class="md-nav__link">
         
   
   
@@ -329,7 +463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../CONTRIBUTING.md" class="md-nav__link">
+      <a href="../../CONTRIBUTING.md" class="md-nav__link">
         
   
   
@@ -351,7 +485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../CODE_OF_CONDUCT.md" class="md-nav__link">
+      <a href="../../CODE_OF_CONDUCT.md" class="md-nav__link">
         
   
   
@@ -373,7 +507,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../ROADMAP.md" class="md-nav__link">
+      <a href="../../ROADMAP.md" class="md-nav__link">
         
   
   
@@ -405,6 +539,97 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧰 Pré-requisitos
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clonando-o-projeto" class="md-nav__link">
+    <span class="md-ellipsis">
+      🚀 Clonando o Projeto
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#criando-ambiente-virtual" class="md-nav__link">
+    <span class="md-ellipsis">
+      🐍 Criando Ambiente Virtual
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalando-dependencias" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Instalando Dependências
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Variáveis de Ambiente
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inicializando-o-banco-de-dados" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧱 Inicializando o Banco de Dados
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rodando-localmente" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Rodando Localmente
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#criando-um-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      👤 Criando um Admin
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dicas-adicionais" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧼 Dicas Adicionais
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -416,8 +641,95 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+  
+  
+
+
+<h1 id="guia-de-instalacao-ambiente-de-desenvolvimento">🧪 Guia de Instalação — Ambiente de Desenvolvimento</h1>
+<p>Este guia explica como rodar o sistema <strong>Terman OS</strong> localmente, usando Python, Flask e SQLite/PostgreSQL.</p>
+<hr />
+<h2 id="pre-requisitos">🧰 Pré-requisitos</h2>
+<p>Antes de começar, instale:</p>
+<ul>
+<li><a href="https://www.python.org/downloads/">Python 3.11+</a></li>
+<li><a href="https://git-scm.com/downloads">Git</a></li>
+<li><a href="https://pip.pypa.io/en/stable/installation/">pip</a></li>
+<li>(Opcional) <a href="https://www.postgresql.org/download/">PostgreSQL</a></li>
+</ul>
+<hr />
+<h2 id="clonando-o-projeto">🚀 Clonando o Projeto</h2>
+<pre><code class="language-bash">git clone https://github.com/KallebyX/terman_os.git
+cd terman_os
+</code></pre>
+<hr />
+<h2 id="criando-ambiente-virtual">🐍 Criando Ambiente Virtual</h2>
+<pre><code class="language-bash">python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate     # Windows
+</code></pre>
+<hr />
+<h2 id="instalando-dependencias">📦 Instalando Dependências</h2>
+<pre><code class="language-bash">pip install -r requirements.txt
+</code></pre>
+<hr />
+<h2 id="variaveis-de-ambiente">🔐 Variáveis de Ambiente</h2>
+<p>Crie um arquivo <code>.env</code> na raiz do projeto com o seguinte conteúdo:</p>
+<pre><code class="language-env">FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=superseguro
+DATABASE_URL=sqlite:///dev.db
+UPLOAD_FOLDER=app/static/produtos
+MAX_CONTENT_LENGTH=16777216
+</code></pre>
+<hr />
+<h2 id="inicializando-o-banco-de-dados">🧱 Inicializando o Banco de Dados</h2>
+<pre><code class="language-bash">flask db init      # apenas na primeira vez
+flask db migrate -m &quot;init&quot;
+flask db upgrade
+</code></pre>
+<hr />
+<h2 id="rodando-localmente">🧪 Rodando Localmente</h2>
+<pre><code class="language-bash">flask run
+</code></pre>
+<p>Acesse: <a href="http://127.0.0.1:5000">http://127.0.0.1:5000</a></p>
+<hr />
+<h2 id="criando-um-admin">👤 Criando um Admin</h2>
+<pre><code class="language-bash">flask shell
+</code></pre>
+<p>No shell interativo:</p>
+<pre><code class="language-python">from app import db
+from app.models.user import User
+
+admin = User(nome=&quot;admin&quot;, email=&quot;admin@example.com&quot;, tipo_usuario=&quot;admin&quot;)
+admin.set_senha(&quot;123456&quot;)
+db.session.add(admin)
+db.session.commit()
+</code></pre>
+<hr />
+<h2 id="dicas-adicionais">🧼 Dicas Adicionais</h2>
+<ul>
+<li>Use <code>make run</code> se tiver o <code>Makefile</code> configurado</li>
+<li>Para testes, use <code>sqlite:///teste.db</code></li>
+<li>Logs aparecem no terminal (modo debug)</li>
+</ul>
+<hr />
+<p>Se tiver dúvidas, abra uma <a href="https://github.com/KallebyX/terman_os/issues">Issue</a> ou entre em contato com o desenvolvedor.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -441,12 +753,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "/terman_os/", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "/terman_os/assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/terman_os/assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
       
-        <script src="/terman_os/scripts/extra.js"></script>
+        <script src="../scripts/extra.js"></script>
       
     
   </body>

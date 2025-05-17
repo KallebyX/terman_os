@@ -8,22 +8,28 @@
       
       
       
+        <link rel="canonical" href="https://kallebyx.github.io/terman_os/deploy/">
       
       
+        <link rel="prev" href="../instalacao-dev/">
       
-      <link rel="icon" href="/terman_os/images/logo.png">
+      
+        <link rel="next" href="../faq/">
+      
+      
+      <link rel="icon" href="../images/logo.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
-        <title>Terman OS</title>
+        <title>Deploy (Render) - Terman OS</title>
       
     
     
-      <link rel="stylesheet" href="/terman_os/assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="/terman_os/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -42,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="/terman_os/styles/terman.css">
+      <link rel="stylesheet" href="../styles/terman.css">
     
-    <script>__md_scope=new URL("/terman_os/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -67,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#deploy-rendercom" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -79,9 +90,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/terman_os/." title="Terman OS" class="md-header__button md-logo" aria-label="Terman OS" data-md-component="logo">
+    <a href=".." title="Terman OS" class="md-header__button md-logo" aria-label="Terman OS" data-md-component="logo">
       
-  <img src="/terman_os/images/logo.png" alt="logo">
+  <img src="../images/logo.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -98,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Deploy (Render)
             
           </span>
         </div>
@@ -190,9 +201,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/terman_os/." title="Terman OS" class="md-nav__button md-logo" aria-label="Terman OS" data-md-component="logo">
+    <a href=".." title="Terman OS" class="md-nav__button md-logo" aria-label="Terman OS" data-md-component="logo">
       
-  <img src="/terman_os/images/logo.png" alt="logo">
+  <img src="../images/logo.png" alt="logo">
 
     </a>
     Terman OS
@@ -219,7 +230,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -241,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/instalacao-dev/" class="md-nav__link">
+      <a href="../instalacao-dev/" class="md-nav__link">
         
   
   
@@ -260,10 +271,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/terman_os/deploy/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Deploy (Render)
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -274,6 +307,107 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧱 Pré-requisitos
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Variáveis de Ambiente (.env)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arquivos-necessarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Arquivos necessários
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renderyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      🛠 render.yaml
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Migrações
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cronjobs-e-worker-opcional" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔁 CronJobs e Worker (opcional)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publicacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Publicação
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acesso" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌐 Acesso
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#suporte" class="md-nav__link">
+    <span class="md-ellipsis">
+      📩 Suporte
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -285,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -307,7 +441,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/equipe/" class="md-nav__link">
+      <a href="../equipe/" class="md-nav__link">
         
   
   
@@ -329,7 +463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../CONTRIBUTING.md" class="md-nav__link">
+      <a href="../../CONTRIBUTING.md" class="md-nav__link">
         
   
   
@@ -351,7 +485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../CODE_OF_CONDUCT.md" class="md-nav__link">
+      <a href="../../CODE_OF_CONDUCT.md" class="md-nav__link">
         
   
   
@@ -373,7 +507,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/terman_os/../ROADMAP.md" class="md-nav__link">
+      <a href="../../ROADMAP.md" class="md-nav__link">
         
   
   
@@ -405,6 +539,97 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pre-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧱 Pré-requisitos
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Variáveis de Ambiente (.env)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arquivos-necessarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Arquivos necessários
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renderyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      🛠 render.yaml
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migracoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Migrações
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cronjobs-e-worker-opcional" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔁 CronJobs e Worker (opcional)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publicacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Publicação
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acesso" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌐 Acesso
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#suporte" class="md-nav__link">
+    <span class="md-ellipsis">
+      📩 Suporte
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -416,8 +641,113 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+  
+  
+
+
+<h1 id="deploy-rendercom">🚀 Deploy — Render.com</h1>
+<p>Este guia ensina como publicar o sistema <strong>Terman OS</strong> na nuvem usando a plataforma <a href="https://render.com">Render</a>, com PostgreSQL e suporte a ambiente <code>.env</code>.</p>
+<hr />
+<h2 id="pre-requisitos">🧱 Pré-requisitos</h2>
+<ul>
+<li>Conta gratuita no <a href="https://render.com">Render</a></li>
+<li>Repositório no GitHub com o projeto</li>
+<li>Banco PostgreSQL (pode ser interno ou externo na Render)</li>
+</ul>
+<hr />
+<h2 id="variaveis-de-ambiente-env">🔐 Variáveis de Ambiente (.env)</h2>
+<p>No painel da Render, adicione as seguintes variáveis:</p>
+<pre><code class="language-env">FLASK_APP=run.py
+FLASK_ENV=production
+SECRET_KEY=sua_chave_secreta
+DATABASE_URL=postgresql://usuario:senha@host:porta/nome_db
+UPLOAD_FOLDER=app/static/produtos
+MAX_CONTENT_LENGTH=16777216
+</code></pre>
+<hr />
+<h2 id="arquivos-necessarios">⚙️ Arquivos necessários</h2>
+<ul>
+<li><code>run.py</code>: ponto de entrada com <code>create_app()</code></li>
+<li><code>render.yaml</code>: arquivo de configuração do deploy</li>
+<li><code>requirements.txt</code>: dependências, incluindo <code>gunicorn</code> e <code>psycopg2-binary</code></li>
+</ul>
+<hr />
+<h2 id="renderyaml">🛠 render.yaml</h2>
+<pre><code class="language-yaml">services:
+  - type: web
+    name: terman-os
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: terman-db
+          property: connectionString
+      - key: UPLOAD_FOLDER
+        value: app/static/produtos
+      - key: MAX_CONTENT_LENGTH
+        value: &quot;16777216&quot;
+
+databases:
+  - name: terman-db
+    databaseName: terman_db
+    user: admin
+</code></pre>
+<hr />
+<h2 id="migracoes">🔄 Migrações</h2>
+<p>Após o deploy, acesse o terminal web do Render e execute:</p>
+<pre><code class="language-bash">flask db upgrade
+</code></pre>
+<hr />
+<h2 id="cronjobs-e-worker-opcional">🔁 CronJobs e Worker (opcional)</h2>
+<p>Use <code>render.yaml</code> para:</p>
+<ul>
+<li>Gerar relatórios automáticos</li>
+<li>Agendar tarefas recorrentes</li>
+<li>Processar filas (futuro)</li>
+</ul>
+<hr />
+<h2 id="publicacao">📦 Publicação</h2>
+<p>Após salvar as configurações:</p>
+<ol>
+<li>Clique em <strong>New Web Service</strong></li>
+<li>Selecione seu repositório</li>
+<li>Escolha o ambiente <strong>Python 3</strong></li>
+<li>Configure variáveis e <code>startCommand</code></li>
+<li>Publique 🎉</li>
+</ol>
+<hr />
+<h2 id="acesso">🌐 Acesso</h2>
+<p>Acesse sua aplicação em:</p>
+<pre><code>https://terman-os.onrender.com
+</code></pre>
+<hr />
+<h2 id="suporte">📩 Suporte</h2>
+<p>Se tiver dúvidas, entre em contato com o desenvolvedor:<br />
+📧 <strong>kallebyevangelho03@gmail.com</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -441,12 +771,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "/terman_os/", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "/terman_os/assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/terman_os/assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
       
-        <script src="/terman_os/scripts/extra.js"></script>
+        <script src="../scripts/extra.js"></script>
       
     
   </body>
