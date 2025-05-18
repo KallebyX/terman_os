@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Produtos{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>📦 Lista de Produtos</h2>
+  <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-primary mb-3">➕ Novo Produto</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Categoria</th>
+        <th>Preço</th>
+        <th>Estoque</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for produto in produtos %}
+      <tr>
+        <td>{{ produto.nome }}</td>
+        <td>{{ produto.categoria.nome if produto.categoria }}</td>
+        <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
+        <td>{{ produto.estoque }}</td>
+        <td>
+          <a href="{{ url_for('admin.editar_produto', produto_id=produto.id) }}" class="btn btn-sm btn-warning">✏️</a>
+          <a href="{{ url_for('admin.excluir_produto', produto_id=produto.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este produto?')">🗑️</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
