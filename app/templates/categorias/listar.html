@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Categorias{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Lista de Categorias</h2>
+    <a href="{{ url_for('admin.criar_categoria') }}" class="btn btn-success mb-3">Nova Categoria</a>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in categorias %}
+            <tr>
+                <td>{{ categoria.nome }}</td>
+                <td>{{ categoria.descricao }}</td>
+                <td>
+                    <a href="{{ url_for('admin.editar_categoria', categoria_id=categoria.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <form method="POST" action="{{ url_for('admin.excluir_categoria', categoria_id=categoria.id) }}" style="display:inline-block;" onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

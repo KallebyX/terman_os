@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required
 from app.models.user import User
 from app import db
@@ -16,9 +16,13 @@ def login():
             login_user(usuario, remember=form.lembrar.data)
             flash('Login realizado com sucesso!', 'success')
             if usuario.tipo_usuario == 'admin':
-                return redirect(url_for('admin.dashboard'))
-            else:
+                return redirect(url_for('admin.listar_produtos'))
+            elif usuario.tipo_usuario == 'cliente':
                 return redirect(url_for('cliente.perfil'))
+            else:
+                logout_user()
+                flash('Tipo de usuário inválido.', 'danger')
+                return redirect(url_for('auth.login'))
         else:
             flash('E-mail ou senha inválidos.', 'danger')
     return render_template('login.html', form=form)
@@ -54,9 +58,6 @@ def logout():
     flash('Você saiu da sua conta.', 'info')
     return redirect(url_for('auth.login'))
 
-from flask import jsonify
-from app.models.user import User  # ajuste o caminho conforme necessário
-
 @auth_bp.route('/test-db')
 def testar_conexao_banco():
     try:
@@ -73,6 +74,8 @@ def testar_conexao_banco():
 
 @auth_bp.route('/force-create')
 def force_create_tables():
+    if not current_app.config.get('DEBUG', False):
+        return "🔒 Rota indisponível em produção."
     try:
         db.create_all()
         return "✅ Tabelas criadas no PostgreSQL remoto com sucesso!"
