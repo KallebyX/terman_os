@@ -15,10 +15,11 @@ def login():
         if usuario and usuario.verificar_senha(form.senha.data):
             login_user(usuario, remember=form.lembrar.data)
             flash('Login realizado com sucesso!', 'success')
+            next_page = request.args.get('next')
             if usuario.tipo_usuario == 'admin':
-                return redirect(url_for('admin.listar_produtos'))
+                return redirect(next_page) if next_page else redirect(url_for('admin.listar_produtos'))
             elif usuario.tipo_usuario == 'cliente':
-                return redirect(url_for('cliente.perfil'))
+                return redirect(next_page) if next_page else redirect(url_for('cliente.perfil'))
             else:
                 logout_user()
                 flash('Tipo de usuário inválido.', 'danger')
@@ -47,7 +48,7 @@ def cadastro():
                 return redirect(url_for('auth.login'))
             except Exception as e:
                 db.session.rollback()
-                print(f"Erro ao cadastrar usuário: {e}")
+                current_app.logger.error(f"Erro ao cadastrar usuário: {e}")
                 flash('Erro ao cadastrar. Tente novamente mais tarde.', 'danger')
     return render_template('cadastro.html', form=form)
 
@@ -60,6 +61,7 @@ def logout():
 
 @auth_bp.route('/test-db')
 def testar_conexao_banco():
+    current_app.logger.info("🔍 Testando conexão com o banco de dados...")
     try:
         usuarios = User.query.limit(5).all()
         return jsonify({
@@ -76,6 +78,7 @@ def testar_conexao_banco():
 def force_create_tables():
     if not current_app.config.get('DEBUG', False):
         return "🔒 Rota indisponível em produção."
+    current_app.logger.info("⚙️ Forçando criação de tabelas no banco.")
     try:
         db.create_all()
         return "✅ Tabelas criadas no PostgreSQL remoto com sucesso!"
