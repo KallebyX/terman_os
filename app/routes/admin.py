@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required
 from app.models.produto import Produto
 from app import db
@@ -8,6 +8,11 @@ import os
 from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Rota do dashboard admin
 @admin_bp.route('/dashboard')
@@ -26,7 +31,7 @@ def painel_admin():
 @login_required
 @admin_required
 def listar_produtos():
-    produtos = Produto.query.all()
+    produtos = Produto.query.order_by(Produto.nome.asc()).all()
     return render_template('produtos/listar.html', produtos=produtos)
 
 @admin_bp.route('/produtos/novo', methods=['GET', 'POST'])
@@ -42,9 +47,9 @@ def criar_produto():
         imagem = request.files.get('imagem')
 
         imagem_filename = None
-        if imagem and imagem.filename:
+        if imagem and allowed_file(imagem.filename):
             imagem_filename = secure_filename(imagem.filename)
-            caminho = os.path.join('app/static/produtos', imagem_filename)
+            caminho = os.path.join(current_app.root_path, 'static/produtos', imagem_filename)
             imagem.save(caminho)
 
         novo_produto = Produto(
@@ -77,9 +82,9 @@ def editar_produto(produto_id):
         produto.categoria_id = int(request.form['categoria_id'])
         imagem = request.files.get('imagem')
 
-        if imagem and imagem.filename:
+        if imagem and allowed_file(imagem.filename):
             imagem_filename = secure_filename(imagem.filename)
-            caminho = os.path.join('app/static/produtos', imagem_filename)
+            caminho = os.path.join(current_app.root_path, 'static/produtos', imagem_filename)
             imagem.save(caminho)
             produto.imagem_filename = imagem_filename
 
@@ -154,7 +159,7 @@ from app.models.pedido import Pedido, ItemPedido
 @login_required
 @admin_required
 def listar_pedidos_admin():
-    pedidos = Pedido.query.order_by(Pedido.data_criacao.desc()).all()
+    pedidos = Pedido.query.order_by(Pedido.data_criacao.desc()).limit(50).all()
     return render_template('pedidos/admin_listar.html', pedidos=pedidos)
 
 
