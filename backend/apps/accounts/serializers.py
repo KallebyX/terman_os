@@ -104,8 +104,8 @@ class UserLoginSerializer(serializers.Serializer):
     """
     Serializer para login de usuários.
     """
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
+    email = serializers.EmailField(required=True, error_messages={'required': 'O email é obrigatório.'})
+    password = serializers.CharField(required=True, write_only=True, error_messages={'required': 'A senha é obrigatória.'})
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
