@@ -81,6 +81,16 @@ class Produto(models.Model):
         Verifica se há estoque suficiente para a quantidade solicitada.
         """
         return self.estoque_minimo >= quantidade
+
+    def atualizar_estoque(self, quantidade):
+        """
+        Atualiza o estoque do produto após uma venda.
+        """
+        if self.verificar_estoque(quantidade):
+            self.estoque_minimo -= quantidade
+            self.save()
+        else:
+            raise ValueError("Estoque insuficiente para a quantidade solicitada.")
     
     @property
     def preco_atual(self):

@@ -110,6 +110,9 @@ class ProdutoDetailBySlugView(generics.RetrieveAPIView):
         produto = serializer.save()
         if not produto.verificar_estoque(self.request.data.get('quantidade', 0)):
             raise serializers.ValidationError({'error': 'Estoque insuficiente'})
+        # Atualizar o estoque após a criação
+        produto.estoque_minimo -= self.request.data.get('quantidade', 0)
+        produto.save()
 
     def perform_update(self, serializer):
         """
