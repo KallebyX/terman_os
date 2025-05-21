@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/add backend/tests/import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Definindo o tipo para o contexto de autenticação
 interface AuthContextType {
   isAuthenticated: boolean;
   userRole: string | null;
+  userName: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -12,6 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   userRole: null,
+  userName: null,
   login: async () => false,
   logout: () => {},
 });
@@ -23,6 +25,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
   // Verificar se o usuário já está autenticado ao carregar a página
   useEffect(() => {
@@ -31,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const authData = JSON.parse(storedAuth);
       setIsAuthenticated(true);
       setUserRole(authData.role);
+      setUserName(authData.name || authData.email.split('@')[0]);
     }
   }, []);
 
@@ -48,12 +52,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role = 'admin';
         }
         
+        // Extrair nome do usuário do email
+        const name = email.split('@')[0];
+        
         // Armazenar dados de autenticação
-        const authData = { email, role };
+        const authData = { email, role, name };
         localStorage.setItem('auth', JSON.stringify(authData));
+        
+        // Simular token JWT para autenticação
+        localStorage.setItem('access_token', 'jwt_token_simulado');
         
         setIsAuthenticated(true);
         setUserRole(role);
+        setUserName(name);
         return true;
       }
       return false;
@@ -66,14 +77,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Função de logout
   const logout = () => {
     localStorage.removeItem('auth');
+    localStorage.removeItem('access_token');
     setIsAuthenticated(false);
     setUserRole(null);
+    setUserName(null);
   };
 
   // Valores fornecidos pelo contexto
   const value = {
     isAuthenticated,
     userRole,
+    userName,
     login,
     logout,
   };
