@@ -19,12 +19,16 @@ const Login: React.FC = () => {
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         login(email, password);
-        return true;
+        window.location.href = '/dashboard'; // Redirecionar para o dashboard após login bem-sucedido
       } else {
         setError('Erro ao fazer login. Verifique suas credenciais.');
       }
-    } catch (err) {
-      setError('Erro ao fazer login. Verifique suas credenciais.');
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setError('Credenciais inválidas. Tente novamente.');
+      } else {
+        setError('Erro ao conectar com o servidor. Tente novamente mais tarde.');
+      }
     }
   };
 
