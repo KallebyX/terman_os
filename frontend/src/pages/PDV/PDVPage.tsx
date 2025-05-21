@@ -1,0 +1,432 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { PDVLayout } from '../../layouts/PDVLayout';
+
+const PDVPage = () => {
+  // Estados
+  const [cart, setCart] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  // Produtos simulados
+  const products = [
+    { id: 1, code: 'MH-001', name: 'Mangueira Hidráulica 1/2"', price: 89.90, stock: 25 },
+    { id: 2, code: 'CR-002', name: 'Conexão Rápida 3/4"', price: 45.50, stock: 42 },
+    { id: 3, code: 'AH-003', name: 'Adaptador Hidráulico', price: 32.75, stock: 18 },
+    { id: 4, code: 'KR-004', name: 'Kit Reparo para Mangueiras', price: 120.00, stock: 10 },
+    { id: 5, code: 'MF-005', name: 'Mangueira Flexível 1"', price: 75.30, stock: 15 },
+    { id: 6, code: 'CT-006', name: 'Conexão em T', price: 28.90, stock: 30 },
+    { id: 7, code: 'VC-007', name: 'Válvula de Controle', price: 195.00, stock: 8 },
+    { id: 8, code: 'MA-008', name: 'Mangueira de Alta Temperatura', price: 145.50, stock: 12 }
+  ];
+  
+  // Clientes simulados
+  const customers = [
+    { id: 1, name: 'Indústria ABC Ltda', email: 'contato@industriaabc.com.br', phone: '(11) 3456-7890', address: 'Av. Industrial, 1000 - São Paulo/SP' },
+    { id: 2, name: 'Construtora XYZ', email: 'compras@construtoraXYZ.com.br', phone: '(11) 2345-6789', address: 'Rua das Obras, 500 - São Paulo/SP' },
+    { id: 3, name: 'Metalúrgica Silva', email: 'vendas@metalurgicasilva.com.br', phone: '(11) 4567-8901', address: 'Rua dos Metais, 200 - Guarulhos/SP' },
+    { id: 4, name: 'Transportadora Rápida', email: 'contato@transportadorarapida.com.br', phone: '(11) 5678-9012', address: 'Av. das Entregas, 300 - Osasco/SP' },
+    { id: 5, name: 'Fábrica de Móveis Confort', email: 'compras@moveisconfort.com.br', phone: '(11) 6789-0123', address: 'Rua da Madeira, 400 - Barueri/SP' }
+  ];
+  
+  // Filtrar produtos
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Adicionar ao carrinho
+  const addToCart = (product) => {
+    const existingItem = cart.find(item => item.id === product.id);
+    
+    if (existingItem) {
+      setCart(cart.map(item => 
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      ));
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
+  };
+  
+  // Remover do carrinho
+  const removeFromCart = (productId) => {
+    setCart(cart.filter(item => item.id !== productId));
+  };
+  
+  // Atualizar quantidade
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    setCart(cart.map(item => 
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    ));
+  };
+  
+  // Calcular total
+  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
+  // Finalizar venda
+  const finalizeSale = () => {
+    if (cart.length === 0) {
+      alert('Adicione produtos ao carrinho para finalizar a venda.');
+      return;
+    }
+    
+    if (!selectedCustomer) {
+      alert('Selecione um cliente para finalizar a venda.');
+      return;
+    }
+    
+    setShowPaymentModal(true);
+  };
+  
+  // Processar pagamento
+  const processPayment = () => {
+    if (!paymentMethod) {
+      alert('Selecione um método de pagamento.');
+      return;
+    }
+    
+    // Simulação de processamento de pagamento
+    alert(`Venda finalizada com sucesso!\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
+    
+    // Limpar carrinho e fechar modal
+    setCart([]);
+    setSelectedCustomer(null);
+    setPaymentMethod('');
+    setShowPaymentModal(false);
+  };
+  
+  return (
+    <div className="flex h-screen overflow-hidden bg-background-lightGray">
+      {/* Área principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Cabeçalho */}
+        <header className="bg-white border-b border-secondary-200 py-4 px-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-secondary-900">PDV - Ponto de Venda</h1>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline"
+                onClick={() => setShowCustomerModal(true)}
+              >
+                {selectedCustomer ? (
+                  <span>Cliente: {selectedCustomer.name}</span>
+                ) : (
+                  <span>Selecionar Cliente</span>
+                )}
+              </Button>
+              <Button 
+                variant="primary"
+                onClick={finalizeSale}
+                disabled={cart.length === 0}
+              >
+                Finalizar Venda
+              </Button>
+            </div>
+          </div>
+        </header>
+        
+        {/* Conteúdo principal */}
+        <div className="flex-1 overflow-hidden flex">
+          {/* Lista de produtos */}
+          <div className="w-2/3 p-6 overflow-auto">
+            <div className="mb-6">
+              <Input
+                placeholder="Buscar produtos por nome ou código..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                leftIcon={<i className="fas fa-search"></i>}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredProducts.map(product => (
+                <Card
+                  key={product.id}
+                  variant="elevated"
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => addToCart(product)}
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold">{product.name}</h3>
+                      <span className="text-xs bg-secondary-100 text-secondary-800 px-2 py-1 rounded">
+                        {product.code}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-end">
+                      <span className="text-lg font-bold text-secondary-900">
+                        R$ {product.price.toFixed(2)}
+                      </span>
+                      <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {product.stock > 0 ? `${product.stock} em estoque` : 'Esgotado'}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              
+              {filteredProducts.length === 0 && (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-secondary-500">Nenhum produto encontrado.</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Carrinho */}
+          <div className="w-1/3 bg-white border-l border-secondary-200 flex flex-col">
+            <div className="p-4 border-b border-secondary-200">
+              <h2 className="text-lg font-semibold">Carrinho de Compras</h2>
+            </div>
+            
+            <div className="flex-1 overflow-auto p-4">
+              {cart.length > 0 ? (
+                <div className="space-y-4">
+                  {cart.map(item => (
+                    <Card key={item.id} variant="bordered" className="p-3">
+                      <div className="flex justify-between mb-2">
+                        <h4 className="font-medium">{item.name}</h4>
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => removeFromCart(item.id)}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <button
+                            className="w-6 h-6 flex items-center justify-center bg-secondary-100 rounded-l"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          >
+                            -
+                          </button>
+                          <span className="w-8 h-6 flex items-center justify-center bg-white border-y border-secondary-200">
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="w-6 h-6 flex items-center justify-center bg-secondary-100 rounded-r"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-secondary-500">R$ {item.price.toFixed(2)} un</p>
+                          <p className="font-semibold">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-secondary-400 text-4xl mb-4">
+                    <i className="fas fa-shopping-cart"></i>
+                  </div>
+                  <p className="text-secondary-500">Carrinho vazio</p>
+                  <p className="text-sm text-secondary-400 mt-1">Adicione produtos clicando nos itens à esquerda</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-secondary-200 bg-secondary-50">
+              <div className="flex justify-between mb-2">
+                <span className="text-secondary-700">Subtotal</span>
+                <span className="font-medium">R$ {cartTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mb-4">
+                <span className="text-secondary-700">Desconto</span>
+                <span className="font-medium">R$ 0,00</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span>R$ {cartTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Modal de seleção de cliente */}
+      {showCustomerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div className="p-6 border-b border-secondary-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Selecionar Cliente</h3>
+              <button
+                className="text-secondary-500 hover:text-secondary-700"
+                onClick={() => setShowCustomerModal(false)}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <Input
+                placeholder="Buscar cliente..."
+                leftIcon={<i className="fas fa-search"></i>}
+                className="mb-4"
+              />
+              
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell isHeader>Nome</TableCell>
+                      <TableCell isHeader>Email</TableCell>
+                      <TableCell isHeader>Telefone</TableCell>
+                      <TableCell isHeader>Ações</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {customers.map(customer => (
+                      <TableRow key={customer.id}>
+                        <TableCell>{customer.name}</TableCell>
+                        <TableCell>{customer.email}</TableCell>
+                        <TableCell>{customer.phone}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedCustomer(customer);
+                              setShowCustomerModal(false);
+                            }}
+                          >
+                            Selecionar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              <div className="mt-6 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCustomerModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    // Aqui iria a lógica para cadastrar um novo cliente
+                    alert('Funcionalidade de cadastro de cliente em desenvolvimento');
+                  }}
+                >
+                  Cadastrar Novo Cliente
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de pagamento */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-secondary-200 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Finalizar Venda</h3>
+              <button
+                className="text-secondary-500 hover:text-secondary-700"
+                onClick={() => setShowPaymentModal(false)}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-6">
+                <h4 className="font-medium mb-2">Cliente</h4>
+                <Card variant="bordered" className="p-3">
+                  <p className="font-semibold">{selectedCustomer?.name}</p>
+                  <p className="text-sm text-secondary-500">{selectedCustomer?.email}</p>
+                  <p className="text-sm text-secondary-500">{selectedCustomer?.phone}</p>
+                </Card>
+              </div>
+              
+              <div className="mb-6">
+                <h4 className="font-medium mb-2">Resumo da Compra</h4>
+                <div className="bg-secondary-50 rounded-lg p-3">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-secondary-700">Itens</span>
+                    <span>{cart.length}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-secondary-700">Quantidade</span>
+                    <span>{cart.reduce((total, item) => total + item.quantity, 0)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold mt-2 pt-2 border-t border-secondary-200">
+                    <span>Total</span>
+                    <span>R$ {cartTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h4 className="font-medium mb-2">Forma de Pagamento</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Boleto', 'Transferência'].map(method => (
+                    <div
+                      key={method}
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        paymentMethod === method
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-secondary-200 hover:border-primary-300'
+                      }`}
+                      onClick={() => setPaymentMethod(method)}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-4 h-4 rounded-full border mr-2 ${
+                          paymentMethod === method
+                            ? 'border-primary-500 bg-primary-500'
+                            : 'border-secondary-300'
+                        }`}>
+                          {paymentMethod === method && (
+                            <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                          )}
+                        </div>
+                        <span>{method}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPaymentModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={processPayment}
+                  disabled={!paymentMethod}
+                >
+                  Confirmar Pagamento
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PDVPage;

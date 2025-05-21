@@ -1,0 +1,155 @@
+/* Estilos globais do Terman OS */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Fontes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Cores primárias */
+  --color-primary-50: #e6fff2;
+  --color-primary-100: #ccffe6;
+  --color-primary-200: #99ffcc;
+  --color-primary-300: #66ffb3;
+  --color-primary-400: #33ff99;
+  --color-primary-500: #00e673; /* Verde do logo */
+  --color-primary-600: #00cc66;
+  --color-primary-700: #00b359;
+  --color-primary-800: #00994d;
+  --color-primary-900: #008040;
+  
+  /* Cores secundárias */
+  --color-secondary-50: #f2f2f2;
+  --color-secondary-100: #e6e6e6;
+  --color-secondary-200: #cccccc;
+  --color-secondary-300: #b3b3b3;
+  --color-secondary-400: #999999;
+  --color-secondary-500: #808080;
+  --color-secondary-600: #666666;
+  --color-secondary-700: #4d4d4d;
+  --color-secondary-800: #333333;
+  --color-secondary-900: #1a1a1a;
+  
+  /* Cores de destaque */
+  --color-info: #3498db;
+  --color-success: #2ecc71;
+  --color-warning: #f39c12;
+  --color-danger: #e74c3c;
+  
+  /* Cores de fundo */
+  --color-background-white: #ffffff;
+  --color-background-lightGray: #f9fafb;
+  --color-background-gray: #f1f5f9;
+  --color-background-darkGray: #e5e7eb;
+  
+  /* Cores de texto */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+  --color-text-white: #ffffff;
+}
+
+/* Estilos base */
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-lightGray);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.5s ease-out;
+}
+
+/* Transições */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Componentes personalizados */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary-100 text-secondary-800 hover:bg-secondary-200 focus:ring-secondary-300;
+  }
+  
+  .btn-outline {
+    @apply border border-primary-500 text-primary-500 hover:bg-primary-50 focus:ring-primary-500;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-secondary-700 mb-1;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Acessibilidade */
+:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-lightGray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary-400);
+}
