@@ -5,7 +5,14 @@ class CategoriaSerializer(serializers.ModelSerializer):
     """
     Serializer para categorias de produtos.
     """
-    class Meta:
+    def validate(self, data):
+        """
+        Valida se o estoque é suficiente para a quantidade solicitada.
+        """
+        produto = Produto(**data)
+        if not produto.verificar_estoque(data.get('quantidade', 0)):
+            raise serializers.ValidationError('Estoque insuficiente para a quantidade solicitada.')
+        return data
         model = Categoria
         fields = ['id', 'nome', 'descricao', 'slug', 'ativa', 'ordem']
 

@@ -448,3 +448,46 @@ class ProductsAPITests(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+from django.test import TestCase
+from rest_framework.test import APIClient
+from rest_framework import status
+from .models import Produto, Categoria, Fornecedor
+
+class ProdutoTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.categoria = Categoria.objects.create(nome="Eletrônicos", slug="eletronicos")
+        self.fornecedor = Fornecedor.objects.create(nome="Fornecedor Teste")
+        self.produto = Produto.objects.create(
+            codigo="12345",
+            nome="Produto Teste",
+            preco=100.00,
+            estoque_minimo=10,
+            fornecedor=self.fornecedor
+        )
+        self.produto.categorias.add(self.categoria)
+
+    def test_criar_produto(self):
+        data = {
+            "codigo": "67890",
+            "nome": "Novo Produto",
+            "preco": 150.00,
+            "estoque_minimo": 5,
+            "categorias": [self.categoria.id],
+            "fornecedor": self.fornecedor.id
+        }
+        response = self.client.post('/api/produtos/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_verificar_estoque_insuficiente(self):
+        data = {
+            "codigo": "67891",
+            "nome": "Produto Sem Estoque",
+            "preco": 200.00,
+            "estoque_minimo": 0,
+            "categorias": [self.categoria.id],
+            "fornecedor": self.fornecedor.id
+        }
+        response = self.client.post('/api/produtos/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Estoque insuficiente', response.data['error'])

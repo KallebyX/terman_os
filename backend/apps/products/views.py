@@ -48,10 +48,7 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ProdutoListSerializer
         elif self.action in ['create', 'update', 'partial_update']:
-            # Verificar estoque antes de atualizar
-            produto = self.get_object()
-            if not produto.verificar_estoque(self.request.data.get('quantidade', 0)):
-                return Response({'error': 'Estoque insuficiente'}, status=status.HTTP_400_BAD_REQUEST)
+            return ProdutoCreateUpdateSerializer
             return ProdutoCreateUpdateSerializer
         return ProdutoDetailSerializer
 
@@ -106,3 +103,18 @@ class ProdutoDetailBySlugView(generics.RetrieveAPIView):
     serializer_class = ProdutoDetailSerializer
     permission_classes = [AllowAny]
     lookup_field = 'slug'
+    def perform_create(self, serializer):
+        """
+        Verifica o estoque antes de criar um produto.
+        """
+        produto = serializer.save()
+        if not produto.verificar_estoque(self.request.data.get('quantidade', 0)):
+            raise serializers.ValidationError({'error': 'Estoque insuficiente'})
+
+    def perform_update(self, serializer):
+        """
+        Verifica o estoque antes de atualizar um produto.
+        """
+        produto = serializer.save()
+        if not produto.verificar_estoque(self.request.data.get('quantidade', 0)):
+            raise serializers.ValidationError({'error': 'Estoque insuficiente'})
