@@ -168,6 +168,9 @@ class Venda(models.Model):
             )
 
         pedido.save()
+        self.status = 'finalizada'
+        self.data_finalizacao = timezone.now()
+        self.save()
 
 
 class ItemVenda(models.Model):

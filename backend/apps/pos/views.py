@@ -141,16 +141,10 @@ class ItemVendaListCreateView(generics.ListCreateAPIView):
         produto.estoque_minimo -= quantidade
         produto.save()
         
-        # Atualizar totais da venda e estoque
+        # Atualizar totais da venda
         venda.subtotal = sum(item.subtotal for item in venda.itens.all())
         venda.total = venda.subtotal - venda.desconto + venda.acrescimo
         venda.save()
-
-        # Atualizar estoque
-        for item in venda.itens.all():
-            produto = item.produto
-            produto.estoque_minimo -= item.quantidade
-            produto.save()
         
         return Response(
             ItemVendaSerializer(item).data,
@@ -289,6 +283,8 @@ class VendaFinalizarView(APIView):
             return Response({"status": "Venda processada com sucesso"})
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": "Erro inesperado ao processar a venda."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class VendaCancelarView(APIView):
