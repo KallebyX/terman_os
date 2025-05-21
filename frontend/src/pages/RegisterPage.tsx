@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -42,12 +43,16 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Cadastre-se
-          </h2>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex flex-col justify-center items-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-secondary-900">Cadastre-se</h2>
+          <p className="text-secondary-600">Crie sua conta para acessar o sistema</p>
         </div>
         <Card variant="elevated" className="p-6">
           {error && (
@@ -102,7 +107,7 @@ const RegisterPage: React.FC = () => {
             </Button>
           </form>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 };
