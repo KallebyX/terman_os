@@ -50,8 +50,8 @@ const OrderManagementPage: React.FC = () => {
       try {
         // Usar endpoint correto com base no papel do usuário
         const endpoint = userRole === 'admin' || userRole === 'staff' 
-          ? '/api/orders/orders/' 
-          : '/api/orders/my-orders/';
+          ? '/orders/orders/' 
+          : '/orders/my-orders/';
           
         const response = await api.get(endpoint);
         
@@ -89,7 +89,7 @@ const OrderManagementPage: React.FC = () => {
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
       // Chamar a API para atualizar o status
-      const response = await api.patch(`/api/orders/orders/${orderId}/`, {
+      const response = await api.patch(`/orders/orders/${orderId}/`, {
         status: newStatus
       });
       

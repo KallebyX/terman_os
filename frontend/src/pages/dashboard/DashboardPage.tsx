@@ -48,11 +48,11 @@ const DashboardPage: React.FC = () => {
         // Buscar todos os dados em paralelo para melhor performance
         const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
           await Promise.all([
-            api.get(`/api/dashboard/kpis?range=${dateRange}`),
-            api.get('/api/orders/recent'),
-            api.get(`/api/products/top?range=${dateRange}`),
-            api.get('/api/inventory/low-stock'),
-            api.get('/api/activities/recent')
+            api.get(`/dashboard/kpis?range=${dateRange}`),
+            api.get('/orders/recent'),
+            api.get(`/products/top?range=${dateRange}`),
+            api.get('/inventory/low-stock'),
+            api.get('/activities/recent')
           ]);
         
         // Verificar se as respostas têm o formato esperado
@@ -84,11 +84,11 @@ const DashboardPage: React.FC = () => {
     try {
       const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
         await Promise.all([
-          api.get(`/api/dashboard/kpis?range=${dateRange}`),
-          api.get('/api/orders/recent'),
-          api.get(`/api/products/top?range=${dateRange}`),
-          api.get('/api/inventory/low-stock'),
-          api.get('/api/activities/recent')
+          api.get(`/dashboard/kpis?range=${dateRange}`),
+          api.get('/orders/recent'),
+          api.get(`/products/top?range=${dateRange}`),
+          api.get('/inventory/low-stock'),
+          api.get('/activities/recent')
         ]);
       
       // Verificar se as respostas têm o formato esperado

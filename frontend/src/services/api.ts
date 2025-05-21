@@ -6,6 +6,8 @@ const apiUrl = isDocker
   ? import.meta.env.VITE_API_URL_DOCKER 
   : import.meta.env.VITE_API_URL;
 
+console.log('API URL:', apiUrl); // Log para debug
+
 const api = axios.create({
   baseURL: apiUrl || '/api',
   timeout: 10000, // Timeout de 10 segundos

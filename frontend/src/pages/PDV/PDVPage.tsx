@@ -5,9 +5,11 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { useNavigate } from 'react-router-dom';
 // import { PDVLayout } from '../../layouts/PDVLayout';
 
 const PDVPage = () => {
+  const navigate = useNavigate();
   // Estados
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,7 +25,7 @@ const PDVPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/products/produtos/');
+        const response = await api.get('/products/produtos/');
         
         if (response.status !== 200) {
           throw new Error(`Erro na requisição: ${response.status}`);
@@ -43,7 +45,7 @@ const PDVPage = () => {
 
     const fetchCustomers = async () => {
       try {
-        const response = await api.get('/api/accounts/customers/');
+        const response = await api.get('/accounts/customers/');
         
         if (response.status !== 200) {
           throw new Error(`Erro na requisição: ${response.status}`);
@@ -137,7 +139,7 @@ const PDVPage = () => {
       };
       
       // Enviar pedido para a API
-      const response = await api.post('/api/orders/create/', orderData);
+      const response = await api.post('/orders/create/', orderData);
       
       if (response.status !== 201 && response.status !== 200) {
         throw new Error(`Erro ao criar pedido: ${response.status}`);
@@ -375,8 +377,7 @@ const PDVPage = () => {
                 <Button
                   variant="primary"
                   onClick={() => {
-                    // Aqui iria a lógica para cadastrar um novo cliente
-                    alert('Funcionalidade de cadastro de cliente em desenvolvimento');
+                    navigate('/customers/new?redirect=pdv');
                   }}
                 >
                   Cadastrar Novo Cliente
