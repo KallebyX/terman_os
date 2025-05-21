@@ -5,9 +5,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 // Páginas
 import LandingPage from './pages/Landing/LandingPage';
 import MarketplacePage from './pages/Marketplace/MarketplacePage';
-import DashboardPage from './pages/Dashboard/DashboardPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 import PDVPage from './pages/PDV/PDVPage';
-import InventoryPage from './pages/Inventory/InventoryPage';
+import InventoryPage from './pages/inventory/InventoryPage';
 import LoginPage from './pages/Client/LoginPage';
 import ClientDashboard from './pages/Client/ClientDashboard';
 import NotFoundPage from './pages/NotFound';
