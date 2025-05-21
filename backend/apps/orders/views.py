@@ -105,6 +105,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         try:
             product = Produto.objects.get(id=product_id)
             
+            # Verificar se o produto está ativo
+            if not product.ativo:
+                return Response(
+                    {"detail": "Este produto não está disponível para venda."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             # Verificar disponibilidade em estoque
             estoque = Estoque.objects.filter(produto=product).first()
             if estoque and estoque.quantidade_disponivel < quantity:
@@ -112,6 +119,11 @@ class OrderViewSet(viewsets.ModelViewSet):
                     {"detail": f"Quantidade insuficiente em estoque. Disponível: {estoque.quantidade_disponivel}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Reservar estoque
+            if estoque:
+                estoque.quantidade_reservada += quantity
+                estoque.save()
             
             # Adicionar item ao pedido
             order.add_item(product, quantity)
@@ -281,6 +293,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         payment_method = serializer.validated_data['payment_method']
         
+        # Verificar estoque antes de confirmar pagamento
+        for item in order.items.all():
+            estoque = Estoque.objects.filter(produto=item.product).first()
+            if not estoque or estoque.quantidade_disponivel < item.quantity:
+                return Response(
+                    {"detail": f"Estoque insuficiente para o produto {item.product.nome}. Por favor, atualize o pedido."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
         # Registrar pagamento
         if order.mark_as_paid(payment_method):
             # Baixar estoque
@@ -288,6 +309,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                 for item in order.items.all():
                     estoque = Estoque.objects.filter(produto=item.product).first()
                     if estoque:
+                        # Atualizar estoque
+                        estoque.quantidade_atual -= item.quantity
+                        estoque.save()
+                        
                         # Registrar movimentação de saída
                         MovimentacaoEstoque.objects.create(
                             produto=item.product,
@@ -385,6 +410,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                     for item in order.items.all():
                         estoque = Estoque.objects.filter(produto=item.product).first()
                         if estoque:
+                            # Atualizar estoque
+                            estoque.quantidade_atual += item.quantity
+                            estoque.save()
+                            
                             # Registrar movimentação de entrada (devolução)
                             MovimentacaoEstoque.objects.create(
                                 produto=item.product,
@@ -394,6 +423,29 @@ class OrderViewSet(viewsets.ModelViewSet):
                                 valor_unitario=item.price,
                                 documento=f"Pedido #{order.id}",
                                 observacao=f"Cancelamento de pedido para {order.customer.get_full_name()}",
+                                usuario=request.user,
+                                referencia_id=order.id,
+                                referencia_tipo='pedido'
+                            )
+            # Se o pedido estava pendente, liberar reservas
+            elif order.status == 'pending':
+                with transaction.atomic():
+                    for item in order.items.all():
+                        estoque = Estoque.objects.filter(produto=item.product).first()
+                        if estoque:
+                            # Liberar quantidade reservada
+                            estoque.quantidade_reservada -= item.quantity
+                            estoque.save()
+                            
+                            # Registrar movimentação
+                            MovimentacaoEstoque.objects.create(
+                                produto=item.product,
+                                tipo='cancelamento',
+                                origem='pedido_cancelado',
+                                quantidade=item.quantity,
+                                valor_unitario=item.price,
+                                documento=f"Pedido #{order.id}",
+                                observacao=f"Cancelamento de reserva para {order.customer.get_full_name()}",
                                 usuario=request.user,
                                 referencia_id=order.id,
                                 referencia_tipo='pedido'

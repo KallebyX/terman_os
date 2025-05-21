@@ -144,34 +144,46 @@ class Venda(models.Model):
         """
         Processa a venda, atualizando o estoque e criando o pedido.
         """
-        from apps.inventory.models import Estoque
-        from apps.orders.models import Pedido, ItemPedido
-
-        for item in self.itens.all():
-            estoque = Estoque.objects.get(produto=item.produto)
-            if estoque.quantidade_atual < item.quantidade:
-                raise ValueError(f"Estoque insuficiente para o produto: {item.produto.nome}")
-            estoque.quantidade_atual -= item.quantidade
-            estoque.save()
-
-        pedido = Pedido.objects.create(
-            cliente=self.cliente,
-            vendedor=self.vendedor,
-            total=self.calcular_total()
-        )
-
-        for item in self.itens.all():
-            ItemPedido.objects.create(
-                pedido=pedido,
-                produto=item.produto,
-                quantidade=item.quantidade,
-                preco_unitario=item.preco_unitario
-            )
-
-        pedido.save()
-        self.status = 'finalizada'
-        self.data_finalizacao = timezone.now()
-        self.save()
+        from apps.inventory.models import Estoque, MovimentacaoEstoque
+        from django.db import transaction
+        
+        # Usar transação para garantir consistência dos dados
+        with transaction.atomic():
+            # Verificar estoque antes de processar
+            for item in self.itens.all():
+                estoque, created = Estoque.objects.get_or_create(
+                    produto=item.produto,
+                    defaults={'quantidade_atual': 0, 'quantidade_reservada': 0}
+                )
+                if estoque.quantidade_atual < item.quantidade:
+                    raise ValueError(f"Estoque insuficiente para o produto: {item.produto.nome}")
+            
+            # Processar itens e atualizar estoque
+            for item in self.itens.all():
+                estoque = Estoque.objects.get(produto=item.produto)
+                estoque.quantidade_atual -= item.quantidade
+                estoque.save()
+                
+                # Registrar movimentação de estoque
+                MovimentacaoEstoque.objects.create(
+                    produto=item.produto,
+                    tipo='saida',
+                    origem='venda',
+                    quantidade=item.quantidade,
+                    valor_unitario=item.preco_unitario,
+                    documento=f"Venda #{self.id}",
+                    observacao=f"Venda para {self.cliente.nome}",
+                    usuario=self.vendedor,
+                    referencia_id=self.id,
+                    referencia_tipo='venda'
+                )
+            
+            # Finalizar venda
+            self.status = 'finalizada'
+            self.data_finalizacao = timezone.now()
+            self.save()
+            
+            return True
 
 
 class ItemVenda(models.Model):

@@ -5,14 +5,7 @@ class CategoriaSerializer(serializers.ModelSerializer):
     """
     Serializer para categorias de produtos.
     """
-    def validate(self, data):
-        """
-        Valida se o estoque é suficiente para a quantidade solicitada.
-        """
-        produto = Produto(**data)
-        if not produto.verificar_estoque(data.get('quantidade', 0)):
-            raise serializers.ValidationError('Estoque insuficiente para a quantidade solicitada.')
-        return data
+    class Meta:
         model = Categoria
         fields = ['id', 'nome', 'descricao', 'slug', 'ativa', 'ordem']
 
@@ -76,6 +69,30 @@ class ProdutoCreateUpdateSerializer(serializers.ModelSerializer):
             'preco', 'unidade', 'slug', 'ativo', 'estoque_minimo',
             'categorias', 'fornecedor'
         ]
+        
+    def create(self, validated_data):
+        """
+        Cria um novo produto e inicializa seu estoque.
+        """
+        from apps.inventory.models import Estoque
+        
+        # Extrair categorias para adicionar depois
+        categorias = validated_data.pop('categorias', [])
+        
+        # Criar o produto
+        produto = Produto.objects.create(**validated_data)
+        
+        # Adicionar categorias
+        produto.categorias.set(categorias)
+        
+        # Inicializar estoque
+        Estoque.objects.create(
+            produto=produto,
+            quantidade_atual=0,
+            quantidade_reservada=0
+        )
+        
+        return produto
 
 # Manter o ProdutoSerializer para compatibilidade com outros módulos
 class ProdutoSerializer(serializers.ModelSerializer):

@@ -266,25 +266,98 @@ class VendaFinalizarView(APIView):
         Processa a venda com base nos itens e forma de pagamento informados.
         Caso a venda seja processada com sucesso, retorna um objeto com chave 'status'
         e valor 'Venda processada com sucesso'. Caso contrário, retorna um objeto com
-        chave 'error' e valor com a descri o do erro.
+        chave 'error' e valor com a descrição do erro.
 
-        :param request: Requisi o HTTP.
+        :param request: Requisição HTTP.
         :type request: rest_framework.request.Request
         :param args: Argumentos adicionais.
         :type args: list
-        :param kwargs: Dicion rio de argumentos nomeados.
+        :param kwargs: Dicionário de argumentos nomeados.
         :type kwargs: dict
         :return: Resposta HTTP com o status da venda.
         :rtype: rest_framework.response.Response
         """
         venda = self.get_object()
+        
+        # Verificar se a venda já está finalizada
+        if venda.status != 'aberta':
+            return Response(
+                {"error": "Esta venda não está aberta para finalização."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar se a venda tem itens
+        if not venda.itens.exists():
+            return Response(
+                {"error": "Não é possível finalizar uma venda sem itens."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar se o pagamento foi informado
+        if 'pagamentos' not in request.data or not request.data['pagamentos']:
+            return Response(
+                {"error": "É necessário informar pelo menos um pagamento."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
+            # Processar pagamentos
+            pagamentos_data = request.data['pagamentos']
+            total_pagamentos = 0
+            
+            # Validar pagamentos
+            for pagamento_data in pagamentos_data:
+                if 'forma_pagamento' not in pagamento_data:
+                    return Response(
+                        {"error": "Forma de pagamento não informada."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if 'valor' not in pagamento_data:
+                    return Response(
+                        {"error": "Valor do pagamento não informado."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                total_pagamentos += float(pagamento_data['valor'])
+            
+            # Verificar se o total de pagamentos cobre o valor da venda
+            if total_pagamentos < float(venda.total):
+                return Response(
+                    {"error": f"O valor total dos pagamentos ({total_pagamentos}) é menor que o valor da venda ({venda.total})."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Processar a venda
             venda.processar_venda()
-            return Response({"status": "Venda processada com sucesso"})
+            
+            # Registrar pagamentos
+            for pagamento_data in pagamentos_data:
+                forma_pagamento = get_object_or_404(
+                    FormaPagamento, 
+                    id=pagamento_data['forma_pagamento']
+                )
+                
+                Pagamento.objects.create(
+                    venda=venda,
+                    forma_pagamento=forma_pagamento,
+                    valor=pagamento_data['valor'],
+                    status='aprovado',
+                    parcelas=pagamento_data.get('parcelas', 1),
+                    autorizacao=pagamento_data.get('autorizacao'),
+                    bandeira=pagamento_data.get('bandeira'),
+                    nsu=pagamento_data.get('nsu')
+                )
+            
+            return Response({
+                "status": "Venda processada com sucesso",
+                "venda_id": venda.id,
+                "total": venda.total,
+                "data_finalizacao": venda.data_finalizacao
+            })
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": "Erro inesperado ao processar a venda."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Erro inesperado ao processar a venda: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class VendaCancelarView(APIView):

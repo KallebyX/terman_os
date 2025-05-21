@@ -80,17 +80,38 @@ class Produto(models.Model):
         """
         Verifica se há estoque suficiente para a quantidade solicitada.
         """
-        return self.estoque_minimo >= quantidade
+        from apps.inventory.models import Estoque
+        
+        # Obter o estoque do produto
+        estoque = Estoque.objects.filter(produto=self).first()
+        
+        # Se não houver registro de estoque, considerar como indisponível
+        if not estoque:
+            return False
+            
+        # Verificar se a quantidade disponível é suficiente
+        return estoque.quantidade_disponivel >= quantidade
 
     def atualizar_estoque(self, quantidade):
         """
         Atualiza o estoque do produto após uma venda.
         """
-        if self.verificar_estoque(quantidade):
-            self.estoque_minimo -= quantidade
-            self.save()
+        from apps.inventory.models import Estoque
+        
+        # Obter ou criar o estoque do produto
+        estoque, created = Estoque.objects.get_or_create(
+            produto=self,
+            defaults={'quantidade_atual': 0, 'quantidade_reservada': 0}
+        )
+        
+        # Verificar se há estoque suficiente
+        if estoque.quantidade_disponivel >= quantidade:
+            # Atualizar o estoque
+            estoque.quantidade_atual -= quantidade
+            estoque.save()
+            return True
         else:
-            raise ValueError("Estoque insuficiente para a quantidade solicitada.")
+            raise ValueError(f"Estoque insuficiente para o produto {self.nome}. Disponível: {estoque.quantidade_disponivel}, Solicitado: {quantidade}")
     
     @property
     def preco_atual(self):

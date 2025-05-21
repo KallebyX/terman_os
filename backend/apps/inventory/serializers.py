@@ -50,7 +50,7 @@ class AjusteEstoqueSerializer(serializers.Serializer):
     """
     produto_id = serializers.IntegerField()
     quantidade = serializers.DecimalField(max_digits=10, decimal_places=2)
-    tipo = serializers.ChoiceField(choices=['entrada', 'saida', 'ajuste'])
+    tipo = serializers.ChoiceField(choices=['entrada', 'saida', 'ajuste', 'reserva', 'cancelamento'])
     origem = serializers.ChoiceField(choices=MovimentacaoEstoque.ORIGEM_CHOICES)
     documento = serializers.CharField(required=False, allow_blank=True)
     observacao = serializers.CharField(required=False, allow_blank=True)
@@ -62,10 +62,37 @@ class AjusteEstoqueSerializer(serializers.Serializer):
         """
         Valida os dados do ajuste de estoque.
         """
-        if data['tipo'] == 'saida' and data['quantidade'] <= 0:
-            raise serializers.ValidationError("A quantidade para saída deve ser maior que zero.")
+        if data['tipo'] in ['saida', 'reserva'] and data['quantidade'] <= 0:
+            raise serializers.ValidationError(f"A quantidade para {data['tipo']} deve ser maior que zero.")
         
         if data['tipo'] == 'entrada' and data['quantidade'] <= 0:
             raise serializers.ValidationError("A quantidade para entrada deve ser maior que zero.")
+        
+        # Verificar se o produto existe
+        from apps.products.models import Produto
+        try:
+            produto = Produto.objects.get(id=data['produto_id'])
+        except Produto.DoesNotExist:
+            raise serializers.ValidationError(f"Produto com ID {data['produto_id']} não encontrado.")
+        
+        # Verificar estoque disponível para saída ou reserva
+        if data['tipo'] in ['saida', 'reserva']:
+            from apps.inventory.models import Estoque
+            estoque = Estoque.objects.filter(produto_id=data['produto_id']).first()
+            
+            if not estoque:
+                raise serializers.ValidationError(f"Não há registro de estoque para o produto {produto.nome}.")
+            
+            if data['tipo'] == 'saida' and estoque.quantidade_disponivel < data['quantidade']:
+                raise serializers.ValidationError(
+                    f"Estoque insuficiente para o produto {produto.nome}. "
+                    f"Disponível: {estoque.quantidade_disponivel}, Solicitado: {data['quantidade']}"
+                )
+            
+            if data['tipo'] == 'reserva' and estoque.quantidade_disponivel < data['quantidade']:
+                raise serializers.ValidationError(
+                    f"Estoque insuficiente para reserva do produto {produto.nome}. "
+                    f"Disponível: {estoque.quantidade_disponivel}, Solicitado: {data['quantidade']}"
+                )
             
         return data
