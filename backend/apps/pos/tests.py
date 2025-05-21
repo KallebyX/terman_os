@@ -422,3 +422,47 @@ class PosAPITests(TestCase):
         self.assertEqual(float(response.data['vendas_semana']['valor']), 1500.00)
         self.assertEqual(response.data['vendas_mes']['quantidade'], 2)
         self.assertEqual(float(response.data['vendas_mes']['valor']), 1500.00)
+    def test_estoque_atualizacao_ao_adicionar_item(self):
+        """Teste de atualização de estoque ao adicionar item à venda."""
+        self.client.force_authenticate(user=self.seller_user)
+        url = reverse('pos:venda-itens', kwargs={'venda_id': self.venda.id})
+        data = {
+            'produto': self.produto1.id,
+            'quantidade': 5.00,
+            'preco_unitario': 100.00
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verificar se o estoque foi atualizado corretamente
+        self.estoque1.refresh_from_db()
+        self.assertEqual(float(self.estoque1.quantidade_reservada), 5.00)
+        self.assertEqual(float(self.estoque1.quantidade_atual), 15.00)
+
+    def test_estoque_atualizacao_ao_remover_item(self):
+        """Teste de atualização de estoque ao remover item da venda."""
+        self.client.force_authenticate(user=self.seller_user)
+        
+        # Adicionar item à venda
+        item = ItemVenda.objects.create(
+            venda=self.venda,
+            produto=self.produto1,
+            quantidade=5.00,
+            preco_unitario=100.00,
+            subtotal=500.00
+        )
+        
+        # Atualizar estoque
+        self.estoque1.quantidade_reservada = 5.00
+        self.estoque1.quantidade_atual = 15.00
+        self.estoque1.save()
+        
+        # Remover item
+        url = reverse('pos:venda-item-detail', kwargs={'venda_id': self.venda.id, 'pk': item.id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
+        # Verificar se o estoque foi atualizado corretamente
+        self.estoque1.refresh_from_db()
+        self.assertEqual(float(self.estoque1.quantidade_reservada), 0.00)
+        self.assertEqual(float(self.estoque1.quantidade_atual), 20.00)

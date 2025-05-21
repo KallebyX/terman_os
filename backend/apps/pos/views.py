@@ -125,6 +125,7 @@ class ItemVendaListCreateView(generics.ListCreateAPIView):
         
         # Reservar estoque
         estoque.quantidade_reservada += quantidade
+        estoque.quantidade_atual -= quantidade
         estoque.save()
         
         # Criar item de venda
@@ -173,6 +174,7 @@ class ItemVendaDetailView(generics.RetrieveUpdateDestroyAPIView):
         # Liberar estoque reservado
         estoque = Estoque.objects.get(produto=item.produto)
         estoque.quantidade_reservada -= item.quantidade
+        estoque.quantidade_atual += item.quantidade
         
         # Atualizar item
         serializer = self.get_serializer(item, data=request.data, partial=True)
