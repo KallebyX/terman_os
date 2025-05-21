@@ -479,3 +479,43 @@ class PosAPITests(TestCase):
         response = self.client.post(reverse('pos:processar-venda', args=[self.venda.id]))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Estoque insuficiente", response.data['error'])
+
+    def test_processar_venda_produto_nao_cadastrado_em_estoque(self):
+        """Teste para venda com produto sem registro de estoque."""
+        self.client.force_authenticate(user=self.seller_user)
+
+        produto_novo = Produto.objects.create(
+            codigo='MH999',
+            nome='Produto Sem Estoque',
+            descricao='Produto sem estoque registrado',
+            preco=10.0,
+            unidade='un',
+            slug='produto-sem-estoque',
+            ativo=True,
+            estoque_minimo=0.0
+        )
+        produto_novo.categorias.add(self.categoria)
+
+        self.venda.adicionar_item(produto_novo, 1)
+
+        url = reverse('pos:processar-venda', args=[self.venda.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Estoque insuficiente", response.data['error'])
+
+    def test_processar_venda_com_multiplos_itens(self):
+        """Teste para processar venda com múltiplos itens."""
+        self.client.force_authenticate(user=self.seller_user)
+
+        self.venda.adicionar_item(self.produto1, 2)
+        self.venda.adicionar_item(self.produto2, 3)
+
+        url = reverse('pos:processar-venda', args=[self.venda.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("Venda processada com sucesso", response.data['status'])
+
+        self.estoque1.refresh_from_db()
+        self.estoque2.refresh_from_db()
+        self.assertEqual(float(self.estoque1.quantidade_atual), 18.00)
+        self.assertEqual(float(self.estoque2.quantidade_atual), 7.00)

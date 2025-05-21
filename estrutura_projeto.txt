@@ -1,0 +1,148 @@
+.
+├── \
+├── aider_smart_launcher.sh
+├── backend
+│   ├── apps
+│   │   ├── accounts
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── migrations
+│   │   │   ├── models.py
+│   │   │   ├── permissions.py
+│   │   │   ├── serializers.py
+│   │   │   ├── signals.py
+│   │   │   ├── tests
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── dashboard
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── financial
+│   │   │   ├── models.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── fiscal
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── hr
+│   │   │   ├── models.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── inventory
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── models.py
+│   │   │   ├── permissions.py
+│   │   │   ├── serializers.py
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── orders
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── migrations
+│   │   │   ├── models.py
+│   │   │   ├── permissions.py
+│   │   │   ├── serializers.py
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── pos
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── models.py
+│   │   │   ├── serializers.py
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   ├── products
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── models.py
+│   │   │   ├── serializers.py
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   └── service_orders
+│   │       ├── admin.py
+│   │       ├── apps.py
+│   │       ├── models.py
+│   │       ├── serializers.py
+│   │       ├── urls.py
+│   │       └── views.py
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── logs
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── terman_os
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── test_accounts.py
+│   │   ├── test_inventory.py
+│   │   ├── test_orders.py
+│   │   └── test_products.py
+│   └── wait-for-postgres.sh
+├── docker-compose.yml
+├── estrutura_projeto.txt
+├── frontend
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   │   └── ui
+│   │   ├── contexts
+│   │   │   └── AuthContext.tsx
+│   │   ├── layouts
+│   │   │   ├── BaseLayouts.tsx
+│   │   │   └── PDVLayout.tsx
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   │   ├── Client
+│   │   │   ├── Customers
+│   │   │   ├── dashboard
+│   │   │   ├── inventory
+│   │   │   ├── Landing
+│   │   │   ├── Login.tsx
+│   │   │   ├── marketplace
+│   │   │   ├── NotFound.tsx
+│   │   │   ├── Orders
+│   │   │   └── PDV
+│   │   ├── services
+│   │   │   ├── api.ts
+│   │   │   └── AuthContext.tsx
+│   │   ├── styles
+│   │   │   ├── colors.ts
+│   │   │   └── global.css
+│   │   └── utils
+│   │       ├── auth.ts
+│   │       └── cn.ts
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.js
+├── incluir.txt
+├── manage.py
+├── README.md
+├── requirements.txt
+├── terman_os_documentacao.md
+├── todo.md
+└── wait-for-postgres.sh
+    └── temp.sh
+
+39 directories, 107 files

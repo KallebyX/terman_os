@@ -1,0 +1,154 @@
+# 🚀 SCRIPT COMPLETO DE BLOCOS PARA USO COM AIDER
+# Seguindo o limite de 30.000 tokens/min do gpt-4o
+# Cada bloco está separado com prompts e comandos adequados
+
+#############################
+# BLOCO 1: POS - Módulo Central
+#############################
+/add backend/apps/pos/models.py \
+     backend/apps/pos/views.py \
+     backend/apps/pos/serializers.py
+
+PROMPT:
+> Corrija a lógica de vendas, atualização de estoque e integração com pedidos.
+> Implemente tratamento de erros e geração de pedido ao finalizar venda.
+
+/drop backend/apps/pos/
+
+
+#############################
+# BLOCO 2: ORDERS + PRODUCTS
+#############################
+/add backend/apps/orders/models.py \
+     backend/apps/orders/views.py \
+     backend/apps/orders/serializers.py
+/add backend/apps/products/models.py \
+     backend/apps/products/views.py \
+     backend/apps/products/serializers.py
+
+PROMPT:
+> Corrija a lógica de criação e listagem de pedidos.
+> Valide a integração com produtos e estoque.
+
+/drop backend/apps/orders/ backend/apps/products/
+
+
+#############################
+# BLOCO 3: INVENTORY
+#############################
+/add backend/apps/inventory/models.py \
+     backend/apps/inventory/views.py \
+     backend/apps/inventory/serializers.py
+
+PROMPT:
+> Verifique e corrija o controle de estoque (entrada, saída, reserva).
+> Confirme integração com POS e Orders.
+
+/drop backend/apps/inventory/
+
+
+#############################
+# BLOCO 4: AUTENTICAÇÃO COMPLETA
+#############################
+/add backend/apps/accounts/views.py \
+     backend/apps/accounts/serializers.py \
+     backend/apps/accounts/models.py \
+     backend/apps/accounts/permissions.py \
+     backend/apps/accounts/urls.py
+
+PROMPT:
+> Corrija e valide o fluxo de autenticação JWT.
+> Proteja rotas com permissões adequadas.
+
+/drop backend/apps/accounts/
+
+
+#############################
+# BLOCO 5: API + CONTEXTOS FRONTEND
+#############################
+/add frontend/src/contexts/AuthContext.tsx \
+     frontend/src/services/AuthContext.tsx \
+     frontend/src/utils/auth.ts \
+     frontend/src/services/api.ts \
+     frontend/vite.config.js \
+     frontend/.env
+
+PROMPT:
+> Confirme a configuração da API base e headers JWT.
+> Ajuste axios/fetch para integração com o backend.
+
+/drop frontend/src/contexts/AuthContext.tsx frontend/src/services/AuthContext.tsx frontend/src/utils/auth.ts frontend/src/services/api.ts frontend/vite.config.js frontend/.env
+
+
+#############################
+# BLOCO 6: LOGIN
+#############################
+/add frontend/src/pages/Login.tsx
+
+PROMPT:
+> Corrija a integração do login com a API real e autenticação JWT.
+> Trate erros e redirecione corretamente após sucesso.
+
+/drop frontend/src/pages/Login.tsx
+
+
+#############################
+# BLOCO 7: DASHBOARD + PDV
+#############################
+/add frontend/src/pages/dashboard/DashboardPage.tsx \
+     frontend/src/pages/PDV/PDVPage.tsx
+
+PROMPT:
+> Substitua dados mockados por dados reais da API.
+> Corrija chamadas com JWT, tratamento de erros e exibição dinâmica.
+
+/drop frontend/src/pages/dashboard/DashboardPage.tsx frontend/src/pages/PDV/PDVPage.tsx
+
+
+#############################
+# BLOCO 8: ORDERS + INVENTORY
+#############################
+/add frontend/src/pages/Orders/OrderManagementPage.tsx \
+     frontend/src/pages/inventory/InventoryPage.tsx
+
+PROMPT:
+> Substitua dados mockados por dados reais da API.
+> Valide ações de criação, listagem e controle de estoque.
+
+/drop frontend/src/pages/Orders/OrderManagementPage.tsx frontend/src/pages/inventory/InventoryPage.tsx
+
+
+#############################
+# BLOCO 9: TESTES BACKEND
+#############################
+/add backend/tests/
+
+PROMPT:
+> Valide os testes automatizados de venda, estoque, pedidos e autenticação.
+> Corrija testes quebrados e adicione cenários reais com API JWT.
+
+/drop backend/tests/
+
+
+#############################
+# BLOCO 10: DOCKER + DEPLOY
+#############################
+/add docker-compose.yml backend/Dockerfile frontend/Dockerfile
+
+PROMPT:
+> Corrija as imagens e serviços para subir backend, frontend e postgres.
+> Verifique variáveis de ambiente e conexão entre os containers.
+
+/drop docker-compose.yml backend/Dockerfile frontend/Dockerfile
+
+
+#############################
+# BLOCO 11: DOCUMENTAÇÃO
+#############################
+/add README.md terman_os_documentacao.md
+
+PROMPT:
+> Atualize a documentação com instalação local, docker, login e testes.
+> Inclua instruções de configuração de .env e consumo da API com JWT.
+
+/drop README.md terman_os_documentacao.md
