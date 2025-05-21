@@ -201,6 +201,22 @@ class TestOrdersAPI:
         url = f'/api/orders/orders/{order_cliente2.id}/'
         response = api_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
+        
+        # Autenticar como cliente2 e verificar se ele vê apenas seus pedidos
+        token = get_jwt_token(cliente2)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        url = '/api/orders/my-orders/'
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['id'] == order_cliente2.id
+        
+        # Cliente2 não deve conseguir ver pedido do cliente1
+        url = f'/api/orders/orders/{order_cliente1.id}/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
     
     def test_atualizar_status_order(self, api_client, create_order, create_produto, admin_user, get_jwt_token):
         """Teste de atualização de status de pedido."""
@@ -296,3 +312,27 @@ class TestOrdersAPI:
             # Verificar apenas se os estoques existem
             assert Estoque.objects.filter(produto=produto1).exists()
             assert Estoque.objects.filter(produto=produto2).exists()
+            
+    def test_unauthorized_access_orders(self, api_client):
+        """Teste de acesso não autorizado a endpoints de pedidos."""
+        # Tentar acessar lista de pedidos sem autenticação
+        url = '/api/orders/orders/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar acessar meus pedidos sem autenticação
+        url = '/api/orders/my-orders/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar criar pedido sem autenticação
+        url = '/api/orders/create/'
+        data = {
+            'items': [
+                {'product_id': 1, 'quantity': 2},
+                {'product_id': 2, 'quantity': 1}
+            ],
+            'notes': 'Pedido sem autenticação'
+        }
+        response = api_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

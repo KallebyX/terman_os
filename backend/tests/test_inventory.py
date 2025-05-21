@@ -195,3 +195,55 @@ class TestInventoryAPI:
                     quantidade_reservada=0
                 )
             assert estoque is not None
+            
+    def test_unauthorized_access_inventory(self, api_client):
+        """Teste de acesso não autorizado a endpoints de estoque."""
+        # Tentar acessar lista de estoque sem autenticação
+        url = '/api/inventory/estoque/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar acessar movimentações sem autenticação
+        url = '/api/inventory/movimentacoes/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar criar movimentação sem autenticação
+        url = '/api/inventory/movimentacoes/'
+        data = {
+            'produto': 1,
+            'tipo': 'entrada',
+            'origem': 'compra',
+            'quantidade': 10,
+            'valor_unitario': 100.00,
+            'observacao': 'Movimentação sem autenticação'
+        }
+        response = api_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+    def test_cliente_nao_pode_criar_movimentacao(self, api_client, create_cliente, create_produto, get_jwt_token):
+        """Teste de que cliente não pode criar movimentações de estoque."""
+        # Criar cliente comum
+        cliente = create_cliente(email='cliente_estoque@example.com')
+        produto = create_produto(codigo='PROD009', nome='Produto Movimentação Cliente')
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(cliente)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Dados para a nova movimentação
+        data = {
+            'produto': produto.id,
+            'tipo': 'entrada',
+            'origem': 'compra',
+            'quantidade': 20,
+            'valor_unitario': 90.00,
+            'observacao': 'Entrada teste cliente'
+        }
+        
+        # Fazer requisição para criar movimentação
+        url = '/api/inventory/movimentacoes/'
+        response = api_client.post(url, data, format='json')
+        
+        # Verificar que cliente não tem permissão
+        assert response.status_code == status.HTTP_403_FORBIDDEN

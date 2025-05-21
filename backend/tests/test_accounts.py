@@ -145,3 +145,25 @@ class TestUserAPI:
             import sys
             print(f"Aviso: Teste de verificação de token ignorado: {str(e)}", file=sys.stderr)
             pytest.skip("Verificação de token não está disponível")
+            
+    def test_unauthorized_access(self, api_client):
+        """Teste de acesso não autorizado a endpoints protegidos."""
+        # Tentar acessar perfil sem autenticação
+        url = reverse('accounts:me')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar acessar lista de usuários sem autenticação
+        url = reverse('accounts:users-list')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+    def test_invalid_token(self, api_client):
+        """Teste de acesso com token inválido."""
+        # Configurar um token inválido
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer invalidtoken12345')
+        
+        # Tentar acessar perfil com token inválido
+        url = reverse('accounts:me')
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
