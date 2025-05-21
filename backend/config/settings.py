@@ -91,13 +91,6 @@ DATABASES = {
 }
 
 
-# Configuração de log para depuração de SQL
-if DEBUG:
-    LOGGING['loggers']['django.db.backends'] = {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-        'propagate': False,
-    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -240,6 +233,14 @@ LOGGING = {
         },
     },
 }
+
+# Configuração de log para depuração de SQL
+if DEBUG:
+    LOGGING['loggers']['django.db.backends'] = {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    }
 
 # Ensure logs directory exists
 os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
