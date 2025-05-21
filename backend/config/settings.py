@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@db:5432/terman_db'),
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/terman_db'),
         conn_max_age=600,
         ssl_require=False
     )
