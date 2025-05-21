@@ -12,7 +12,7 @@ echo "⏳ Aguardando o PostgreSQL ficar disponível..."
 
 # Função para verificar se o PostgreSQL está pronto
 check_postgres() {
-  PGPASSWORD=$password psql -h "$host" -p "$port" -U "$user" -d "$database" -c '\q' 2>/dev/null
+  PGPASSWORD=$password psql -h "$host" -p "$port" -U "$user" -d "postgres" -c '\q' 2>/dev/null
   return $?
 }
 
@@ -24,7 +24,14 @@ check_database_exists() {
 
 # Verificar se o host está acessível primeiro
 echo "Verificando conectividade com o host $host..."
-timeout 5 bash -c "until nc -z $host $port; do echo 'Aguardando porta $port em $host...'; sleep 1; done" || echo "Não foi possível conectar ao host $host:$port"
+timeout 30 bash -c "until nc -z $host $port; do echo 'Aguardando porta $port em $host...'; sleep 2; done" || {
+  echo "Não foi possível conectar ao host $host:$port após 30 segundos"
+  echo "Verificando status do contêiner PostgreSQL..."
+  docker ps | grep postgres || echo "Contêiner PostgreSQL não encontrado"
+  exit 1
+}
+
+echo "Host $host:$port está acessível!"
 
 # Contador para timeout
 count=0
@@ -41,14 +48,16 @@ until check_postgres; do
     docker ps | grep postgres || echo "Contêiner PostgreSQL não encontrado"
   fi
   
-  # Timeout após 60 tentativas (1 minuto)
+  # Timeout após 60 tentativas (2 minutos)
   if [ $count -ge $max_attempts ]; then
     echo "Timeout ao aguardar PostgreSQL. Verifique se o serviço está rodando corretamente."
     exit 1
   fi
   
-  sleep 1
+  sleep 2
 done
+
+echo "PostgreSQL está disponível!"
 
 # Verificar se o banco de dados existe
 if ! check_database_exists; then
@@ -58,6 +67,8 @@ if ! check_database_exists; then
     exit 1
   }
   echo "Banco de dados $database criado com sucesso!"
+else
+  echo "Banco de dados $database já existe."
 fi
 
 echo "✅ PostgreSQL está pronto! Iniciando o backend..."

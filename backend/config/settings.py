@@ -84,11 +84,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://postgres:postgres@db:5432/terman_db'),
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@db:5432/terman_db'),
         conn_max_age=600,
         ssl_require=False
     )
 }
+
+# Configuração de log para depuração de SQL
+if DEBUG:
+    LOGGING['loggers']['django.db.backends'] = {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
