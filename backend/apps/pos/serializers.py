@@ -2,8 +2,6 @@ from rest_framework import serializers
 from .models import Cliente, Venda, ItemVenda, FormaPagamento, Pagamento
 from apps.products.serializers import ProdutoListSerializer
 from apps.accounts.serializers import UserSerializer
-from apps.products.serializers import ProdutoListSerializer
-from apps.accounts.serializers import UserSerializer
 
 
 class ClienteSerializer(serializers.ModelSerializer):
@@ -131,10 +129,7 @@ class VendaFinalizarSerializer(serializers.Serializer):
     Serializer para finalização de venda.
     """
     pagamentos = serializers.ListField(
-        child=serializers.DictField(
-            child=serializers.Field(),
-            allow_empty=False
-        ),
+        child=serializers.DictField(),
         required=True
     )
     
