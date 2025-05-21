@@ -18,9 +18,11 @@ const InventoryPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/products');
-        setProducts(response.data);
+        setProducts(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
+        // Mostrar mensagem de erro para o usuário
+        alert('Não foi possível carregar os produtos. Por favor, tente novamente mais tarde.');
       }
     };
 
@@ -34,13 +36,17 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchCategoriesAndSuppliers = async () => {
       try {
-        const categoriesResponse = await api.get('/categories');
-        setCategories(categoriesResponse.data);
-
-        const suppliersResponse = await api.get('/suppliers');
-        setSuppliers(suppliersResponse.data);
+        const [categoriesResponse, suppliersResponse] = await Promise.all([
+          api.get('/categories'),
+          api.get('/suppliers')
+        ]);
+        
+        setCategories(categoriesResponse.data.results || categoriesResponse.data);
+        setSuppliers(suppliersResponse.data.results || suppliersResponse.data);
       } catch (error) {
         console.error('Erro ao buscar categorias e fornecedores:', error);
+        // Mostrar mensagem de erro para o usuário
+        alert('Não foi possível carregar categorias e fornecedores. Por favor, tente novamente mais tarde.');
       }
     };
 

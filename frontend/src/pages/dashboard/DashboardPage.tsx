@@ -55,11 +55,12 @@ const DashboardPage: React.FC = () => {
             api.get('/activities/recent')
           ]);
         
-        setKpiData(kpiResponse.data);
-        setRecentOrders(ordersResponse.data);
-        setTopProducts(productsResponse.data);
-        setLowStockAlerts(stockAlertsResponse.data);
-        setActivities(activitiesResponse.data);
+        // Verificar se as respostas têm o formato esperado
+        setKpiData(kpiResponse.data.results || kpiResponse.data);
+        setRecentOrders(ordersResponse.data.results || ordersResponse.data);
+        setTopProducts(productsResponse.data.results || productsResponse.data);
+        setLowStockAlerts(stockAlertsResponse.data.results || stockAlertsResponse.data);
+        setActivities(activitiesResponse.data.results || activitiesResponse.data);
       } catch (error: any) {
         console.error('Erro ao buscar dados do dashboard:', error);
         setError(
@@ -75,39 +76,39 @@ const DashboardPage: React.FC = () => {
   }, [dateRange]); // Refazer a busca quando o intervalo de datas mudar
   
   // Função para atualizar os dados
-  const refreshData = () => {
+  const refreshData = async () => {
     // Refaz a busca de dados
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Adicionar timestamp para evitar cache
+      const timestamp = new Date().getTime();
       
-      try {
-        const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
-          await Promise.all([
-            api.get(`/dashboard/kpis?range=${dateRange}`),
-            api.get('/orders/recent'),
-            api.get(`/products/top?range=${dateRange}`),
-            api.get('/inventory/low-stock'),
-            api.get('/activities/recent')
-          ]);
-        
-        setKpiData(kpiResponse.data);
-        setRecentOrders(ordersResponse.data);
-        setTopProducts(productsResponse.data);
-        setLowStockAlerts(stockAlertsResponse.data);
-        setActivities(activitiesResponse.data);
-      } catch (error: any) {
-        console.error('Erro ao atualizar dados do dashboard:', error);
-        setError(
-          error.response?.data?.message || 
-          'Não foi possível atualizar os dados. Por favor, tente novamente mais tarde.'
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+      const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
+        await Promise.all([
+          api.get(`/dashboard/kpis?range=${dateRange}&_t=${timestamp}`),
+          api.get(`/orders/recent?_t=${timestamp}`),
+          api.get(`/products/top?range=${dateRange}&_t=${timestamp}`),
+          api.get(`/inventory/low-stock?_t=${timestamp}`),
+          api.get(`/activities/recent?_t=${timestamp}`)
+        ]);
+      
+      // Verificar se as respostas têm o formato esperado
+      setKpiData(kpiResponse.data.results || kpiResponse.data);
+      setRecentOrders(ordersResponse.data.results || ordersResponse.data);
+      setTopProducts(productsResponse.data.results || productsResponse.data);
+      setLowStockAlerts(stockAlertsResponse.data.results || stockAlertsResponse.data);
+      setActivities(activitiesResponse.data.results || activitiesResponse.data);
+    } catch (error: any) {
+      console.error('Erro ao atualizar dados do dashboard:', error);
+      setError(
+        error.response?.data?.message || 
+        'Não foi possível atualizar os dados. Por favor, tente novamente mais tarde.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Renderizar KPI cards

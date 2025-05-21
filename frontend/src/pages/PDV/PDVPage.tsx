@@ -5,7 +5,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
-import { PDVLayout } from '../../layouts/PDVLayout';
+// import { PDVLayout } from '../../layouts/PDVLayout';
 
 const PDVPage = () => {
   // Estados
@@ -27,6 +27,8 @@ const PDVPage = () => {
         setProducts(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
+        // Mostrar mensagem de erro para o usuário
+        alert('Não foi possível carregar a lista de produtos. Por favor, tente novamente mais tarde.');
       }
     };
 
@@ -36,6 +38,8 @@ const PDVPage = () => {
         setCustomers(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
+        // Mostrar mensagem de erro para o usuário
+        alert('Não foi possível carregar a lista de clientes. Por favor, tente novamente mais tarde.');
       }
     };
 
