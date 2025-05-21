@@ -31,6 +31,24 @@ class Estoque(models.Model):
         """
         self.quantidade_disponivel = max(0, self.quantidade_atual - self.quantidade_reservada)
         super().save(*args, **kwargs)
+
+    def atualizar_estoque(self, quantidade, tipo):
+        """
+        Atualiza o estoque com base no tipo de movimentação.
+        """
+        if tipo == 'entrada':
+            self.quantidade_atual += quantidade
+        elif tipo == 'saida':
+            if self.quantidade_disponivel < quantidade:
+                raise ValueError("Quantidade insuficiente em estoque.")
+            self.quantidade_atual -= quantidade
+        elif tipo == 'reserva':
+            if self.quantidade_disponivel < quantidade:
+                raise ValueError("Quantidade insuficiente para reserva.")
+            self.quantidade_reservada += quantidade
+        elif tipo == 'cancelamento':
+            self.quantidade_reservada = max(0, self.quantidade_reservada - quantidade)
+        self.save()
     
     @property
     def status(self):

@@ -74,20 +74,11 @@ class AjusteEstoqueView(APIView):
             defaults={'quantidade_atual': 0, 'quantidade_reservada': 0}
         )
         
-        # Atualizar o estoque
-        if tipo == 'entrada':
-            estoque.quantidade_atual += quantidade
-        elif tipo == 'saida':
-            if estoque.quantidade_disponivel < quantidade:
-                return Response(
-                    {'detail': 'Quantidade insuficiente em estoque.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            estoque.quantidade_atual -= quantidade
-        elif tipo == 'ajuste':
-            estoque.quantidade_atual = quantidade
-        
-        estoque.save()
+        # Atualizar o estoque usando o método atualizar_estoque
+        try:
+            estoque.atualizar_estoque(quantidade, tipo)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         # Registrar a movimentação
         movimentacao = MovimentacaoEstoque.objects.create(
