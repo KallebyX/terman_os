@@ -37,7 +37,7 @@ class ProdutoViewSet(viewsets.ModelViewSet):
     Administradores podem criar, editar e excluir.
     Outros usuários podem apenas visualizar.
     """
-    queryset = Produto.objects.all()
+    queryset = Produto.objects.select_related('fornecedor').prefetch_related('categorias', 'imagens').all()
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['ativo', 'destaque', 'categorias']
@@ -48,6 +48,10 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ProdutoListSerializer
         elif self.action in ['create', 'update', 'partial_update']:
+            # Verificar estoque antes de atualizar
+            produto = self.get_object()
+            if not produto.verificar_estoque(self.request.data.get('quantidade', 0)):
+                return Response({'error': 'Estoque insuficiente'}, status=status.HTTP_400_BAD_REQUEST)
             return ProdutoCreateUpdateSerializer
         return ProdutoDetailSerializer
 

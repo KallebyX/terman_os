@@ -59,6 +59,9 @@ class ProdutoCreateUpdateSerializer(serializers.ModelSerializer):
     """
     Serializer para criação e atualização de produtos.
     """
+    categorias = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all(), many=True)
+    fornecedor = serializers.PrimaryKeyRelatedField(queryset=Fornecedor.objects.all())
+
     class Meta:
         model = Produto
         fields = [

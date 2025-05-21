@@ -75,6 +75,12 @@ class Produto(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
+
+    def verificar_estoque(self, quantidade):
+        """
+        Verifica se há estoque suficiente para a quantidade solicitada.
+        """
+        return self.estoque_minimo >= quantidade
     
     @property
     def preco_atual(self):
