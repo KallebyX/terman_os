@@ -122,6 +122,14 @@ class UserLoginView(TokenObtainPairView):
         # Gerar tokens JWT
         refresh = RefreshToken.for_user(user)
         
+        # Adicionar claims personalizados ao token
+        refresh['user_id'] = user.id
+        refresh['email'] = user.email
+        refresh['is_admin'] = user.is_admin
+        refresh['is_seller'] = user.is_seller
+        refresh['is_operator'] = user.is_operator
+        refresh['name'] = user.get_full_name()
+        
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
