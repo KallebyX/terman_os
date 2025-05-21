@@ -1,3 +1,11 @@
+INSTALLED_APPS = [
+    # Outros apps do Django
+]
+
+MIDDLEWARE = [
+    # Outros middlewares do Django
+]
+
 # Adicionando configuração de CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
