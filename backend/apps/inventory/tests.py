@@ -228,6 +228,30 @@ class InventoryAPITests(TestCase):
         
         # Verificar se nenhuma movimentação foi registrada
         self.assertEqual(MovimentacaoEstoque.objects.count(), 2)
+    
+    def test_ajuste_estoque_com_valor_unitario(self):
+        """Teste de ajuste de estoque com valor unitário."""
+        self.client.force_authenticate(user=self.admin_user)
+        url = reverse('inventory:ajuste-estoque')
+        data = {
+            'produto_id': self.produto1.id,
+            'quantidade': 5.00,
+            'tipo': 'entrada',
+            'origem': 'compra',
+            'documento': 'NF-003',
+            'observacao': 'Compra com valor unitário',
+            'valor_unitario': 95.00
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verificar se o estoque foi atualizado
+        self.estoque1.refresh_from_db()
+        self.assertEqual(float(self.estoque1.quantidade_atual), 25.00)
+        
+        # Verificar se a movimentação foi registrada com o valor unitário
+        movimentacao = MovimentacaoEstoque.objects.latest('data_movimentacao')
+        self.assertEqual(float(movimentacao.valor_unitario), 95.00)
 
     def test_produtos_baixo_estoque(self):
         """Teste de listagem de produtos com estoque baixo."""
@@ -251,3 +275,97 @@ class InventoryAPITests(TestCase):
         self.assertEqual(float(response.data['total_entradas']), 20.00)
         self.assertEqual(float(response.data['total_saidas']), 5.00)
         self.assertEqual(float(response.data['saldo']), 15.00)
+        self.assertEqual(response.data['count'], 2)
+    
+    def test_relatorio_movimentacoes_com_filtros(self):
+        """Teste de relatório de movimentações com filtros."""
+        self.client.force_authenticate(user=self.admin_user)
+        
+        # Adicionar mais uma movimentação para testar filtros
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto2,
+            tipo='entrada',
+            origem='compra',
+            quantidade=10.00,
+            valor_unitario=140.00,
+            documento='NF-002',
+            observacao='Compra produto 2',
+            usuario=self.admin_user
+        )
+        
+        # Testar filtro por produto
+        url = reverse('inventory:relatorio-movimentacoes') + f'?produto_id={self.produto1.id}'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['movimentacoes']), 2)
+        
+        # Testar filtro por tipo
+        url = reverse('inventory:relatorio-movimentacoes') + '?tipo=entrada'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['movimentacoes']), 2)
+        self.assertEqual(float(response.data['total_entradas']), 30.00)
+        self.assertEqual(float(response.data['total_saidas']), 0.00)
+    def test_acesso_nao_autenticado(self):
+        """Teste de acesso não autenticado às APIs de inventário."""
+        # Testar acesso à lista de estoque
+        url = reverse('inventory:estoque-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+        # Testar acesso à lista de movimentações
+        url = reverse('inventory:movimentacoes-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+        # Testar acesso ao ajuste de estoque
+        url = reverse('inventory:ajuste-estoque')
+        response = self.client.post(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+        # Testar acesso aos produtos com baixo estoque
+        url = reverse('inventory:produtos-baixo-estoque')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+        # Testar acesso ao relatório de movimentações
+        url = reverse('inventory:relatorio-movimentacoes')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_acesso_cliente_negado(self):
+        """Teste de acesso negado para clientes às APIs de inventário."""
+        self.client.force_authenticate(user=self.customer_user)
+        
+        # Testar acesso à lista de estoque
+        url = reverse('inventory:estoque-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # Testar acesso à lista de movimentações
+        url = reverse('inventory:movimentacoes-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # Testar acesso ao ajuste de estoque
+        url = reverse('inventory:ajuste-estoque')
+        data = {
+            'produto_id': self.produto1.id,
+            'quantidade': 5.00,
+            'tipo': 'entrada',
+            'origem': 'compra',
+            'documento': 'NF-004',
+            'observacao': 'Tentativa de cliente'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # Testar acesso aos produtos com baixo estoque
+        url = reverse('inventory:produtos-baixo-estoque')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+        # Testar acesso ao relatório de movimentações
+        url = reverse('inventory:relatorio-movimentacoes')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

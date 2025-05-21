@@ -29,7 +29,7 @@ class Estoque(models.Model):
         """
         Sobrescreve o método save para calcular a quantidade disponível.
         """
-        self.quantidade_disponivel = self.quantidade_atual - self.quantidade_reservada
+        self.quantidade_disponivel = max(0, self.quantidade_atual - self.quantidade_reservada)
         super().save(*args, **kwargs)
     
     @property

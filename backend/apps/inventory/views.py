@@ -6,6 +6,7 @@ from rest_framework import filters
 from django.db import transaction
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.db import models
 
 from .models import Estoque, MovimentacaoEstoque
 from .serializers import EstoqueSerializer, MovimentacaoEstoqueSerializer, AjusteEstoqueSerializer
@@ -126,7 +127,7 @@ class ProdutosBaixoEstoqueView(generics.ListAPIView):
             quantidade_disponivel__lt=models.F('produto__estoque_minimo')
         )
         
-        return queryset
+        return queryset.select_related('produto')
 
 
 class RelatorioMovimentacoesView(APIView):
@@ -145,7 +146,7 @@ class RelatorioMovimentacoesView(APIView):
         produto_id = request.query_params.get('produto_id')
         
         # Base da query
-        queryset = MovimentacaoEstoque.objects.all()
+        queryset = MovimentacaoEstoque.objects.all().select_related('produto', 'usuario')
         
         # Aplicar filtros
         if data_inicio:
@@ -164,10 +165,10 @@ class RelatorioMovimentacoesView(APIView):
         
         # Calcular totais
         total_entradas = sum(
-            m.quantidade for m in queryset if m.tipo == 'entrada'
+            float(m.quantidade) for m in queryset if m.tipo == 'entrada'
         )
         total_saidas = sum(
-            m.quantidade for m in queryset if m.tipo == 'saida'
+            float(m.quantidade) for m in queryset if m.tipo == 'saida'
         )
         
         return Response({
@@ -178,5 +179,6 @@ class RelatorioMovimentacoesView(APIView):
             'periodo': {
                 'inicio': data_inicio,
                 'fim': data_fim or timezone.now().date().isoformat()
-            }
+            },
+            'count': queryset.count()
         })
