@@ -10,6 +10,7 @@ import PDVPage from './pages/PDV/PDVPage';
 import InventoryPage from './pages/inventory/InventoryPage';
 import LoginPage from './pages/Client/LoginPage';
 import ClientDashboard from './pages/Client/ClientDashboard';
+import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFound';
 
 // Layouts
@@ -43,7 +44,9 @@ const App = () => {
           
           {/* Autenticação */}
           <Route path="/login" element={<LoginPage />} />
-          
+          {/* Cadastro */}
+          <Route path="/register" element={<RegisterPage />} />
+
           {/* Marketplace */}
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/product/:id" element={<MarketplacePage />} />
