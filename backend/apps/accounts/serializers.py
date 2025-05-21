@@ -1,8 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from .models import Profile
 
 User = get_user_model()
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer para o modelo Profile.
+    """
+    class Meta:
+        model = Profile
+        fields = ['phone', 'address', 'city', 'state', 'zip_code']
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -10,13 +20,28 @@ class UserSerializer(serializers.ModelSerializer):
     """
     password = serializers.CharField(write_only=True, required=False)
     password_confirmation = serializers.CharField(write_only=True, required=False)
+    profile = ProfileSerializer(required=False)
+    user_type = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'is_admin', 'is_seller', 'is_operator',
-                  'is_active', 'date_joined', 'last_login',
-                  'password', 'password_confirmation']
-        read_only_fields = ['id', 'date_joined', 'last_login']
+                  'is_active', 'date_joined', 'last_login', 'is_email_verified',
+                  'password', 'password_confirmation', 'profile', 'user_type']
+        read_only_fields = ['id', 'date_joined', 'last_login', 'is_email_verified']
+    
+    def get_user_type(self, obj):
+        """
+        Retorna o tipo de usuário com base nas flags booleanas.
+        """
+        if obj.is_admin:
+            return 'admin'
+        elif obj.is_seller:
+            return 'seller'
+        elif obj.is_operator:
+            return 'operator'
+        else:
+            return 'customer'
     
     def validate(self, attrs):
         # Validação de senha apenas quando criando um novo usuário ou atualizando senha
@@ -46,6 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
+        profile_data = validated_data.pop('profile', None)
         
         # Atualizar campos do usuário
         for attr, value in validated_data.items():
@@ -55,6 +81,13 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         
         instance.save()
+        
+        # Atualizar ou criar perfil
+        if profile_data:
+            profile, created = Profile.objects.get_or_create(user=instance)
+            for attr, value in profile_data.items():
+                setattr(profile, attr, value)
+            profile.save()
         
         return instance
 

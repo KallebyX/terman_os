@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, Profile
 
 
 @admin.register(User)
@@ -28,3 +28,13 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'first_name', 'last_name', 'password1', 'password2'),
         }),
     )
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    """
+    Admin para o modelo Profile.
+    """
+    list_display = ('user', 'phone', 'city', 'state')
+    search_fields = ('user__email', 'user__first_name', 'user__last_name', 'phone', 'city', 'state')
+    raw_id_fields = ('user',)

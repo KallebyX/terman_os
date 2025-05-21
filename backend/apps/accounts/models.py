@@ -49,6 +49,9 @@ class User(AbstractUser):
     is_seller = models.BooleanField('Vendedor', default=False)
     is_operator = models.BooleanField('Operador', default=False)
     date_joined = models.DateTimeField('Data de cadastro', default=timezone.now)
+    is_email_verified = models.BooleanField('Email verificado', default=False)
+    password_reset_token = models.CharField('Token de redefinição de senha', max_length=100, null=True, blank=True)
+    password_reset_expires = models.DateTimeField('Expiração do token', null=True, blank=True)
     
     objects = UserManager()
     
@@ -74,3 +77,31 @@ class User(AbstractUser):
         Retorna o primeiro nome do usuário.
         """
         return self.first_name
+        
+    @property
+    def is_customer(self):
+        """
+        Verifica se o usuário é um cliente (não é admin, vendedor ou operador).
+        """
+        return not (self.is_admin or self.is_seller or self.is_operator)
+
+
+class Profile(models.Model):
+    """
+    Modelo de perfil de usuário com informações adicionais.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    phone = models.CharField('Telefone', max_length=20, blank=True, null=True)
+    address = models.CharField('Endereço', max_length=255, blank=True, null=True)
+    city = models.CharField('Cidade', max_length=100, blank=True, null=True)
+    state = models.CharField('Estado', max_length=2, blank=True, null=True)
+    zip_code = models.CharField('CEP', max_length=10, blank=True, null=True)
+    created_at = models.DateTimeField('Criado em', auto_now_add=True)
+    updated_at = models.DateTimeField('Atualizado em', auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Perfil'
+        verbose_name_plural = 'Perfis'
+        
+    def __str__(self):
+        return f"Perfil de {self.user.get_full_name()}"
