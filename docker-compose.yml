@@ -35,7 +35,7 @@ services:
     depends_on:
       - backend
     environment:
-      VITE_API_URL: http://localhost:8000/api/v1
+      VITE_API_URL: http://backend:8000/api/v1
 
 volumes:
   postgres_data:
