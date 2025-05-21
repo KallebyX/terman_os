@@ -209,13 +209,13 @@ const InventoryPage = () => {
                   <TableCell>{product.supplier}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <button className="text-secondary-500 hover:text-secondary-700">
+                      <button className="text-secondary-500 hover:text-secondary-700" title="Editar produto">
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button className="text-secondary-500 hover:text-secondary-700">
+                      <button className="text-secondary-500 hover:text-secondary-700" title="Movimentar produto">
                         <i className="fas fa-exchange-alt"></i>
                       </button>
-                      <button className="text-secondary-500 hover:text-secondary-700">
+                      <button className="text-secondary-500 hover:text-secondary-700" title="Histórico de produto">
                         <i className="fas fa-history"></i>
                       </button>
                     </div>
@@ -298,6 +298,7 @@ const InventoryPage = () => {
               <label className="block text-sm font-medium text-secondary-700 mb-1">Categoria</label>
               <select
                 className="w-full px-4 py-2 border border-secondary-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                title="Selecionar categoria"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -420,7 +421,7 @@ const InventoryPage = () => {
               <Card key={supplier.id} variant="elevated" className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold">{supplier.name}</h3>
-                  <button className="text-secondary-500 hover:text-secondary-700">
+                  <button className="text-secondary-500 hover:text-secondary-700" title="Mais opções">
                     <i className="fas fa-ellipsis-v"></i>
                   </button>
                 </div>
