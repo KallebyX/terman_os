@@ -4,7 +4,7 @@ import axios from 'axios';
 const isDocker = process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost';
 const apiUrl = isDocker 
   ? import.meta.env.VITE_API_URL_DOCKER 
-  : import.meta.env.VITE_API_URL;
+  : 'http://localhost:8000/api';
 
 console.log('API URL:', apiUrl); // Log para debug
 

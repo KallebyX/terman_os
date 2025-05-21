@@ -28,7 +28,7 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/accounts/register/', formData);
+      const response = await api.post('/v1/accounts/register/', formData);
       if (response.status === 201) {
         alert('Cadastro realizado com sucesso!');
         navigate('/login');
