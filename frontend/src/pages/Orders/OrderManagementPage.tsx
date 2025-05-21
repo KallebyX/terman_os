@@ -42,107 +42,19 @@ const OrderManagementPage: React.FC = () => {
   const { userRole } = useAuth();
   const navigate = useNavigate();
   
-  // Carregar pedidos (simulado)
+  // Carregar pedidos reais da API
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        // Simulação de carregamento de dados
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Dados simulados de pedidos
-        const mockOrders: Order[] = [
-          {
-            id: 'PED-2025-001',
-            customerId: 1,
-            customerName: 'Indústria ABC Ltda',
-            customerEmail: 'compras@industriaabc.com',
-            items: [
-              { id: 1, productId: 1, productName: 'Mangueira Hidráulica 1/2"', quantity: 5, unitPrice: 89.90 },
-              { id: 2, productId: 4, productName: 'Kit Reparo para Mangueiras', quantity: 2, unitPrice: 120.00 }
-            ],
-            total: 689.50,
-            status: 'delivered',
-            paymentStatus: 'paid',
-            paymentMethod: 'credit_card',
-            createdAt: '2025-05-10T14:30:00Z',
-            updatedAt: '2025-05-12T16:45:00Z',
-            shippingAddress: 'Av. Industrial, 1000, São Paulo, SP',
-            trackingCode: 'BR123456789'
-          },
-          {
-            id: 'PED-2025-002',
-            customerId: 2,
-            customerName: 'Metalúrgica XYZ',
-            customerEmail: 'suprimentos@metalxyz.com',
-            items: [
-              { id: 3, productId: 2, productName: 'Conexão Rápida 3/4"', quantity: 10, unitPrice: 45.50 },
-              { id: 4, productId: 3, productName: 'Adaptador Hidráulico', quantity: 8, unitPrice: 32.75 }
-            ],
-            total: 717.00,
-            status: 'processing',
-            paymentStatus: 'paid',
-            paymentMethod: 'bank_transfer',
-            createdAt: '2025-05-15T09:20:00Z',
-            updatedAt: '2025-05-15T14:10:00Z',
-            shippingAddress: 'Rua das Indústrias, 500, Belo Horizonte, MG'
-          },
-          {
-            id: 'PED-2025-003',
-            customerId: 3,
-            customerName: 'Construtora Horizonte',
-            customerEmail: 'materiais@construtora-horizonte.com',
-            items: [
-              { id: 5, productId: 8, productName: 'Mangueira de Alta Temperatura', quantity: 3, unitPrice: 145.50 },
-              { id: 6, productId: 7, productName: 'Válvula de Controle', quantity: 2, unitPrice: 195.00 }
-            ],
-            total: 826.50,
-            status: 'shipped',
-            paymentStatus: 'paid',
-            paymentMethod: 'credit_card',
-            createdAt: '2025-05-18T11:45:00Z',
-            updatedAt: '2025-05-19T08:30:00Z',
-            shippingAddress: 'Av. Construtores, 750, Rio de Janeiro, RJ',
-            trackingCode: 'BR987654321'
-          },
-          {
-            id: 'PED-2025-004',
-            customerId: 4,
-            customerName: 'Fábrica de Móveis Silva',
-            customerEmail: 'compras@moveissilva.com',
-            items: [
-              { id: 7, productId: 5, productName: 'Mangueira Flexível 1"', quantity: 4, unitPrice: 75.30 },
-              { id: 8, productId: 6, productName: 'Conexão em T', quantity: 12, unitPrice: 28.90 }
-            ],
-            total: 647.80,
-            status: 'pending',
-            paymentStatus: 'pending',
-            paymentMethod: 'pix',
-            createdAt: '2025-05-20T10:15:00Z',
-            updatedAt: '2025-05-20T10:15:00Z',
-            shippingAddress: 'Rua dos Marceneiros, 300, Curitiba, PR'
-          },
-          {
-            id: 'PED-2025-005',
-            customerId: 5,
-            customerName: 'Transportadora Expressa',
-            customerEmail: 'manutencao@transportadoraexpressa.com',
-            items: [
-              { id: 9, productId: 1, productName: 'Mangueira Hidráulica 1/2"', quantity: 8, unitPrice: 89.90 },
-              { id: 10, productId: 7, productName: 'Válvula de Controle', quantity: 3, unitPrice: 195.00 }
-            ],
-            total: 1304.20,
-            status: 'cancelled',
-            paymentStatus: 'refunded',
-            paymentMethod: 'credit_card',
-            createdAt: '2025-05-05T16:20:00Z',
-            updatedAt: '2025-05-07T09:45:00Z',
-            shippingAddress: 'Rodovia BR-101, Km 200, Joinville, SC',
-            notes: 'Pedido cancelado a pedido do cliente'
-          }
-        ];
-        
-        setOrders(mockOrders);
+        try {
+          const response = await api.get('/orders');
+          setOrders(response.data);
+        } catch (error) {
+          console.error('Erro ao carregar pedidos:', error);
+        } finally {
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Erro ao carregar pedidos:', error);
       } finally {

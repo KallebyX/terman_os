@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -10,121 +11,21 @@ const InventoryPage = () => {
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [viewMode, setViewMode] = React.useState('cards'); // 'cards' ou 'table'
   
-  // Produtos simulados
-  const products = [
-    { 
-      id: 1, 
-      code: 'MH-001', 
-      name: 'Mangueira Hidráulica 1/2"', 
-      description: 'Mangueira hidráulica de alta pressão para aplicações industriais.',
-      price: 89.90, 
-      cost: 45.00,
-      stock: 25,
-      minStock: 10,
-      category: 'mangueiras',
-      supplier: 'Fornecedor A',
-      barcode: '7891234567890',
-      lastUpdate: '18/05/2025'
-    },
-    { 
-      id: 2, 
-      code: 'CR-002', 
-      name: 'Conexão Rápida 3/4"', 
-      description: 'Conexão rápida para mangueiras hidráulicas de 3/4 polegadas.',
-      price: 45.50, 
-      cost: 22.75,
-      stock: 42,
-      minStock: 15,
-      category: 'conexoes',
-      supplier: 'Fornecedor B',
-      barcode: '7891234567891',
-      lastUpdate: '17/05/2025'
-    },
-    { 
-      id: 3, 
-      code: 'AH-003', 
-      name: 'Adaptador Hidráulico', 
-      description: 'Adaptador para sistemas hidráulicos de alta pressão.',
-      price: 32.75, 
-      cost: 16.50,
-      stock: 18,
-      minStock: 20,
-      category: 'adaptadores',
-      supplier: 'Fornecedor C',
-      barcode: '7891234567892',
-      lastUpdate: '16/05/2025'
-    },
-    { 
-      id: 4, 
-      code: 'KR-004', 
-      name: 'Kit Reparo para Mangueiras', 
-      description: 'Kit completo para reparo de mangueiras hidráulicas danificadas.',
-      price: 120.00, 
-      cost: 65.00,
-      stock: 10,
-      minStock: 5,
-      category: 'acessorios',
-      supplier: 'Fornecedor A',
-      barcode: '7891234567893',
-      lastUpdate: '15/05/2025'
-    },
-    { 
-      id: 5, 
-      code: 'MF-005', 
-      name: 'Mangueira Flexível 1"', 
-      description: 'Mangueira flexível para aplicações de baixa pressão.',
-      price: 75.30, 
-      cost: 38.00,
-      stock: 15,
-      minStock: 12,
-      category: 'mangueiras',
-      supplier: 'Fornecedor D',
-      barcode: '7891234567894',
-      lastUpdate: '14/05/2025'
-    },
-    { 
-      id: 6, 
-      code: 'CT-006', 
-      name: 'Conexão em T', 
-      description: 'Conexão em T para sistemas hidráulicos complexos.',
-      price: 28.90, 
-      cost: 14.50,
-      stock: 30,
-      minStock: 10,
-      category: 'conexoes',
-      supplier: 'Fornecedor B',
-      barcode: '7891234567895',
-      lastUpdate: '13/05/2025'
-    },
-    { 
-      id: 7, 
-      code: 'VC-007', 
-      name: 'Válvula de Controle', 
-      description: 'Válvula de controle para sistemas hidráulicos industriais.',
-      price: 195.00, 
-      cost: 98.00,
-      stock: 8,
-      minStock: 10,
-      category: 'acessorios',
-      supplier: 'Fornecedor E',
-      barcode: '7891234567896',
-      lastUpdate: '12/05/2025'
-    },
-    { 
-      id: 8, 
-      code: 'MA-008', 
-      name: 'Mangueira de Alta Temperatura', 
-      description: 'Mangueira especial para ambientes com alta temperatura.',
-      price: 145.50, 
-      cost: 72.75,
-      stock: 12,
-      minStock: 8,
-      category: 'mangueiras',
-      supplier: 'Fornecedor A',
-      barcode: '7891234567897',
-      lastUpdate: '11/05/2025'
-    }
-  ];
+  // Estados para dados reais
+  const [products, setProducts] = useState([]);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
   
   // Categorias
   const categories = [
