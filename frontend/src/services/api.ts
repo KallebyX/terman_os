@@ -4,7 +4,7 @@ import axios from 'axios';
 const isDocker = process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost';
 const apiUrl = isDocker 
   ? import.meta.env.VITE_API_URL_DOCKER 
-  : 'http://localhost:8000/api';
+  : 'http://localhost:8000';
 
 console.log('API URL:', apiUrl); // Log para debug
 
@@ -71,7 +71,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
           const response = await axios.post(
-            `${api.defaults.baseURL}/accounts/token/refresh/`,
+            `${api.defaults.baseURL}/api/token/refresh/`,
             { refresh: refreshToken }
           );
           
