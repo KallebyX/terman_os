@@ -1,4 +1,4 @@
-from rest_framework import serializers
+/drop backend/apps/pos/from rest_framework import serializers
 from .models import Cliente, Venda, ItemVenda, FormaPagamento, Pagamento
 from apps.products.serializers import ProdutoListSerializer
 from apps.accounts.serializers import UserSerializer
@@ -77,7 +77,7 @@ class VendaListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'cliente', 'cliente_nome', 'vendedor', 'vendedor_nome',
             'data_venda', 'status', 'status_display', 'tipo', 'tipo_display',
-            'subtotal', 'desconto', 'acrescimo', 'total', 'nfe_emitida'
+            'subtotal', 'desconto', 'acréscimo', 'total', 'nfe_emitida'
         ]
 
 
@@ -96,7 +96,7 @@ class VendaDetailSerializer(serializers.ModelSerializer):
         model = Venda
         fields = [
             'id', 'cliente', 'vendedor', 'data_venda', 'status', 'status_display',
-            'tipo', 'tipo_display', 'subtotal', 'desconto', 'acrescimo', 'total',
+            'tipo', 'tipo_display', 'subtotal', 'desconto', 'acréscimo', 'total',
             'observacoes', 'data_finalizacao', 'data_cancelamento', 'motivo_cancelamento',
             'nfe_emitida', 'nfe_numero', 'nfe_chave', 'nfe_data', 'itens', 'pagamentos'
         ]
