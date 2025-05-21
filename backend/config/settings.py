@@ -90,6 +90,7 @@ DATABASES = {
     )
 }
 
+
 # Configuração de log para depuração de SQL
 if DEBUG:
     LOGGING['loggers']['django.db.backends'] = {
