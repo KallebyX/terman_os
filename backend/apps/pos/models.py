@@ -105,7 +105,7 @@ class Venda(models.Model):
     # Valores
     subtotal = models.DecimalField(_('subtotal'), max_digits=10, decimal_places=2, default=0)
     desconto = models.DecimalField(_('desconto'), max_digits=10, decimal_places=2, default=0)
-    acrescimo = models.DecimalField(_('acréscimo'), max_digits=10, decimal_places=2, default=0)
+    acréscimo = models.DecimalField(_('acréscimo'), max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(_('total'), max_digits=10, decimal_places=2, default=0)
     
     # Campos adicionais
@@ -137,7 +137,7 @@ class Venda(models.Model):
         Calcula o total da venda.
         """
         self.subtotal = sum(item.subtotal for item in self.itens.all())
-        self.total = self.subtotal - self.desconto + self.acrescimo
+        self.total = self.subtotal - self.desconto + self.acréscimo
         return self.total
 
     def processar_venda(self):
