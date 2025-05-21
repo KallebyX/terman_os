@@ -1,13 +1,18 @@
 import axios from 'axios';
 
 // Determinar a URL base da API com base no ambiente
-const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? import.meta.env.VITE_API_URL
-  : `http://${window.location.hostname}:8000/api/v1`;
+const isDocker = process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost';
+const apiUrl = isDocker 
+  ? import.meta.env.VITE_API_URL_DOCKER 
+  : import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: apiUrl || 'http://localhost:8000/api/v1',
+  baseURL: apiUrl || '/api',
   timeout: 10000, // Timeout de 10 segundos
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
 });
 
 // Interceptor para adicionar token JWT em todas as requisições
@@ -31,7 +36,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     
     // Se o erro for 401 (não autorizado) e não for uma tentativa de refresh
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/accounts/token/refresh/') {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('token/refresh')) {
       originalRequest._retry = true;
       
       try {
@@ -39,7 +44,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
           const response = await axios.post(
-            `${apiUrl}/accounts/token/refresh/`,
+            `${api.defaults.baseURL}/accounts/token/refresh/`,
             { refresh: refreshToken }
           );
           
