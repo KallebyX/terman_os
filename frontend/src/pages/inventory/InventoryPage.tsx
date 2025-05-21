@@ -299,6 +299,7 @@ const InventoryPage = () => {
               <select
                 className="w-full px-4 py-2 border border-secondary-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                 title="Selecionar categoria"
+                title="Selecionar categoria"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
