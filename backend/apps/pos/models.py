@@ -139,6 +139,36 @@ class Venda(models.Model):
         self.total = self.subtotal - self.desconto + self.acrescimo
         return self.total
 
+    def processar_venda(self):
+        """
+        Processa a venda, atualizando o estoque e criando o pedido.
+        """
+        from apps.inventory.models import Estoque
+        from apps.orders.models import Pedido, ItemPedido
+
+        for item in self.itens.all():
+            estoque = Estoque.objects.get(produto=item.produto)
+            if estoque.quantidade_atual < item.quantidade:
+                raise ValueError(f"Estoque insuficiente para o produto: {item.produto.nome}")
+            estoque.quantidade_atual -= item.quantidade
+            estoque.save()
+
+        pedido = Pedido.objects.create(
+            cliente=self.cliente,
+            vendedor=self.vendedor,
+            total=self.calcular_total()
+        )
+
+        for item in self.itens.all():
+            ItemPedido.objects.create(
+                pedido=pedido,
+                produto=item.produto,
+                quantidade=item.quantidade,
+                preco_unitario=item.preco_unitario
+            )
+
+        pedido.save()
+
 
 class ItemVenda(models.Model):
     """
