@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Componente para gráficos
 const Chart = ({ type, data, options }) => {
@@ -74,6 +75,42 @@ const DashboardPage: React.FC = () => {
     fetchData();
   }, [dateRange]); // Refazer a busca quando o intervalo de datas mudar
   
+  // Função para atualizar os dados
+  const refreshData = () => {
+    // Refaz a busca de dados
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
+          await Promise.all([
+            api.get(`/dashboard/kpis?range=${dateRange}`),
+            api.get('/orders/recent'),
+            api.get(`/products/top?range=${dateRange}`),
+            api.get('/inventory/low-stock'),
+            api.get('/activities/recent')
+          ]);
+        
+        setKpiData(kpiResponse.data);
+        setRecentOrders(ordersResponse.data);
+        setTopProducts(productsResponse.data);
+        setLowStockAlerts(stockAlertsResponse.data);
+        setActivities(activitiesResponse.data);
+      } catch (error: any) {
+        console.error('Erro ao atualizar dados do dashboard:', error);
+        setError(
+          error.response?.data?.message || 
+          'Não foi possível atualizar os dados. Por favor, tente novamente mais tarde.'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  };
+
   // Função para atualizar os dados
   const refreshData = () => {
     // Refaz a busca de dados
@@ -260,8 +297,28 @@ const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* KPI Cards */}
-            {renderKpiCards()}
+            {/* Mensagem de erro */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 flex items-center">
+                <i className="fas fa-exclamation-circle mr-2"></i>
+                <span>{error}</span>
+              </div>
+            )}
+        
+            {/* Estado de carregamento */}
+            {isLoading && !kpiData ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-center">
+                  <i className="fas fa-spinner fa-spin text-primary-500 text-3xl mb-4"></i>
+                  <p className="text-secondary-500">Carregando dados do dashboard...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* KPI Cards */}
+                {renderKpiCards()}
+              </>
+            )}
           </>
         )}
         
