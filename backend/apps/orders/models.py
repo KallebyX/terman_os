@@ -82,6 +82,16 @@ class Order(models.Model):
         
         self.save(update_fields=['subtotal', 'total'])
         return self.total
+
+    def verificar_estoque(self):
+        """
+        Verifica se há estoque suficiente para todos os itens do pedido.
+        """
+        for item in self.items.all():
+            estoque = Estoque.objects.filter(produto=item.product).first()
+            if estoque and estoque.quantidade_disponivel < item.quantity:
+                return False
+        return True
     
     def add_item(self, product, quantity=1, price=None):
         """

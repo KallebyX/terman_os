@@ -422,3 +422,30 @@ class OrderAPITests(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)  # Apenas o pedido finalizado, não o carrinho
+    def test_create_order_with_insufficient_stock(self):
+        """Teste de criação de pedido com estoque insuficiente."""
+        self.estoque1.quantidade_atual = 1
+        self.estoque1.save()
+        
+        response = self.client.post(reverse('orders:pedidos-add-item', args=[self.order.id]), {
+            'product_id': self.produto1.id,
+            'quantity': 2
+        }, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Estoque insuficiente', response.data['detail'])
+
+    def test_cancel_order_with_stock_return(self):
+        """Teste de cancelamento de pedido com devolução ao estoque."""
+        self.order.add_item(self.produto1, 2)
+        self.order.finalize_order()
+        self.order.mark_as_paid('pix')
+        
+        response = self.client.post(reverse('orders:pedidos-cancel', args=[self.order.id]))
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'canceled')
+        
+        # Verificar se o estoque foi devolvido
+        estoque = Estoque.objects.get(produto=self.produto1)
+        self.assertEqual(estoque.quantidade_atual, 10)

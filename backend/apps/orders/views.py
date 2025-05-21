@@ -235,6 +235,13 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Verificar estoque
+        if not order.verificar_estoque():
+            return Response(
+                {"detail": "Estoque insuficiente para um ou mais itens do pedido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         serializer = FinalizeOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
