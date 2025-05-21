@@ -50,11 +50,25 @@ const OrderManagementPage: React.FC = () => {
       try {
         // Usar endpoint correto com base no papel do usuário
         const endpoint = userRole === 'admin' || userRole === 'staff' 
-          ? '/orders/orders/' 
-          : '/orders/my-orders/';
+          ? '/api/orders/orders/' 
+          : '/api/orders/my-orders/';
+        
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
           
-        const response = await api.get(endpoint);
-        setOrders(response.data.results || response.data);
+        const response = await api.get(endpoint, { headers });
+        
+        if (response.status !== 200) {
+          throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        
+        if (response.data && (response.data.results || Array.isArray(response.data))) {
+          setOrders(response.data.results || response.data);
+        } else {
+          console.error('Formato de resposta inesperado:', response.data);
+        }
       } catch (error) {
         console.error('Erro ao carregar pedidos:', error);
       } finally {
@@ -79,10 +93,19 @@ const OrderManagementPage: React.FC = () => {
   // Atualizar status do pedido
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
+      const headers = {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      };
+      
       // Chamar a API para atualizar o status
-      await api.patch(`/orders/orders/${orderId}/`, {
+      const response = await api.patch(`/api/orders/orders/${orderId}/`, {
         status: newStatus
-      });
+      }, { headers });
+      
+      if (response.status !== 200) {
+        throw new Error(`Erro na atualização: ${response.status}`);
+      }
       
       // Atualizar o estado local após confirmação da API
       setOrders(prevOrders => 

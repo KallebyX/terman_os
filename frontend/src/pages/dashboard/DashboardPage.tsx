@@ -45,14 +45,20 @@ const DashboardPage: React.FC = () => {
       setError(null);
       
       try {
+        // Adicionar token de autenticação e headers adequados
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
+        
         // Buscar todos os dados em paralelo para melhor performance
         const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
           await Promise.all([
-            api.get(`/dashboard/kpis?range=${dateRange}`),
-            api.get('/orders/recent'),
-            api.get(`/products/top?range=${dateRange}`),
-            api.get('/inventory/low-stock'),
-            api.get('/activities/recent')
+            api.get(`/api/dashboard/kpis?range=${dateRange}`, { headers }),
+            api.get('/api/orders/recent', { headers }),
+            api.get(`/api/products/top?range=${dateRange}`, { headers }),
+            api.get('/api/inventory/low-stock', { headers }),
+            api.get('/api/activities/recent', { headers })
           ]);
         
         // Verificar se as respostas têm o formato esperado
@@ -82,16 +88,20 @@ const DashboardPage: React.FC = () => {
     setError(null);
     
     try {
-      // Adicionar timestamp para evitar cache
+      // Adicionar timestamp para evitar cache e headers de autenticação
       const timestamp = new Date().getTime();
+      const headers = {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      };
       
       const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
         await Promise.all([
-          api.get(`/dashboard/kpis?range=${dateRange}&_t=${timestamp}`),
-          api.get(`/orders/recent?_t=${timestamp}`),
-          api.get(`/products/top?range=${dateRange}&_t=${timestamp}`),
-          api.get(`/inventory/low-stock?_t=${timestamp}`),
-          api.get(`/activities/recent?_t=${timestamp}`)
+          api.get(`/api/dashboard/kpis?range=${dateRange}&_t=${timestamp}`, { headers }),
+          api.get(`/api/orders/recent?_t=${timestamp}`, { headers }),
+          api.get(`/api/products/top?range=${dateRange}&_t=${timestamp}`, { headers }),
+          api.get(`/api/inventory/low-stock?_t=${timestamp}`, { headers }),
+          api.get(`/api/activities/recent?_t=${timestamp}`, { headers })
         ]);
       
       // Verificar se as respostas têm o formato esperado

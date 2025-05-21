@@ -17,8 +17,19 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products');
-        setProducts(response.data.results || response.data);
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
+        
+        const response = await api.get('/api/products', { headers });
+        
+        if (response.data && (response.data.results || Array.isArray(response.data))) {
+          setProducts(response.data.results || response.data);
+        } else {
+          console.error('Formato de resposta inesperado:', response.data);
+          alert('Erro no formato dos dados recebidos do servidor.');
+        }
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         // Mostrar mensagem de erro para o usuário
@@ -36,13 +47,29 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchCategoriesAndSuppliers = async () => {
       try {
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
+        
         const [categoriesResponse, suppliersResponse] = await Promise.all([
-          api.get('/categories'),
-          api.get('/suppliers')
+          api.get('/api/categories', { headers }),
+          api.get('/api/suppliers', { headers })
         ]);
         
-        setCategories(categoriesResponse.data.results || categoriesResponse.data);
-        setSuppliers(suppliersResponse.data.results || suppliersResponse.data);
+        // Verificar e processar dados de categorias
+        if (categoriesResponse.data && (categoriesResponse.data.results || Array.isArray(categoriesResponse.data))) {
+          setCategories(categoriesResponse.data.results || categoriesResponse.data);
+        } else {
+          console.error('Formato de resposta inesperado para categorias:', categoriesResponse.data);
+        }
+        
+        // Verificar e processar dados de fornecedores
+        if (suppliersResponse.data && (suppliersResponse.data.results || Array.isArray(suppliersResponse.data))) {
+          setSuppliers(suppliersResponse.data.results || suppliersResponse.data);
+        } else {
+          console.error('Formato de resposta inesperado para fornecedores:', suppliersResponse.data);
+        }
       } catch (error) {
         console.error('Erro ao buscar categorias e fornecedores:', error);
         // Mostrar mensagem de erro para o usuário

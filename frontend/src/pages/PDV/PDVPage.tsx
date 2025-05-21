@@ -23,8 +23,22 @@ const PDVPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products/produtos/');
-        setProducts(response.data.results || response.data);
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
+        
+        const response = await api.get('/api/products/produtos/', { headers });
+        
+        if (response.status !== 200) {
+          throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        
+        if (response.data && (response.data.results || Array.isArray(response.data))) {
+          setProducts(response.data.results || response.data);
+        } else {
+          throw new Error('Formato de resposta inválido');
+        }
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         // Mostrar mensagem de erro para o usuário
@@ -34,8 +48,22 @@ const PDVPage = () => {
 
     const fetchCustomers = async () => {
       try {
-        const response = await api.get('/accounts/customers/');
-        setCustomers(response.data.results || response.data);
+        const headers = {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        };
+        
+        const response = await api.get('/api/accounts/customers/', { headers });
+        
+        if (response.status !== 200) {
+          throw new Error(`Erro na requisição: ${response.status}`);
+        }
+        
+        if (response.data && (response.data.results || Array.isArray(response.data))) {
+          setCustomers(response.data.results || response.data);
+        } else {
+          throw new Error('Formato de resposta inválido');
+        }
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
         // Mostrar mensagem de erro para o usuário
@@ -118,11 +146,20 @@ const PDVPage = () => {
         notes: 'Pedido criado via PDV'
       };
       
+      const headers = {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      };
+      
       // Enviar pedido para a API
-      const response = await api.post('/orders/create/', orderData);
+      const response = await api.post('/api/orders/create/', orderData, { headers });
+      
+      if (response.status !== 201 && response.status !== 200) {
+        throw new Error(`Erro ao criar pedido: ${response.status}`);
+      }
       
       // Mostrar mensagem de sucesso
-      alert(`Venda finalizada com sucesso!\nPedido #${response.data.id}\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
+      alert(`Venda finalizada com sucesso!\nPedido #${response.data.id || response.data.order_id}\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
       
       // Limpar carrinho e fechar modal
       setCart([]);
