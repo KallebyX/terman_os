@@ -1,23 +1,22 @@
-FROM python:3.11
-
-# Instalar dependências do sistema
-RUN apt-get update && apt-get install -y netcat-traditional postgresql-client && apt-get clean && rm -rf /var/lib/apt/lists/*
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copiar requirements e instalar dependências Python
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements primeiro para aproveitar o cache do Docker
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar o script de espera pelo PostgreSQL
-COPY wait-for-postgres.sh /app/wait-for-postgres.sh
-RUN chmod +x /app/wait-for-postgres.sh
-
-# Copiar o código da aplicação
+# Copiar o resto do código
 COPY . .
 
-# Expor a porta da aplicação
-EXPOSE 8000
+# Expor a porta
+EXPOSE 5000
 
-# Comando para iniciar a aplicação
-CMD ["/app/wait-for-postgres.sh", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Comando para iniciar o servidor
+CMD ["flask", "run", "--host=0.0.0.0"]

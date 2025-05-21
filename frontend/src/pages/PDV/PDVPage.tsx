@@ -6,12 +6,25 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 import { useNavigate } from 'react-router-dom';
+import { ProductSearch } from './components/ProductSearch';
+import { Cart } from './components/Cart';
+import { PaymentModal } from './components/PaymentModal';
+import { useProducts } from '../../hooks/useProducts';
+import { useToast } from '../../components/ui/Toast';
+import { ProductList } from '../../components/pdv/ProductList';
+import { Product } from '../../types/common';
 // import { PDVLayout } from '../../layouts/PDVLayout';
+
+interface CartItem extends Product {
+  quantity: number;
+}
 
 const PDVPage = () => {
   const navigate = useNavigate();
+  const { products, loading } = useProducts();
+  const { addToast } = useToast();
   // Estados
-  const [cart, setCart] = useState([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -19,7 +32,6 @@ const PDVPage = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   // Estados para dados reais
-  const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
 
   // Verificar se há um cliente recém-cadastrado na navegação
@@ -33,26 +45,6 @@ const PDVPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get('/products/produtos/');
-        
-        if (response.status !== 200) {
-          throw new Error(`Erro na requisição: ${response.status}`);
-        }
-        
-        if (response.data && (response.data.results || Array.isArray(response.data))) {
-          setProducts(response.data.results || response.data);
-        } else {
-          throw new Error('Formato de resposta inválido');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
-        // Mostrar mensagem de erro para o usuário
-        alert('Não foi possível carregar a lista de produtos. Por favor, tente novamente mais tarde.');
-      }
-    };
-
     const fetchCustomers = async () => {
       try {
         const response = await api.get('/accounts/customers/');
@@ -73,7 +65,6 @@ const PDVPage = () => {
       }
     };
 
-    fetchProducts();
     fetchCustomers();
   }, []);
   
@@ -84,38 +75,40 @@ const PDVPage = () => {
   );
   
   // Adicionar ao carrinho
-  const addToCart = (product) => {
-    const existingItem = cart.find(item => item.id === product.id);
-    
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
+  const handleSelectProduct = (product: Product) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
+      if (existingItem) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
   };
   
   // Remover do carrinho
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
+  const handleRemoveItem = (productId: string) => {
+    setCartItems(prev => prev.filter(item => item.id !== productId));
   };
   
   // Atualizar quantidade
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity < 1) return;
-    
-    setCart(cart.map(item => 
-      item.id === productId ? { ...item, quantity: newQuantity } : item
-    ));
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    setCartItems(prev =>
+      prev.map(item =>
+        item.id === productId ? { ...item, quantity } : item
+      )
+    );
   };
   
   // Calcular total
-  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   
   // Finalizar venda
-  const finalizeSale = () => {
-    if (cart.length === 0) {
+  const handleFinalizeSale = async () => {
+    if (cartItems.length === 0) {
       alert('Adicione produtos ao carrinho para finalizar a venda.');
       return;
     }
@@ -125,7 +118,27 @@ const PDVPage = () => {
       return;
     }
     
-    setShowPaymentModal(true);
+    try {
+      const sale = {
+        items: cartItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: cartTotal
+      };
+
+      await api.post('/sales', sale);
+      setCartItems([]);
+      setSelectedCustomer(null);
+      setPaymentMethod('');
+      setShowPaymentModal(false);
+      addToast('Venda realizada com sucesso!', 'success');
+    } catch (error) {
+      console.error('Erro ao finalizar venda:', error);
+      alert('Erro ao finalizar venda. Por favor, tente novamente mais tarde.');
+      addToast('Erro ao finalizar venda', 'error');
+    }
   };
   
   // Processar pagamento
@@ -139,7 +152,7 @@ const PDVPage = () => {
       // Preparar dados do pedido
       const orderData = {
         customer: selectedCustomer.id,
-        items: cart.map(item => ({
+        items: cartItems.map(item => ({
           product_id: item.id,
           quantity: item.quantity,
           price: item.price
@@ -159,13 +172,14 @@ const PDVPage = () => {
       alert(`Venda finalizada com sucesso!\nPedido #${response.data.id || response.data.order_id}\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
       
       // Limpar carrinho e fechar modal
-      setCart([]);
+      setCartItems([]);
       setSelectedCustomer(null);
       setPaymentMethod('');
       setShowPaymentModal(false);
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
       alert('Erro ao finalizar venda. Por favor, tente novamente.');
+      addToast('Erro ao finalizar venda', 'error');
     }
   };
   
@@ -190,8 +204,8 @@ const PDVPage = () => {
               </Button>
               <Button 
                 variant="primary"
-                onClick={finalizeSale}
-                disabled={cart.length === 0}
+                onClick={handleFinalizeSale}
+                disabled={cartItems.length === 0}
               >
                 Finalizar Venda
               </Button>
@@ -203,41 +217,20 @@ const PDVPage = () => {
         <div className="flex-1 overflow-hidden flex">
           {/* Lista de produtos */}
           <div className="w-2/3 p-6 overflow-auto">
-            <div className="mb-6">
-              <Input
-                placeholder="Buscar produtos por nome ou código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<i className="fas fa-search"></i>}
-              />
-            </div>
+            <ProductSearch
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProducts.map(product => (
-                <Card
-                  key={product.id}
-                  variant="elevated"
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => addToCart(product)}
-                >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <span className="text-xs bg-secondary-100 text-secondary-800 px-2 py-1 rounded">
-                        {product.code}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-end">
-                      <span className="text-lg font-bold text-secondary-900">
-                        R$ {product.price.toFixed(2)}
-                      </span>
-                      <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.stock > 0 ? `${product.stock} em estoque` : 'Esgotado'}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+              {loading ? (
+                <div>Carregando produtos...</div>
+              ) : (
+                <ProductList
+                  products={products}
+                  onSelectProduct={handleSelectProduct}
+                />
+              )}
               
               {filteredProducts.length === 0 && (
                 <div className="col-span-full text-center py-12">
@@ -254,54 +247,12 @@ const PDVPage = () => {
             </div>
             
             <div className="flex-1 overflow-auto p-4">
-              {cart.length > 0 ? (
-                <div className="space-y-4">
-                  {cart.map(item => (
-                    <Card key={item.id} variant="bordered" className="p-3">
-                      <div className="flex justify-between mb-2">
-                        <h4 className="font-medium">{item.name}</h4>
-                        <button
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <i className="fas fa-times"></i>
-                        </button>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <button
-                            className="w-6 h-6 flex items-center justify-center bg-secondary-100 rounded-l"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          >
-                            -
-                          </button>
-                          <span className="w-8 h-6 flex items-center justify-center bg-white border-y border-secondary-200">
-                            {item.quantity}
-                          </span>
-                          <button
-                            className="w-6 h-6 flex items-center justify-center bg-secondary-100 rounded-r"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-secondary-500">R$ {item.price.toFixed(2)} un</p>
-                          <p className="font-semibold">R$ {(item.price * item.quantity).toFixed(2)}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-secondary-400 text-4xl mb-4">
-                    <i className="fas fa-shopping-cart"></i>
-                  </div>
-                  <p className="text-secondary-500">Carrinho vazio</p>
-                  <p className="text-sm text-secondary-400 mt-1">Adicione produtos clicando nos itens à esquerda</p>
-                </div>
-              )}
+              <Cart
+                items={cartItems}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemoveItem={handleRemoveItem}
+                onFinalize={handleFinalizeSale}
+              />
             </div>
             
             <div className="p-4 border-t border-secondary-200 bg-secondary-50">
@@ -400,94 +351,14 @@ const PDVPage = () => {
       
       {/* Modal de pagamento */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="p-6 border-b border-secondary-200 flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Finalizar Venda</h3>
-              <button
-                className="text-secondary-500 hover:text-secondary-700"
-                onClick={() => setShowPaymentModal(false)}
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            
-            <div className="p-6">
-              <div className="mb-6">
-                <h4 className="font-medium mb-2">Cliente</h4>
-                <Card variant="bordered" className="p-3">
-                  <p className="font-semibold">{selectedCustomer?.name}</p>
-                  <p className="text-sm text-secondary-500">{selectedCustomer?.email}</p>
-                  <p className="text-sm text-secondary-500">{selectedCustomer?.phone}</p>
-                </Card>
-              </div>
-              
-              <div className="mb-6">
-                <h4 className="font-medium mb-2">Resumo da Compra</h4>
-                <div className="bg-secondary-50 rounded-lg p-3">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-secondary-700">Itens</span>
-                    <span>{cart.length}</span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-secondary-700">Quantidade</span>
-                    <span>{cart.reduce((total, item) => total + item.quantity, 0)}</span>
-                  </div>
-                  <div className="flex justify-between font-bold mt-2 pt-2 border-t border-secondary-200">
-                    <span>Total</span>
-                    <span>R$ {cartTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <h4 className="font-medium mb-2">Forma de Pagamento</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Boleto', 'Transferência'].map(method => (
-                    <div
-                      key={method}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                        paymentMethod === method
-                          ? 'border-primary-500 bg-primary-50'
-                          : 'border-secondary-200 hover:border-primary-300'
-                      }`}
-                      onClick={() => setPaymentMethod(method)}
-                    >
-                      <div className="flex items-center">
-                        <div className={`w-4 h-4 rounded-full border mr-2 ${
-                          paymentMethod === method
-                            ? 'border-primary-500 bg-primary-500'
-                            : 'border-secondary-300'
-                        }`}>
-                          {paymentMethod === method && (
-                            <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
-                          )}
-                        </div>
-                        <span>{method}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowPaymentModal(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={processPayment}
-                  disabled={!paymentMethod}
-                >
-                  Confirmar Pagamento
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={processPayment}
+          paymentMethod={paymentMethod}
+          onPaymentMethodChange={setPaymentMethod}
+          total={cartTotal}
+        />
       )}
     </div>
   );

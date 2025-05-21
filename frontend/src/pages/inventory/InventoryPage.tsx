@@ -2,8 +2,16 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../components/ui';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { ProductForm } from './components/ProductForm';
+import { ProductList } from './components/ProductList';
+import { StockMovement } from './components/StockMovement';
+import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { LoadingSpinner } from '../../components/shared/LoadingSpinner';
+import { ErrorMessage } from '../../components/shared/ErrorMessage';
+import { useProducts } from '../../hooks/useProducts';
+import { Product } from '../../types';
 
 interface Product {
   id: string;
@@ -28,229 +36,64 @@ interface Supplier {
 }
 
 const InventoryPage = () => {
-  // Estados
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedCategory, setSelectedCategory] = React.useState('all');
-  const [viewMode, setViewMode] = React.useState('cards'); // 'cards' ou 'table'
-  
-  // Estados para dados reais
-  const [products, setProducts] = useState<Product[]>([]);
-  
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get('/api/products');
-        
-        if (response.data && (response.data.results || Array.isArray(response.data))) {
-          setProducts(response.data.results || response.data);
-        } else {
-          console.error('Formato de resposta inesperado:', response.data);
-          alert('Erro no formato dos dados recebidos do servidor.');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
-        // Mostrar mensagem de erro para o usuário
-        alert('Não foi possível carregar os produtos. Por favor, tente novamente mais tarde.');
+  const {
+    products,
+    isLoading,
+    error,
+    createProduct,
+    updateProduct,
+    deleteProduct
+  } = useProducts();
+
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [showStockMovement, setShowStockMovement] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleProductSubmit = async (data: Partial<Product>) => {
+    try {
+      if (selectedProduct) {
+        await updateProduct(selectedProduct.id, data);
+      } else {
+        await createProduct(data);
       }
-    };
-
-    fetchProducts();
-  }, []);
-  
-  // Estados para categorias e fornecedores
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-
-  useEffect(() => {
-    const fetchCategoriesAndSuppliers = async () => {
-      try {
-        const [categoriesResponse, suppliersResponse] = await Promise.all([
-          api.get('/api/categories'),
-          api.get('/api/suppliers')
-        ]);
-        
-        // Verificar e processar dados de categorias
-        if (categoriesResponse.data && (categoriesResponse.data.results || Array.isArray(categoriesResponse.data))) {
-          setCategories(categoriesResponse.data.results || categoriesResponse.data);
-        } else {
-          console.error('Formato de resposta inesperado para categorias:', categoriesResponse.data);
-        }
-        
-        // Verificar e processar dados de fornecedores
-        if (suppliersResponse.data && (suppliersResponse.data.results || Array.isArray(suppliersResponse.data))) {
-          setSuppliers(suppliersResponse.data.results || suppliersResponse.data);
-        } else {
-          console.error('Formato de resposta inesperado para fornecedores:', suppliersResponse.data);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar categorias e fornecedores:', error);
-        // Mostrar mensagem de erro para o usuário
-        alert('Não foi possível carregar categorias e fornecedores. Por favor, tente novamente mais tarde.');
-      }
-    };
-
-    fetchCategoriesAndSuppliers();
-  }, []);
-  
-  // Filtrar produtos
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         product.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
-  
-  // Verificar estoque baixo
-  const isLowStock = (product: Product) => product.stock < product.minStock;
-  
-  // Renderizar cards de produtos
-  const renderProductCards = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map(product => (
-          <Card
-            key={product.id}
-            variant="elevated"
-            className="overflow-hidden transition-transform hover:scale-105"
-          >
-            <div className="p-4 border-b border-secondary-200 flex justify-between items-center">
-              <h3 className="font-semibold">{product.name}</h3>
-              <span className="text-xs bg-secondary-100 text-secondary-800 px-2 py-1 rounded">
-                {product.code}
-              </span>
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-secondary-600 mb-3">{product.description}</p>
-              
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div>
-                  <p className="text-xs text-secondary-500">Preço</p>
-                  <p className="font-semibold">R$ {product.price.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary-500">Custo</p>
-                  <p className="font-semibold">R$ {product.cost.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary-500">Estoque</p>
-                  <p className={`font-semibold ${isLowStock(product) ? 'text-red-600' : 'text-green-600'}`}>
-                    {product.stock} un
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary-500">Mínimo</p>
-                  <p className="font-semibold">{product.minStock} un</p>
-                </div>
-              </div>
-              
-              <div className="mb-3">
-                <p className="text-xs text-secondary-500">Fornecedor</p>
-                <p className="text-sm">{product.supplier}</p>
-              </div>
-              
-              <div className="mb-3">
-                <p className="text-xs text-secondary-500">Código de Barras</p>
-                <p className="text-sm font-mono">{product.barcode}</p>
-              </div>
-              
-              <div className="flex justify-between items-center text-xs text-secondary-500">
-                <span>Atualizado: {product.lastUpdate}</span>
-                <span className={`px-2 py-1 rounded-full ${
-                  product.category === 'mangueiras' ? 'bg-blue-100 text-blue-800' :
-                  product.category === 'conexoes' ? 'bg-green-100 text-green-800' :
-                  product.category === 'adaptadores' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-purple-100 text-purple-800'
-                }`}>
-                  {categories.find(c => c.id === product.category)?.name || product.category}
-                </span>
-              </div>
-              
-              <div className="mt-4 flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                >
-                  Editar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="flex-1"
-                >
-                  Movimentar
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
+      setShowProductForm(false);
+      setSelectedProduct(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
-  
-  // Renderizar tabela de produtos
-  const renderProductTable = () => {
-    return (
-      <Card variant="elevated" className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell isHeader>Código</TableCell>
-                <TableCell isHeader>Nome</TableCell>
-                <TableCell isHeader>Categoria</TableCell>
-                <TableCell isHeader>Estoque</TableCell>
-                <TableCell isHeader>Preço</TableCell>
-                <TableCell isHeader>Fornecedor</TableCell>
-                <TableCell isHeader>Ações</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredProducts.map(product => (
-                <TableRow key={product.id}>
-                  <TableCell>{product.code}</TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      product.category === 'mangueiras' ? 'bg-blue-100 text-blue-800' :
-                      product.category === 'conexoes' ? 'bg-green-100 text-green-800' :
-                      product.category === 'adaptadores' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
-                      {categories.find(c => c.id === product.category)?.name || product.category}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={isLowStock(product) ? 'text-red-600 font-medium' : ''}>
-                      {product.stock} / {product.minStock}
-                    </span>
-                  </TableCell>
-                  <TableCell>R$ {product.price.toFixed(2)}</TableCell>
-                  <TableCell>{product.supplier}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <button className="text-secondary-500 hover:text-secondary-700" title="Editar produto">
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button className="text-secondary-500 hover:text-secondary-700" title="Movimentar produto">
-                        <i className="fas fa-exchange-alt"></i>
-                      </button>
-                      <button className="text-secondary-500 hover:text-secondary-700" title="Histórico de produto">
-                        <i className="fas fa-history"></i>
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-    );
+
+  const handleStockMovement = async (quantity: number, type: 'add' | 'remove') => {
+    if (!selectedProduct) return;
+
+    try {
+      const newStock = type === 'add'
+        ? selectedProduct.stock + quantity
+        : selectedProduct.stock - quantity;
+
+      await updateProduct(selectedProduct.id, { stock: newStock });
+      setSelectedProduct(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
-  
+
+  const handleDelete = async () => {
+    if (!selectedProduct) return;
+
+    try {
+      await deleteProduct(selectedProduct.id);
+      setShowDeleteConfirm(false);
+      setSelectedProduct(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} />;
+
   return (
     <div className="p-6">
       <motion.div
@@ -262,7 +105,7 @@ const InventoryPage = () => {
           <h1 className="text-2xl font-bold mb-4 md:mb-0">Controle de Estoque</h1>
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="outline">
+            <Button onClick={() => setShowProductForm(true)}>
               <i className="fas fa-plus mr-2"></i>
               Novo Produto
             </Button>
@@ -473,6 +316,37 @@ const InventoryPage = () => {
           </div>
         </div>
       </motion.div>
+
+      <ProductForm
+        isOpen={showProductForm}
+        onClose={() => {
+          setShowProductForm(false);
+          setSelectedProduct(null);
+        }}
+        onSubmit={handleProductSubmit}
+        initialValues={selectedProduct || undefined}
+      />
+
+      <StockMovement
+        product={selectedProduct}
+        isOpen={showStockMovement}
+        onClose={() => {
+          setShowStockMovement(false);
+          setSelectedProduct(null);
+        }}
+        onConfirm={handleStockMovement}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setSelectedProduct(null);
+        }}
+        onConfirm={handleDelete}
+        title="Excluir Produto"
+        message={`Tem certeza que deseja excluir o produto ${selectedProduct?.name}?`}
+      />
     </div>
   );
 };

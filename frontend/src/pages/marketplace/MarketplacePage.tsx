@@ -5,6 +5,13 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
+import { ProductCard } from './components/ProductCard';
+import { CartDrawer } from './components/CartDrawer';
+import { ProductFilters } from './components/ProductFilters';
+import { LoadingSpinner } from '../../components/shared/LoadingSpinner';
+import { ErrorMessage } from '../../components/shared/ErrorMessage';
+import { useProducts } from '../../hooks/useProducts';
+import { Product } from '../../types';
 
 // Tipo para produtos
 interface Product {
@@ -28,195 +35,71 @@ interface CartItem {
 const MarketplacePage: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { products, isLoading, error } = useProducts();
   
   // Estados
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<Array<Product & { quantity: number }>>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showCart, setShowCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Categorias
-  const categories = [
-    { id: 'all', name: 'Todos os Produtos' },
-    { id: 'mangueiras', name: 'Mangueiras' },
-    { id: 'conexoes', name: 'Conexões' },
-    { id: 'adaptadores', name: 'Adaptadores' },
-    { id: 'acessorios', name: 'Acessórios' }
-  ];
-  
-  // Produtos simulados
-  useEffect(() => {
-    // Em produção, isso seria uma chamada à API
-    const mockProducts: Product[] = [
-      {
-        id: 1,
-        name: 'Mangueira Hidráulica 1/2"',
-        description: 'Mangueira hidráulica de alta pressão para aplicações industriais.',
-        price: 89.90,
-        image: '/images/products/mangueira-1.jpg',
-        category: 'mangueiras',
-        stock: 25,
-        rating: 4.5,
-        featured: true
-      },
-      {
-        id: 2,
-        name: 'Conexão Rápida 3/4"',
-        description: 'Conexão rápida para mangueiras hidráulicas de 3/4 polegadas.',
-        price: 45.50,
-        image: '/images/products/conexao-1.jpg',
-        category: 'conexoes',
-        stock: 42,
-        rating: 4.2,
-        featured: false
-      },
-      {
-        id: 3,
-        name: 'Adaptador Hidráulico',
-        description: 'Adaptador para sistemas hidráulicos de alta pressão.',
-        price: 32.75,
-        image: '/images/products/adaptador-1.jpg',
-        category: 'adaptadores',
-        stock: 18,
-        rating: 4.0,
-        featured: false
-      },
-      {
-        id: 4,
-        name: 'Kit Reparo para Mangueiras',
-        description: 'Kit completo para reparo de mangueiras hidráulicas danificadas.',
-        price: 120.00,
-        image: '/images/products/kit-1.jpg',
-        category: 'acessorios',
-        stock: 10,
-        rating: 4.8,
-        featured: true
-      },
-      {
-        id: 5,
-        name: 'Mangueira Flexível 1"',
-        description: 'Mangueira flexível para aplicações de baixa pressão.',
-        price: 75.30,
-        image: '/images/products/mangueira-2.jpg',
-        category: 'mangueiras',
-        stock: 15,
-        rating: 4.3,
-        featured: false
-      },
-      {
-        id: 6,
-        name: 'Conexão em T',
-        description: 'Conexão em T para sistemas hidráulicos complexos.',
-        price: 28.90,
-        image: '/images/products/conexao-2.jpg',
-        category: 'conexoes',
-        stock: 30,
-        rating: 4.1,
-        featured: false
-      },
-      {
-        id: 7,
-        name: 'Válvula de Controle',
-        description: 'Válvula de controle para sistemas hidráulicos industriais.',
-        price: 195.00,
-        image: '/images/products/valvula-1.jpg',
-        category: 'acessorios',
-        stock: 8,
-        rating: 4.7,
-        featured: true
-      },
-      {
-        id: 8,
-        name: 'Mangueira de Alta Temperatura',
-        description: 'Mangueira especial para ambientes com alta temperatura.',
-        price: 145.50,
-        image: '/images/products/mangueira-3.jpg',
-        category: 'mangueiras',
-        stock: 12,
-        rating: 4.6,
-        featured: false
-      }
-    ];
-    
-    setProducts(mockProducts);
-    
-    // Se houver um ID de produto na URL, exibir detalhes do produto
-    if (id) {
-      const product = mockProducts.find(p => p.id === parseInt(id));
-      if (product) {
-        setSelectedProduct(product);
-      }
-    }
-    
-    // Carregar carrinho do localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
-      }
-    }
-  }, [id]);
-  
-  // Salvar carrinho no localStorage quando atualizado
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const categories = [...new Set(products.map(p => p.category))];
   
   // Filtrar produtos
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    const matchesSearch = !searchTerm || 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPrice = (!minPrice || product.price >= minPrice) &&
+      (!maxPrice || product.price <= maxPrice);
+
+    return matchesCategory && matchesSearch && matchesPrice;
   });
   
   // Adicionar ao carrinho
-  const addToCart = (product: Product) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.product.id === product.id);
-      
+  const handleAddToCart = (product: Product) => {
+    setCartItems(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
       if (existingItem) {
-        return prevCart.map(item => 
-          item.product.id === product.id 
-            ? { ...item, quantity: item.quantity + 1 } 
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-      } else {
-        return [...prevCart, { product, quantity: 1 }];
       }
+      return [...prev, { ...product, quantity: 1 }];
     });
+    setIsCartOpen(true);
   };
   
   // Remover do carrinho
-  const removeFromCart = (productId: number) => {
-    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
+  const handleRemoveItem = (productId: number) => {
+    setCartItems(prev => prev.filter(item => item.id !== productId));
   };
   
   // Atualizar quantidade no carrinho
-  const updateQuantity = (productId: number, quantity: number) => {
+  const handleUpdateQuantity = (productId: number, quantity: number) => {
     if (quantity < 1) return;
-    
-    setCart(prevCart => 
-      prevCart.map(item => 
-        item.product.id === productId 
-          ? { ...item, quantity } 
-          : item
+    setCartItems(prev =>
+      prev.map(item =>
+        item.id === productId ? { ...item, quantity } : item
       )
     );
   };
   
   // Calcular total do carrinho
-  const cartTotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   
   // Ir para o checkout
-  const goToCheckout = () => {
-    navigate('/marketplace/checkout');
+  const handleCheckout = () => {
+    // Implementar checkout
+    navigate('/checkout', { state: { items: cartItems } });
   };
   
   // Renderizar grid de produtos
@@ -224,92 +107,11 @@ const MarketplacePage: React.FC = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map(product => (
-          <motion.div
+          <ProductCard
             key={product.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card
-              variant="elevated"
-              className="h-full flex flex-col overflow-hidden transition-transform hover:scale-105"
-            >
-              {product.featured && (
-                <div className="absolute top-2 right-2 z-10">
-                  <Badge variant="primary">Destaque</Badge>
-                </div>
-              )}
-              
-              <div 
-                className="h-48 bg-secondary-100 relative cursor-pointer"
-                onClick={() => navigate(`/marketplace/product/${product.id}`)}
-              >
-                <div className="absolute inset-0 flex items-center justify-center text-secondary-400">
-                  <i className="fas fa-image text-4xl"></i>
-                </div>
-              </div>
-              
-              <div className="p-4 flex-grow">
-                <h3 
-                  className="font-semibold text-lg mb-2 cursor-pointer hover:text-primary-600"
-                  onClick={() => navigate(`/marketplace/product/${product.id}`)}
-                >
-                  {product.name}
-                </h3>
-                
-                <p className="text-sm text-secondary-600 mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-                
-                <div className="flex items-center mb-3">
-                  <div className="flex text-yellow-400 mr-2">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <span key={star}>
-                        {product.rating >= star 
-                          ? <i className="fas fa-star"></i>
-                          : product.rating >= star - 0.5
-                            ? <i className="fas fa-star-half-alt"></i>
-                            : <i className="far fa-star"></i>
-                        }
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-sm text-secondary-500">
-                    ({product.rating.toFixed(1)})
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-xl font-bold">
-                    R$ {product.price.toFixed(2)}
-                  </span>
-                  
-                  <Badge 
-                    variant={product.stock > 10 ? "success" : product.stock > 0 ? "warning" : "danger"}
-                  >
-                    {product.stock > 10 
-                      ? "Em estoque" 
-                      : product.stock > 0 
-                        ? `Apenas ${product.stock}` 
-                        : "Esgotado"
-                    }
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="p-4 border-t border-secondary-200">
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  disabled={product.stock === 0}
-                  onClick={() => addToCart(product)}
-                >
-                  <i className="fas fa-shopping-cart mr-2"></i>
-                  Adicionar ao Carrinho
-                </Button>
-              </div>
-            </Card>
-          </motion.div>
+            product={product}
+            onAddToCart={handleAddToCart}
+          />
         ))}
       </div>
     );
@@ -361,7 +163,7 @@ const MarketplacePage: React.FC = () => {
                         'secondary'
                       }
                     >
-                      {categories.find(c => c.id === product.category)?.name || product.category}
+                      {categories.find(c => c === product.category)?.name || product.category}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -400,7 +202,7 @@ const MarketplacePage: React.FC = () => {
                       variant="primary"
                       size="sm"
                       disabled={product.stock === 0}
-                      onClick={() => addToCart(product)}
+                      onClick={() => handleAddToCart(product)}
                     >
                       <i className="fas fa-shopping-cart mr-1"></i>
                       Adicionar
@@ -501,7 +303,7 @@ const MarketplacePage: React.FC = () => {
                   }
                   className="text-sm"
                 >
-                  {categories.find(c => c.id === selectedProduct.category)?.name || selectedProduct.category}
+                  {categories.find(c => c === selectedProduct.category)?.name || selectedProduct.category}
                 </Badge>
                 
                 <Badge 
@@ -526,23 +328,23 @@ const MarketplacePage: React.FC = () => {
                     <button 
                       className="px-3 py-2 bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
                       onClick={() => {
-                        const item = cart.find(item => item.product.id === selectedProduct.id);
+                        const item = cartItems.find(item => item.id === selectedProduct.id);
                         if (item && item.quantity > 1) {
-                          updateQuantity(selectedProduct.id, item.quantity - 1);
+                          handleUpdateQuantity(selectedProduct.id, item.quantity - 1);
                         }
                       }}
                     >
                       <i className="fas fa-minus"></i>
                     </button>
                     <div className="flex-1 px-3 py-2 text-center">
-                      {cart.find(item => item.product.id === selectedProduct.id)?.quantity || 1}
+                      {cartItems.find(item => item.id === selectedProduct.id)?.quantity || 1}
                     </div>
                     <button 
                       className="px-3 py-2 bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
                       onClick={() => {
-                        const item = cart.find(item => item.product.id === selectedProduct.id);
+                        const item = cartItems.find(item => item.id === selectedProduct.id);
                         if (item) {
-                          updateQuantity(selectedProduct.id, item.quantity + 1);
+                          handleUpdateQuantity(selectedProduct.id, item.quantity + 1);
                         }
                       }}
                     >
@@ -557,7 +359,7 @@ const MarketplacePage: React.FC = () => {
                   variant="primary"
                   className="flex-1"
                   disabled={selectedProduct.stock === 0}
-                  onClick={() => addToCart(selectedProduct)}
+                  onClick={() => handleAddToCart(selectedProduct)}
                 >
                   <i className="fas fa-shopping-cart mr-2"></i>
                   Adicionar ao Carrinho
@@ -578,155 +380,9 @@ const MarketplacePage: React.FC = () => {
     );
   };
   
-  // Renderizar carrinho
-  const renderCart = () => {
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 300 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 300 }}
-        className="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-xl z-50 flex flex-col"
-      >
-        <div className="p-4 border-b border-secondary-200 flex justify-between items-center">
-          <h2 className="text-xl font-bold">Carrinho de Compras</h2>
-          <button 
-            className="text-secondary-500 hover:text-secondary-700"
-            onClick={() => setShowCart(false)}
-          >
-            <i className="fas fa-times text-xl"></i>
-          </button>
-        </div>
-        
-        <div className="flex-grow overflow-y-auto p-4">
-          {cart.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-secondary-400 text-5xl mb-4">
-                <i className="fas fa-shopping-cart"></i>
-              </div>
-              <h3 className="text-xl font-medium text-secondary-700 mb-2">Seu carrinho está vazio</h3>
-              <p className="text-secondary-500 mb-4">
-                Adicione produtos ao carrinho para continuar.
-              </p>
-              <Button 
-                variant="primary"
-                onClick={() => setShowCart(false)}
-              >
-                Continuar Comprando
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {cart.map(item => (
-                <Card key={item.product.id} variant="bordered" className="p-3">
-                  <div className="flex">
-                    <div className="w-20 h-20 bg-secondary-100 rounded flex items-center justify-center text-secondary-400 mr-3">
-                      <i className="fas fa-image"></i>
-                    </div>
-                    
-                    <div className="flex-grow">
-                      <div className="flex justify-between">
-                        <h3 className="font-medium">{item.product.name}</h3>
-                        <button 
-                          className="text-secondary-400 hover:text-red-500"
-                          onClick={() => removeFromCart(item.product.id)}
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-                      </div>
-                      
-                      <p className="text-sm text-secondary-500 mb-2">
-                        R$ {item.product.price.toFixed(2)}
-                      </p>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex border border-secondary-300 rounded-md overflow-hidden">
-                          <button 
-                            className="px-2 py-1 bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
-                            onClick={() => {
-                              if (item.quantity > 1) {
-                                updateQuantity(item.product.id, item.quantity - 1);
-                              }
-                            }}
-                          >
-                            <i className="fas fa-minus"></i>
-                          </button>
-                          <div className="w-8 px-2 py-1 text-center">
-                            {item.quantity}
-                          </div>
-                          <button 
-                            className="px-2 py-1 bg-secondary-100 text-secondary-700 hover:bg-secondary-200"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          >
-                            <i className="fas fa-plus"></i>
-                          </button>
-                        </div>
-                        
-                        <div className="font-semibold">
-                          R$ {(item.product.price * item.quantity).toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {cart.length > 0 && (
-          <div className="p-4 border-t border-secondary-200">
-            <div className="flex justify-between mb-4">
-              <span className="font-medium">Subtotal:</span>
-              <span className="font-bold">R$ {cartTotal.toFixed(2)}</span>
-            </div>
-            
-            <Button
-              variant="primary"
-              className="w-full mb-2"
-              onClick={goToCheckout}
-            >
-              Finalizar Compra
-            </Button>
-            
-            <Button
-              variant="text"
-              className="w-full"
-              onClick={() => setShowCart(false)}
-            >
-              Continuar Comprando
-            </Button>
-          </div>
-        )}
-      </motion.div>
-    );
-  };
-  
-  // Se estiver visualizando detalhes do produto
-  if (selectedProduct) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        {renderProductDetails()}
-        {showCart && renderCart()}
-        
-        <div className="fixed bottom-4 right-4 z-40">
-          <Button
-            variant="primary"
-            className="rounded-full w-14 h-14 flex items-center justify-center shadow-lg relative"
-            onClick={() => setShowCart(true)}
-          >
-            <i className="fas fa-shopping-cart text-xl"></i>
-            {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
-                {cart.reduce((total, item) => total + item.quantity, 0)}
-              </span>
-            )}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // Página principal do marketplace
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} />;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
@@ -748,14 +404,14 @@ const MarketplacePage: React.FC = () => {
             
             <Button
               variant="primary"
-              onClick={() => setShowCart(true)}
+              onClick={() => setIsCartOpen(true)}
               className="relative"
             >
               <i className="fas fa-shopping-cart mr-2"></i>
               Carrinho
-              {cart.length > 0 && (
+              {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
-                  {cart.reduce((total, item) => total + item.quantity, 0)}
+                  {cartItems.reduce((total, item) => total + item.quantity, 0)}
                 </span>
               )}
             </Button>
@@ -799,34 +455,19 @@ const MarketplacePage: React.FC = () => {
         <div className="mb-8 bg-white rounded-lg shadow-sm p-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="md:w-1/3">
-              <label className="block text-sm font-medium text-secondary-700 mb-1">Buscar</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="Nome ou descrição do produto..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-search text-secondary-400"></i>
-                </div>
-              </div>
-            </div>
-            
-            <div className="md:w-1/3">
-              <label className="block text-sm font-medium text-secondary-700 mb-1">Categoria</label>
-              <select
-                className="w-full px-4 py-2 border border-secondary-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              <ProductFilters
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onPriceChange={(min, max) => {
+                  setMinPrice(min);
+                  setMaxPrice(max);
+                }}
+              />
             </div>
             
             <div className="md:w-1/3">
@@ -941,7 +582,7 @@ const MarketplacePage: React.FC = () => {
                         variant="primary"
                         className="w-full"
                         disabled={product.stock === 0}
-                        onClick={() => addToCart(product)}
+                        onClick={() => handleAddToCart(product)}
                       >
                         <i className="fas fa-shopping-cart mr-2"></i>
                         Adicionar ao Carrinho
@@ -959,7 +600,7 @@ const MarketplacePage: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-4">
             {selectedCategory === 'all' 
               ? 'Todos os Produtos' 
-              : categories.find(c => c.id === selectedCategory)?.name || 'Produtos'
+              : categories.find(c => c === selectedCategory)?.name || 'Produtos'
             }
             {searchTerm && ` - Resultados para "${searchTerm}"`}
             {` (${filteredProducts.length})`}
@@ -990,22 +631,14 @@ const MarketplacePage: React.FC = () => {
         </div>
       </motion.div>
       
-      {showCart && renderCart()}
-      
-      <div className="fixed bottom-4 right-4 z-40">
-        <Button
-          variant="primary"
-          className="rounded-full w-14 h-14 flex items-center justify-center shadow-lg relative"
-          onClick={() => setShowCart(true)}
-        >
-          <i className="fas fa-shopping-cart text-xl"></i>
-          {cart.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
-              {cart.reduce((total, item) => total + item.quantity, 0)}
-            </span>
-          )}
-        </Button>
-      </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveItem}
+        onCheckout={handleCheckout}
+      />
     </div>
   );
 };

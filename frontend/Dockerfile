@@ -2,15 +2,15 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar package.json e instalar dependências
+# Instalar dependências
 COPY package*.json ./
 RUN npm install
 
-# Copiar o código da aplicação
+# Copiar o código fonte
 COPY . .
 
-# Expor a porta da aplicação
+# Expor a porta
 EXPOSE 3000
 
-# Comando para iniciar a aplicação em modo de desenvolvimento
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Iniciar o servidor de desenvolvimento
+CMD ["npm", "run", "dev"]

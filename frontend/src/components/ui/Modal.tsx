@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import { cn } from '../../utils/cn';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { twMerge } from 'tailwind-merge';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  closeOnOverlayClick?: boolean;
-  showCloseButton?: boolean;
-  footer?: React.ReactNode;
   className?: string;
 }
 
@@ -18,95 +15,48 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
-  size = 'md',
-  closeOnOverlayClick = true,
-  showCloseButton = true,
-  footer,
-  className,
+  className
 }) => {
-  // Tamanhos do modal
-  const sizeStyles = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    full: 'max-w-full mx-4',
-  };
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
 
-  // Fechar ao clicar no overlay
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && closeOnOverlayClick) {
-      onClose();
+    if (isOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
     }
-  };
 
-  // Efeito de animação
-  const [isAnimating, setIsAnimating] = useState(false);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
-  // Atualizar animação quando o modal abrir/fechar
-  React.useEffect(() => {
-    setIsAnimating(isOpen);
-  }, [isOpen]);
+  if (!isOpen) return null;
 
-  if (!isOpen && !isAnimating) return null;
-
-  return (
-    <div
-      className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 transition-opacity',
-        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
-      )}
-      onClick={handleOverlayClick}
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby={title ? 'modal-title' : undefined}
-    >
-      <div
-        className={cn(
-          'bg-white rounded-lg shadow-xl w-full transform transition-all duration-300',
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
-          sizeStyles[size],
-          className
-        )}
-        onTransitionEnd={() => {
-          if (!isOpen) setIsAnimating(false);
-        }}
-      >
-        {/* Cabeçalho */}
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-secondary-200">
-            {title && (
-              <h3 id="modal-title" className="text-lg font-medium text-secondary-900">
-                {title}
-              </h3>
-            )}
-            {showCloseButton && (
-              <button
-                type="button"
-                className="text-secondary-500 hover:text-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full p-1"
-                onClick={onClose}
-                aria-label="Fechar"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Conteúdo */}
-        <div className="px-6 py-4">{children}</div>
-
-        {/* Rodapé */}
-        {footer && (
-          <div className="px-6 py-4 border-t border-secondary-200 bg-secondary-50 rounded-b-lg">
-            {footer}
-          </div>
-        )}
+  return createPortal(
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          onClick={onClose}
+        />
+        <div
+          className={twMerge(
+            'relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6',
+            className
+          )}
+        >
+          {title && (
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+            </div>
+          )}
+          {children}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
-
-export default Modal;

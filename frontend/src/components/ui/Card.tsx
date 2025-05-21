@@ -1,51 +1,31 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
+import { twMerge } from 'tailwind-merge';
 
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'bordered' | 'elevated';
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
   className,
-  variant = 'default',
-  padding = 'md',
-  onClick,
-  ...props
+  padding = 'md'
 }) => {
-  // Variantes de estilo
-  const variantStyles = {
-    default: 'bg-white shadow-sm',
-    bordered: 'bg-white border border-secondary-200',
-    elevated: 'bg-white shadow-md hover:shadow-lg transition-shadow duration-300',
-  };
-
-  // Tamanhos de padding
-  const paddingStyles = {
+  const paddings = {
     none: 'p-0',
     sm: 'p-3',
-    md: 'p-5',
-    lg: 'p-7',
+    md: 'p-4',
+    lg: 'p-6'
   };
-
-  // Cursor pointer se houver onClick
-  const cursorStyle = onClick ? 'cursor-pointer' : '';
 
   return (
     <div
-      className={cn(
-        'rounded-lg overflow-hidden',
-        variantStyles[variant],
-        paddingStyles[padding],
-        cursorStyle,
+      className={twMerge(
+        'bg-white rounded-lg shadow-sm border border-gray-200',
+        paddings[padding],
         className
       )}
-      onClick={onClick}
-      {...props}
     >
       {children}
     </div>

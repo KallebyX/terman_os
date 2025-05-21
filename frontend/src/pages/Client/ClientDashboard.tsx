@@ -4,116 +4,75 @@ import { Link } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { Modal } from '../../components/ui';
+import { OrderHistory } from './components/OrderHistory';
+import { ProfileCard } from './components/ProfileCard';
+import { AddressCard } from './components/AddressCard';
+import { AddressForm } from './components/AddressForm';
+import { ProfileForm } from './components/ProfileForm';
+import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { LoadingSpinner } from '../../components/shared/LoadingSpinner';
+import { ErrorMessage } from '../../components/shared/ErrorMessage';
+import { useAuth } from '../../hooks/useAuth';
+import { useOrders } from '../../hooks/useOrders';
+import { useAddresses } from '../../hooks/useAddresses';
+import { Address, Order } from '../../types';
 
 const ClientDashboard = () => {
+  const { user, updateUser } = useAuth();
+  const { orders, isLoading: ordersLoading } = useOrders();
+  const {
+    addresses,
+    isLoading: addressesLoading,
+    createAddress,
+    updateAddress,
+    deleteAddress
+  } = useAddresses();
+
   const [activeTab, setActiveTab] = useState('pedidos');
-  
-  // Dados simulados de pedidos
-  const orders = [
-    { 
-      id: 'PED-2025-001', 
-      date: '15/05/2025', 
-      status: 'entregue', 
-      total: 345.90,
-      items: 3,
-      tracking: 'BR45678912345'
-    },
-    { 
-      id: 'PED-2025-002', 
-      date: '28/04/2025', 
-      status: 'em_producao', 
-      total: 1250.00,
-      items: 5,
-      tracking: null
-    },
-    { 
-      id: 'PED-2025-003', 
-      date: '10/04/2025', 
-      status: 'enviado', 
-      total: 789.50,
-      items: 2,
-      tracking: 'BR98765432109'
-    },
-    { 
-      id: 'PED-2025-004', 
-      date: '02/04/2025', 
-      status: 'entregue', 
-      total: 450.00,
-      items: 1,
-      tracking: 'BR12345678901'
-    },
-    { 
-      id: 'PED-2025-005', 
-      date: '15/03/2025', 
-      status: 'entregue', 
-      total: 675.30,
-      items: 4,
-      tracking: 'BR45612378901'
-    }
-  ];
-  
-  // Dados simulados do cliente
-  const clientData = {
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    phone: '(11) 98765-4321',
-    address: 'Av. Paulista, 1000, Apto 123',
-    city: 'São Paulo',
-    state: 'SP',
-    zipCode: '01310-100',
-    company: 'Indústrias Silva Ltda.',
-    since: '10/01/2023',
-    totalOrders: 12,
-    totalSpent: 'R$ 15.450,00'
-  };
-  
-  // Dados simulados de cotações
-  const quotes = [
-    {
-      id: 'COT-2025-001',
-      date: '18/05/2025',
-      status: 'pendente',
-      items: 2,
-      validUntil: '25/05/2025'
-    },
-    {
-      id: 'COT-2025-002',
-      date: '05/05/2025',
-      status: 'aprovada',
-      items: 3,
-      validUntil: '12/05/2025'
-    },
-    {
-      id: 'COT-2025-003',
-      date: '20/04/2025',
-      status: 'expirada',
-      items: 1,
-      validUntil: '27/04/2025'
-    }
-  ];
-  
-  // Função para renderizar o status do pedido
-  const renderOrderStatus = (status) => {
-    switch(status) {
-      case 'pendente':
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pendente</span>;
-      case 'em_producao':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Em Produção</span>;
-      case 'enviado':
-        return <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Enviado</span>;
-      case 'entregue':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Entregue</span>;
-      case 'cancelado':
-        return <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Cancelado</span>;
-      case 'aprovada':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Aprovada</span>;
-      case 'expirada':
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Expirada</span>;
-      default:
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">{status}</span>;
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const handleProfileUpdate = async (data: any) => {
+    try {
+      await updateUser(data);
+      setShowProfileForm(false);
+    } catch (error: any) {
+      alert(error.message);
     }
   };
-  
+
+  const handleAddressSubmit = async (data: any) => {
+    try {
+      if (selectedAddress) {
+        await updateAddress(selectedAddress.id, data);
+      } else {
+        await createAddress(data);
+      }
+      setShowAddressForm(false);
+      setSelectedAddress(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleDeleteAddress = async () => {
+    if (!selectedAddress) return;
+
+    try {
+      await deleteAddress(selectedAddress.id);
+      setShowDeleteConfirm(false);
+      setSelectedAddress(null);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  if (ordersLoading || addressesLoading) return <LoadingSpinner />;
+
   return (
     <div className="min-h-screen bg-background-lightGray">
       {/* Header */}
@@ -135,8 +94,8 @@ const ClientDashboard = () => {
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-secondary-900">{clientData.name}</p>
-              <p className="text-xs text-secondary-500">{clientData.email}</p>
+              <p className="text-sm font-medium text-secondary-900">{user?.name}</p>
+              <p className="text-xs text-secondary-500">{user?.email}</p>
             </div>
             <Button
               variant="outline"
@@ -380,89 +339,27 @@ const ClientDashboard = () => {
                 </Button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card variant="elevated" className="p-6">
-                  <h3 className="text-lg font-medium text-secondary-900 mb-4">Informações Pessoais</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-secondary-500">Nome Completo</p>
-                      <p className="font-medium">{clientData.name}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">E-mail</p>
-                      <p className="font-medium">{clientData.email}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">Telefone</p>
-                      <p className="font-medium">{clientData.phone}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">Empresa</p>
-                      <p className="font-medium">{clientData.company}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">Cliente desde</p>
-                      <p className="font-medium">{clientData.since}</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card variant="elevated" className="p-6">
-                  <h3 className="text-lg font-medium text-secondary-900 mb-4">Endereço</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-secondary-500">Endereço</p>
-                      <p className="font-medium">{clientData.address}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">Cidade</p>
-                      <p className="font-medium">{clientData.city}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">Estado</p>
-                      <p className="font-medium">{clientData.state}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-secondary-500">CEP</p>
-                      <p className="font-medium">{clientData.zipCode}</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card variant="elevated" className="p-6 md:col-span-2">
-                  <h3 className="text-lg font-medium text-secondary-900 mb-4">Resumo de Atividades</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-secondary-50 p-4 rounded-lg">
-                      <p className="text-sm text-secondary-500 mb-1">Total de Pedidos</p>
-                      <p className="text-2xl font-bold">{clientData.totalOrders}</p>
-                    </div>
-                    
-                    <div className="bg-secondary-50 p-4 rounded-lg">
-                      <p className="text-sm text-secondary-500 mb-1">Valor Total</p>
-                      <p className="text-2xl font-bold">{clientData.totalSpent}</p>
-                    </div>
-                    
-                    <div className="bg-secondary-50 p-4 rounded-lg">
-                      <p className="text-sm text-secondary-500 mb-1">Último Pedido</p>
-                      <p className="text-2xl font-bold">{orders[0]?.date || 'N/A'}</p>
-                    </div>
-                    
-                    <div className="bg-secondary-50 p-4 rounded-lg">
-                      <p className="text-sm text-secondary-500 mb-1">Cotações Ativas</p>
-                      <p className="text-2xl font-bold">{quotes.filter(q => q.status === 'pendente').length}</p>
-                    </div>
-                  </div>
-                </Card>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ProfileCard
+                  user={user!}
+                  onEdit={() => setShowProfileForm(true)}
+                />
+
+                <AddressCard
+                  addresses={addresses}
+                  onAddAddress={() => {
+                    setSelectedAddress(null);
+                    setShowAddressForm(true);
+                  }}
+                  onEditAddress={(address) => {
+                    setSelectedAddress(address);
+                    setShowAddressForm(true);
+                  }}
+                  onDeleteAddress={(address) => {
+                    setSelectedAddress(address);
+                    setShowDeleteConfirm(true);
+                  }}
+                />
               </div>
             </div>
           )}
@@ -501,6 +398,78 @@ const ClientDashboard = () => {
           </div>
         </div>
       </footer>
+
+      <Modal
+        isOpen={showProfileForm}
+        onClose={() => setShowProfileForm(false)}
+        title="Editar Perfil"
+      >
+        <ProfileForm
+          onSubmit={handleProfileUpdate}
+          initialValues={user!}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showAddressForm}
+        onClose={() => {
+          setShowAddressForm(false);
+          setSelectedAddress(null);
+        }}
+        title={selectedAddress ? 'Editar Endereço' : 'Novo Endereço'}
+      >
+        <AddressForm
+          onSubmit={handleAddressSubmit}
+          initialValues={selectedAddress || undefined}
+        />
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setSelectedAddress(null);
+        }}
+        onConfirm={handleDeleteAddress}
+        title="Excluir Endereço"
+        message="Tem certeza que deseja excluir este endereço?"
+      />
+
+      <Modal
+        isOpen={!!selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        title={`Pedido #${selectedOrder?.id}`}
+      >
+        {selectedOrder && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Status</h3>
+              <p className="mt-1">{selectedOrder.status}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Itens</h3>
+              <ul className="mt-2 divide-y">
+                {selectedOrder.items.map((item, index) => (
+                  <li key={index} className="py-2">
+                    <div className="flex justify-between">
+                      <span>{item.product.name}</span>
+                      <span>
+                        {item.quantity}x {formatCurrency(item.price)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="border-t pt-4">
+              <div className="flex justify-between font-medium">
+                <span>Total</span>
+                <span>{formatCurrency(selectedOrder.total)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
