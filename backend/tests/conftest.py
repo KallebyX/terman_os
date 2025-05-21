@@ -1,5 +1,6 @@
 import os
 import pytest
+from rest_framework_simplejwt.tokens import RefreshToken
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'caminho_correto_do_seu_projeto.settings')
