@@ -250,82 +250,35 @@ class VendaFinalizarView(APIView):
     View para finalizar uma venda.
     """
     permission_classes = [IsSellerOrAdmin]
-    
-    @transaction.atomic
-    def post(self, request, pk):
-        venda = get_object_or_404(Venda, id=pk)
-        
-        # Verificar se a venda está aberta
-        if venda.status != 'aberta':
-            return Response(
-                {'detail': 'Não é possível finalizar uma venda que não está aberta.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Verificar se a venda tem itens
-        if not venda.itens.exists():
-            return Response(
-                {'detail': 'Não é possível finalizar uma venda sem itens.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        serializer = VendaFinalizarSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        pagamentos_data = serializer.validated_data['pagamentos']
-        
-        # Verificar se o total dos pagamentos cobre o valor da venda
-        total_pagamentos = sum(float(p['valor']) for p in pagamentos_data)
-        if total_pagamentos < float(venda.total):
-            return Response(
-                {'detail': 'O total dos pagamentos não cobre o valor da venda.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Registrar pagamentos
-        for pagamento_data in pagamentos_data:
-            forma_pagamento = FormaPagamento.objects.get(id=pagamento_data['forma_pagamento'])
-            Pagamento.objects.create(
-                venda=venda,
-                forma_pagamento=forma_pagamento,
-                valor=pagamento_data['valor'],
-                status='aprovado',
-                parcelas=pagamento_data.get('parcelas', 1),
-                autorizacao=pagamento_data.get('autorizacao'),
-                bandeira=pagamento_data.get('bandeira'),
-                nsu=pagamento_data.get('nsu')
-            )
-        
-        # Atualizar estoque
-        for item in venda.itens.all():
-            # Converter reserva em saída
-            estoque = Estoque.objects.get(produto=item.produto)
-            estoque.quantidade_reservada -= item.quantidade
-            estoque.quantidade_atual -= item.quantidade
-            estoque.save()
-            
-            # Registrar movimentação
-            MovimentacaoEstoque.objects.create(
-                produto=item.produto,
-                tipo='saida',
-                origem='venda',
-                quantidade=item.quantidade,
-                valor_unitario=item.preco_unitario,
-                documento=f"Venda #{venda.id}",
-                usuario=request.user,
-                referencia_id=venda.id,
-                referencia_tipo='venda'
-            )
-        
-        # Finalizar venda
-        venda.status = 'finalizada'
-        venda.data_finalizacao = timezone.now()
-        venda.save()
-        
-        return Response(
-            VendaDetailSerializer(venda).data,
-            status=status.HTTP_200_OK
-        )
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(Venda, id=pk)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Processa uma venda.
+
+        Processa a venda com base nos itens e forma de pagamento informados.
+        Caso a venda seja processada com sucesso, retorna um objeto com chave 'status'
+        e valor 'Venda processada com sucesso'. Caso contrário, retorna um objeto com
+        chave 'error' e valor com a descri o do erro.
+
+        :param request: Requisi o HTTP.
+        :type request: rest_framework.request.Request
+        :param args: Argumentos adicionais.
+        :type args: list
+        :param kwargs: Dicion rio de argumentos nomeados.
+        :type kwargs: dict
+        :return: Resposta HTTP com o status da venda.
+        :rtype: rest_framework.response.Response
+        """
+        venda = self.get_object()
+        try:
+            venda.processar_venda()
+            return Response({"status": "Venda processada com sucesso"})
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VendaCancelarView(APIView):
