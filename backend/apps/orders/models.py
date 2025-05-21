@@ -90,7 +90,7 @@ class Order(models.Model):
         """
         for item in self.items.all():
             estoque = Estoque.objects.filter(produto=item.product).first()
-            if estoque and estoque.quantidade_disponivel < item.quantity:
+            if not estoque or estoque.quantidade_disponivel < item.quantity:
                 return False
         return True
     

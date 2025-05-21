@@ -76,9 +76,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Associa o usuário atual ao pedido ao criar.
+        Associa o usuário atual ao pedido ao criar e verifica o estoque.
         """
-        serializer.save(customer=self.request.user)
+        order = serializer.save(customer=self.request.user)
+        if not order.verificar_estoque():
+            raise serializers.ValidationError("Estoque insuficiente para um ou mais itens do pedido.")
     
     @action(detail=True, methods=['post'])
     def add_item(self, request, pk=None):
