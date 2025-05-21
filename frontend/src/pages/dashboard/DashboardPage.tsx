@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -25,51 +26,33 @@ const DashboardPage: React.FC = () => {
   // Estados
   const [dateRange, setDateRange] = useState('month');
   
-  // Dados simulados
-  const kpiData = {
-    sales: {
-      value: 'R$ 45.789,00',
-      change: '+12,5%',
-      positive: true
-    },
-    orders: {
-      value: '128',
-      change: '+8,2%',
-      positive: true
-    },
-    customers: {
-      value: '32',
-      change: '+15,7%',
-      positive: true
-    },
-    averageTicket: {
-      value: 'R$ 357,73',
-      change: '+3,8%',
-      positive: true
-    }
-  };
-  
-  const recentOrders = [
-    { id: 'OS-2025-042', customer: 'Indústria ABC Ltda', date: '18/05/2025', value: 'R$ 1.250,00', status: 'completed' },
-    { id: 'OS-2025-041', customer: 'Metalúrgica XYZ', date: '17/05/2025', value: 'R$ 3.780,50', status: 'processing' },
-    { id: 'OS-2025-040', customer: 'Construtora Horizonte', date: '16/05/2025', value: 'R$ 890,25', status: 'completed' },
-    { id: 'OS-2025-039', customer: 'Fábrica de Móveis Silva', date: '15/05/2025', value: 'R$ 2.340,00', status: 'pending' },
-    { id: 'OS-2025-038', customer: 'Transportadora Expressa', date: '14/05/2025', value: 'R$ 1.670,80', status: 'completed' }
-  ];
-  
-  const topProducts = [
-    { name: 'Mangueira Hidráulica 1/2"', sales: 42, revenue: 'R$ 3.775,80' },
-    { name: 'Kit Reparo para Mangueiras', sales: 28, revenue: 'R$ 3.360,00' },
-    { name: 'Válvula de Controle', sales: 15, revenue: 'R$ 2.925,00' },
-    { name: 'Mangueira de Alta Temperatura', sales: 18, revenue: 'R$ 2.619,00' },
-    { name: 'Conexão Rápida 3/4"', sales: 35, revenue: 'R$ 1.592,50' }
-  ];
-  
-  const lowStockAlerts = [
-    { name: 'Válvula de Controle', stock: 8, minStock: 10 },
-    { name: 'Adaptador Hidráulico', stock: 18, minStock: 20 },
-    { name: 'Mangueira de Alta Temperatura', stock: 12, minStock: 15 }
-  ];
+  // Estados para dados reais
+  const [kpiData, setKpiData] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [lowStockAlerts, setLowStockAlerts] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const kpiResponse = await api.get('/dashboard/kpis');
+        setKpiData(kpiResponse.data);
+
+        const ordersResponse = await api.get('/orders/recent');
+        setRecentOrders(ordersResponse.data);
+
+        const productsResponse = await api.get('/products/top');
+        setTopProducts(productsResponse.data);
+
+        const stockAlertsResponse = await api.get('/inventory/low-stock');
+        setLowStockAlerts(stockAlertsResponse.data);
+      } catch (error) {
+        console.error('Erro ao buscar dados do dashboard:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
   
   // Renderizar KPI cards
   const renderKpiCards = () => {

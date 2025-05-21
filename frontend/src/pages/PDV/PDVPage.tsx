@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import { motion } from 'framer-motion';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -15,26 +16,32 @@ const PDVPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
-  // Produtos simulados
-  const products = [
-    { id: 1, code: 'MH-001', name: 'Mangueira Hidráulica 1/2"', price: 89.90, stock: 25 },
-    { id: 2, code: 'CR-002', name: 'Conexão Rápida 3/4"', price: 45.50, stock: 42 },
-    { id: 3, code: 'AH-003', name: 'Adaptador Hidráulico', price: 32.75, stock: 18 },
-    { id: 4, code: 'KR-004', name: 'Kit Reparo para Mangueiras', price: 120.00, stock: 10 },
-    { id: 5, code: 'MF-005', name: 'Mangueira Flexível 1"', price: 75.30, stock: 15 },
-    { id: 6, code: 'CT-006', name: 'Conexão em T', price: 28.90, stock: 30 },
-    { id: 7, code: 'VC-007', name: 'Válvula de Controle', price: 195.00, stock: 8 },
-    { id: 8, code: 'MA-008', name: 'Mangueira de Alta Temperatura', price: 145.50, stock: 12 }
-  ];
-  
-  // Clientes simulados
-  const customers = [
-    { id: 1, name: 'Indústria ABC Ltda', email: 'contato@industriaabc.com.br', phone: '(11) 3456-7890', address: 'Av. Industrial, 1000 - São Paulo/SP' },
-    { id: 2, name: 'Construtora XYZ', email: 'compras@construtoraXYZ.com.br', phone: '(11) 2345-6789', address: 'Rua das Obras, 500 - São Paulo/SP' },
-    { id: 3, name: 'Metalúrgica Silva', email: 'vendas@metalurgicasilva.com.br', phone: '(11) 4567-8901', address: 'Rua dos Metais, 200 - Guarulhos/SP' },
-    { id: 4, name: 'Transportadora Rápida', email: 'contato@transportadorarapida.com.br', phone: '(11) 5678-9012', address: 'Av. das Entregas, 300 - Osasco/SP' },
-    { id: 5, name: 'Fábrica de Móveis Confort', email: 'compras@moveisconfort.com.br', phone: '(11) 6789-0123', address: 'Rua da Madeira, 400 - Barueri/SP' }
-  ];
+  // Estados para dados reais
+  const [products, setProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+      }
+    };
+
+    const fetchCustomers = async () => {
+      try {
+        const response = await api.get('/customers');
+        setCustomers(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar clientes:', error);
+      }
+    };
+
+    fetchProducts();
+    fetchCustomers();
+  }, []);
   
   // Filtrar produtos
   const filteredProducts = products.filter(product => 
