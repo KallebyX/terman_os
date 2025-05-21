@@ -21,13 +21,24 @@ import './styles/global.css';
 
 // Componente de proteção de rotas
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const { isAuthenticated, userRole } = useAuth();
+  const { isAuthenticated, userRole, loading } = useAuth();
+  
+  // Mostrar indicador de carregamento enquanto verifica autenticação
+  if (loading) {
+    return <div className="loading-spinner">Carregando...</div>;
+  }
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
   if (requiredRole && userRole !== requiredRole) {
+    // Redirecionar para dashboard apropriado com base no papel do usuário
+    if (userRole === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (userRole === 'client') {
+      return <Navigate to="/client" replace />;
+    }
     return <Navigate to="/" replace />;
   }
   
@@ -43,9 +54,17 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           
           {/* Autenticação */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={
+            <AuthLayout>
+              <LoginPage />
+            </AuthLayout>
+          } />
           {/* Cadastro */}
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register" element={
+            <AuthLayout>
+              <RegisterPage />
+            </AuthLayout>
+          } />
 
           {/* Marketplace */}
           <Route path="/marketplace" element={<MarketplacePage />} />
@@ -122,6 +141,51 @@ const App = () => {
           {/* Rotas legadas para compatibilidade */}
           <Route path="/pdv" element={<Navigate to="/admin/pdv" replace />} />
           <Route path="/inventory" element={<Navigate to="/admin/inventory" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+          
+          {/* Rotas para o PDV */}
+          <Route 
+            path="/admin/pdv/venda" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <PDVPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/pdv/cliente/novo" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <PDVPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Rotas para Inventário */}
+          <Route 
+            path="/admin/inventory/produto/:id" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <InventoryPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/inventory/movimentacao" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout>
+                  <InventoryPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Página 404 para rotas não encontradas */}
           <Route path="*" element={<NotFoundPage />} />

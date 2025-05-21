@@ -12,11 +12,16 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:8000',
+        target: process.env.NODE_ENV === 'production' 
+          ? process.env.VITE_API_URL_DOCKER 
+          : process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api/v1'),
       },
+    },
+    watch: {
+      usePolling: true,
     },
   },
   resolve: {

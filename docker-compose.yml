@@ -62,8 +62,10 @@ services:
     volumes:
       - ./backend:/app
     depends_on:
-      - backend
-      - redis
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       DEBUG: "True"
       SECRET_KEY: sua-chave-secreta-muito-segura
@@ -84,7 +86,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     environment:
       VITE_API_URL: http://localhost:8000/api/v1
       VITE_API_URL_DOCKER: http://backend:8000/api/v1

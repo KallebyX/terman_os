@@ -16,6 +16,12 @@ check_postgres() {
   return $?
 }
 
+# Função para verificar se o banco de dados existe
+check_database_exists() {
+  PGPASSWORD=$password psql -h "$host" -p "$port" -U "$user" -lqt | cut -d \| -f 1 | grep -qw "$database"
+  return $?
+}
+
 # Verificar se o host está acessível primeiro
 echo "Verificando conectividade com o host $host..."
 timeout 5 bash -c "until nc -z $host $port; do echo 'Aguardando porta $port em $host...'; sleep 1; done" || echo "Não foi possível conectar ao host $host:$port"
@@ -43,6 +49,16 @@ until check_postgres; do
   
   sleep 1
 done
+
+# Verificar se o banco de dados existe
+if ! check_database_exists; then
+  echo "Banco de dados $database não existe. Criando..."
+  PGPASSWORD=$password psql -h "$host" -p "$port" -U "$user" -c "CREATE DATABASE $database;" || {
+    echo "Falha ao criar o banco de dados $database"
+    exit 1
+  }
+  echo "Banco de dados $database criado com sucesso!"
+fi
 
 echo "✅ PostgreSQL está pronto! Iniciando o backend..."
 
