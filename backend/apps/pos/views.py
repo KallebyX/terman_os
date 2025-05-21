@@ -6,8 +6,9 @@ from rest_framework import filters
 from django.db import transaction
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.db.models import Sum, Count, F, Q
 
-from .models import Cliente, Venda, ItemVenda, FormaPagamento, Pagamento
+from .models import Cliente, Venda, ItemVenda, FormaPagamento, Pagamento, StatusVenda, MetodoPagamentoPOS
 from .serializers import (
     ClienteSerializer, VendaListSerializer, VendaDetailSerializer, 
     VendaCreateSerializer, ItemVendaSerializer, ItemVendaCreateSerializer,
