@@ -1,6 +1,7 @@
 import os
 import django
 import pytest
+from django.conf import settings
 
 # Configurar Django antes de importar qualquer módulo que dependa da configuração
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -25,3 +26,11 @@ def authenticated_client():
         client.credentials(HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}')
         return client
     return _authenticated_client
+
+# Configuração para usar o banco de dados de teste
+@pytest.fixture(scope='session')
+def django_db_setup():
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }

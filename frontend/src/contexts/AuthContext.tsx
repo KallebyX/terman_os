@@ -1,4 +1,4 @@
-/add backend/tests/import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Definindo o tipo para o contexto de autenticação
 interface AuthContextType {
