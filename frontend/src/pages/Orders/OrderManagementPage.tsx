@@ -52,13 +52,8 @@ const OrderManagementPage: React.FC = () => {
         const endpoint = userRole === 'admin' || userRole === 'staff' 
           ? '/api/orders/orders/' 
           : '/api/orders/my-orders/';
-        
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        };
           
-        const response = await api.get(endpoint, { headers });
+        const response = await api.get(endpoint);
         
         if (response.status !== 200) {
           throw new Error(`Erro na requisição: ${response.status}`);
@@ -93,15 +88,10 @@ const OrderManagementPage: React.FC = () => {
   // Atualizar status do pedido
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      const headers = {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-      };
-      
       // Chamar a API para atualizar o status
       const response = await api.patch(`/api/orders/orders/${orderId}/`, {
         status: newStatus
-      }, { headers });
+      });
       
       if (response.status !== 200) {
         throw new Error(`Erro na atualização: ${response.status}`);

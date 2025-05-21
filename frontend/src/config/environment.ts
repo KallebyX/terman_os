@@ -18,6 +18,45 @@ const environment = {
   
   // Modo de desenvolvimento
   isDevelopment: import.meta.env.MODE === 'development',
+  
+  // Configurações de autenticação
+  auth: {
+    tokenKey: 'token',
+    refreshTokenKey: 'refresh_token',
+    legacyTokenKey: 'access_token',
+    authKey: 'auth',
+    loginRedirect: '/login',
+    homeRedirect: '/dashboard',
+  },
+  
+  // Endpoints da API
+  endpoints: {
+    auth: {
+      login: '/api/accounts/token/',
+      refresh: '/api/accounts/token/refresh/',
+      register: '/api/accounts/register/',
+      profile: '/api/accounts/profile/',
+    },
+    orders: {
+      list: '/api/orders/orders/',
+      myOrders: '/api/orders/my-orders/',
+      create: '/api/orders/create/',
+    },
+    products: {
+      list: '/api/products/',
+      pdvProducts: '/api/products/produtos/',
+      top: '/api/products/top',
+    },
+    customers: {
+      list: '/api/accounts/customers/',
+    },
+    dashboard: {
+      kpis: '/api/dashboard/kpis',
+      recent: '/api/orders/recent',
+      lowStock: '/api/inventory/low-stock',
+      activities: '/api/activities/recent',
+    },
+  }
 };
 
 export default environment;

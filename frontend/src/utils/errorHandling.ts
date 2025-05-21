@@ -49,6 +49,16 @@ export const getErrorMessage = (error: any): string => {
  */
 export const handleApiError = (error: any, defaultMessage: string = 'Ocorreu um erro inesperado'): string => {
   console.error('API Error:', error);
+  
+  // Registrar erro para análise (em produção, poderia enviar para um serviço de monitoramento)
+  if (process.env.NODE_ENV !== 'production') {
+    console.group('Detalhes do erro:');
+    console.error('Mensagem:', error.message);
+    console.error('Status:', error.response?.status);
+    console.error('Dados:', error.response?.data);
+    console.groupEnd();
+  }
+  
   return getErrorMessage(error) || defaultMessage;
 };
 

@@ -23,12 +23,7 @@ const PDVPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        };
-        
-        const response = await api.get('/api/products/produtos/', { headers });
+        const response = await api.get('/api/products/produtos/');
         
         if (response.status !== 200) {
           throw new Error(`Erro na requisição: ${response.status}`);
@@ -48,12 +43,7 @@ const PDVPage = () => {
 
     const fetchCustomers = async () => {
       try {
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        };
-        
-        const response = await api.get('/api/accounts/customers/', { headers });
+        const response = await api.get('/api/accounts/customers/');
         
         if (response.status !== 200) {
           throw new Error(`Erro na requisição: ${response.status}`);
@@ -146,13 +136,8 @@ const PDVPage = () => {
         notes: 'Pedido criado via PDV'
       };
       
-      const headers = {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-      };
-      
       // Enviar pedido para a API
-      const response = await api.post('/api/orders/create/', orderData, { headers });
+      const response = await api.post('/api/orders/create/', orderData);
       
       if (response.status !== 201 && response.status !== 200) {
         throw new Error(`Erro ao criar pedido: ${response.status}`);

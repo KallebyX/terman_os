@@ -17,12 +17,7 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        };
-        
-        const response = await api.get('/api/products', { headers });
+        const response = await api.get('/api/products');
         
         if (response.data && (response.data.results || Array.isArray(response.data))) {
           setProducts(response.data.results || response.data);
@@ -47,14 +42,9 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchCategoriesAndSuppliers = async () => {
       try {
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        };
-        
         const [categoriesResponse, suppliersResponse] = await Promise.all([
-          api.get('/api/categories', { headers }),
-          api.get('/api/suppliers', { headers })
+          api.get('/api/categories'),
+          api.get('/api/suppliers')
         ]);
         
         // Verificar e processar dados de categorias
