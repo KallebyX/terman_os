@@ -128,7 +128,7 @@ class ItemVendaListCreateView(generics.ListCreateAPIView):
         estoque.quantidade_atual -= quantidade
         estoque.save()
         
-        # Criar item de venda
+        # Criar item de venda e atualizar estoque
         item = ItemVenda.objects.create(
             venda=venda,
             produto=produto,
@@ -136,11 +136,21 @@ class ItemVendaListCreateView(generics.ListCreateAPIView):
             preco_unitario=serializer.validated_data['preco_unitario'],
             desconto=serializer.validated_data.get('desconto', 0)
         )
+
+        # Atualizar estoque do produto
+        produto.estoque_minimo -= quantidade
+        produto.save()
         
-        # Atualizar totais da venda
+        # Atualizar totais da venda e estoque
         venda.subtotal = sum(item.subtotal for item in venda.itens.all())
         venda.total = venda.subtotal - venda.desconto + venda.acrescimo
         venda.save()
+
+        # Atualizar estoque
+        for item in venda.itens.all():
+            produto = item.produto
+            produto.estoque_minimo -= item.quantidade
+            produto.save()
         
         return Response(
             ItemVendaSerializer(item).data,
