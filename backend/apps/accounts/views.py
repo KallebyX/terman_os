@@ -107,34 +107,37 @@ class UserLoginView(TokenObtainPairView):
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
         
-        user = authenticate(request, username=email, password=password)
-        
-        if user is None:
-            return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        if not user.is_active:
-            return Response({'detail': 'Conta desativada.'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # Atualizar último login
-        user.last_login = timezone.now()
-        user.save(update_fields=['last_login'])
-        
-        # Gerar tokens JWT
-        refresh = RefreshToken.for_user(user)
-        
-        # Adicionar claims personalizados ao token
-        refresh['user_id'] = user.id
-        refresh['email'] = user.email
-        refresh['is_admin'] = user.is_admin
-        refresh['is_seller'] = user.is_seller
-        refresh['is_operator'] = user.is_operator
-        refresh['name'] = user.get_full_name()
-        
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': UserSerializer(user).data
-        })
+        try:
+            user = authenticate(request, username=email, password=password)
+            
+            if user is None:
+                return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            if not user.is_active:
+                return Response({'detail': 'Conta desativada.'}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Atualizar último login
+            user.last_login = timezone.now()
+            user.save(update_fields=['last_login'])
+            
+            # Gerar tokens JWT
+            refresh = RefreshToken.for_user(user)
+            
+            # Adicionar claims personalizados ao token
+            refresh['user_id'] = user.id
+            refresh['email'] = user.email
+            refresh['is_admin'] = user.is_admin
+            refresh['is_seller'] = user.is_seller
+            refresh['is_operator'] = user.is_operator
+            refresh['name'] = user.get_full_name()
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user).data
+            })
+        except Exception as e:
+            return Response({'detail': f'Erro interno do servidor: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserProfileView(APIView):
