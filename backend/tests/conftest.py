@@ -2,7 +2,7 @@ import os
 import pytest
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.config.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'caminho_correto_do_seu_projeto.settings')
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
