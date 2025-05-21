@@ -1,5 +1,7 @@
-/drop backend/apps/pos/from rest_framework import serializers
+from rest_framework import serializers
 from .models import Cliente, Venda, ItemVenda, FormaPagamento, Pagamento
+from apps.products.serializers import ProdutoListSerializer
+from apps.accounts.serializers import UserSerializer
 from apps.products.serializers import ProdutoListSerializer
 from apps.accounts.serializers import UserSerializer
 
