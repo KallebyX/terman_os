@@ -1,7 +1,8 @@
 import os
+import os
+import django
 import pytest
 from rest_framework_simplejwt.tokens import RefreshToken
-import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
