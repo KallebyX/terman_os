@@ -18,7 +18,14 @@ const api = axios.create({
 // Interceptor para adicionar token JWT em todas as requisições
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
+    // Verificar primeiro o token no localStorage com a chave 'token' (nova implementação)
+    let token = localStorage.getItem('token');
+    
+    // Se não encontrar, tentar com 'access_token' (implementação anterior)
+    if (!token) {
+      token = localStorage.getItem('access_token');
+    }
+    
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -44,12 +51,14 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
           const response = await axios.post(
-            `${api.defaults.baseURL}/accounts/token/refresh/`,
+            `${api.defaults.baseURL}/api/accounts/token/refresh/`,
             { refresh: refreshToken }
           );
           
           // Armazenar novo token de acesso
           localStorage.setItem('access_token', response.data.access);
+          // Também armazenar na nova chave para compatibilidade
+          localStorage.setItem('token', response.data.access);
           
           // Atualizar o cabeçalho da requisição original
           originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
@@ -62,6 +71,7 @@ api.interceptors.response.use(
         localStorage.removeItem('auth');
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('token');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
@@ -74,6 +84,7 @@ api.interceptors.response.use(
         localStorage.removeItem('auth');
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('token');
         window.location.href = '/login';
       } else if (error.response.status === 403) {
         console.error('Acesso proibido: Você não tem permissão para acessar este recurso.');
