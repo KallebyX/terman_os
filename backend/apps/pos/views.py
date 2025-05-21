@@ -71,7 +71,7 @@ class VendaViewSet(viewsets.ModelViewSet):
             status='aberta',
             subtotal=0,
             desconto=0,
-            acrescimo=0,
+            acréscimo=0,
             total=0
         )
 
@@ -143,7 +143,7 @@ class ItemVendaListCreateView(generics.ListCreateAPIView):
         
         # Atualizar totais da venda
         venda.subtotal = sum(item.subtotal for item in venda.itens.all())
-        venda.total = venda.subtotal - venda.desconto + venda.acrescimo
+        venda.total = venda.subtotal - venda.desconto + venda.acréscimo
         venda.save()
         
         return Response(
@@ -204,7 +204,7 @@ class ItemVendaDetailView(generics.RetrieveUpdateDestroyAPIView):
         
         # Atualizar totais da venda
         venda.subtotal = sum(item.subtotal for item in venda.itens.all())
-        venda.total = venda.subtotal - venda.desconto + venda.acrescimo
+        venda.total = venda.subtotal - venda.desconto + venda.acréscimo
         venda.save()
         
         return Response(serializer.data)
@@ -231,7 +231,7 @@ class ItemVendaDetailView(generics.RetrieveUpdateDestroyAPIView):
         
         # Atualizar totais da venda
         venda.subtotal = sum(i.subtotal for i in venda.itens.all())
-        venda.total = venda.subtotal - venda.desconto + venda.acrescimo
+        venda.total = venda.subtotal - venda.desconto + venda.acréscimo
         venda.save()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
