@@ -52,13 +52,18 @@ def create_estoque(create_produto):
 
 @pytest.fixture
 def admin_user(django_user_model):
-    return django_user_model.objects.create_superuser(
-        email='admin@example.com',
-        password='AdminPassword123',
-        first_name='Admin',
-        last_name='User',
-        is_admin=True
-    )
+    # Verificar se o usuário já existe para evitar erros de duplicação
+    try:
+        admin = django_user_model.objects.get(email='admin@example.com')
+    except django_user_model.DoesNotExist:
+        admin = django_user_model.objects.create_superuser(
+            email='admin@example.com',
+            password='AdminPassword123',
+            first_name='Admin',
+            last_name='User',
+            is_admin=True
+        )
+    return admin
 
 @pytest.mark.django_db
 class TestInventoryAPI:
@@ -85,14 +90,15 @@ class TestInventoryAPI:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 3  # Verificar se há pelo menos 3 itens de estoque
     
-    def test_detalhe_estoque(self, api_client, create_estoque, create_produto, admin_user):
+    def test_detalhe_estoque(self, api_client, create_estoque, create_produto, admin_user, get_jwt_token):
         """Teste de detalhe de estoque."""
         # Criar estoque para o teste
         produto = create_produto(codigo='PROD004', nome='Produto Teste Estoque')
         estoque = create_estoque(produto=produto, quantidade=75)
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Fazer requisição para detalhe do estoque
         url = f'/api/inventory/estoque/{estoque.id}/'
@@ -105,14 +111,15 @@ class TestInventoryAPI:
         assert response.data['quantidade_atual'] == '75.00'
         assert float(response.data['quantidade_disponivel']) == 75.0  # Sem reservas
     
-    def test_listar_movimentacoes(self, api_client, create_estoque, create_produto, admin_user):
+    def test_listar_movimentacoes(self, api_client, create_estoque, create_produto, admin_user, get_jwt_token):
         """Teste de listagem de movimentações de estoque."""
         # Criar estoque e movimentações para o teste
         produto = create_produto(codigo='PROD006', nome='Produto Movimentações')
         estoque = create_estoque(produto=produto, quantidade=200)
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Criar algumas movimentações
         MovimentacaoEstoque.objects.create(
@@ -142,3 +149,35 @@ class TestInventoryAPI:
         # Verificar resposta
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 2  # Verificar se há pelo menos 2 movimentações
+        
+    def test_criar_movimentacao_estoque(self, api_client, create_produto, admin_user, get_jwt_token):
+        """Teste de criação de movimentação de estoque."""
+        produto = create_produto(codigo='PROD007', nome='Produto Nova Movimentação')
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Dados para a nova movimentação
+        data = {
+            'produto': produto.id,
+            'tipo': 'entrada',
+            'origem': 'compra',
+            'quantidade': 30,
+            'valor_unitario': 95.00,
+            'observacao': 'Entrada teste via API'
+        }
+        
+        # Fazer requisição para criar movimentação
+        url = '/api/inventory/movimentacoes/'
+        response = api_client.post(url, data, format='json')
+        
+        # Verificar resposta
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['produto'] == produto.id
+        assert response.data['tipo'] == 'entrada'
+        assert float(response.data['quantidade']) == 30.0
+        
+        # Verificar se o estoque foi atualizado
+        estoque = Estoque.objects.get(produto=produto)
+        assert estoque.quantidade_atual == 30.0

@@ -110,42 +110,6 @@ const DashboardPage: React.FC = () => {
     fetchData();
   };
 
-  // Função para atualizar os dados
-  const refreshData = () => {
-    // Refaz a busca de dados
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
-          await Promise.all([
-            api.get(`/dashboard/kpis?range=${dateRange}`),
-            api.get('/orders/recent'),
-            api.get(`/products/top?range=${dateRange}`),
-            api.get('/inventory/low-stock'),
-            api.get('/activities/recent')
-          ]);
-        
-        setKpiData(kpiResponse.data);
-        setRecentOrders(ordersResponse.data);
-        setTopProducts(productsResponse.data);
-        setLowStockAlerts(stockAlertsResponse.data);
-        setActivities(activitiesResponse.data);
-      } catch (error: any) {
-        console.error('Erro ao atualizar dados do dashboard:', error);
-        setError(
-          error.response?.data?.message || 
-          'Não foi possível atualizar os dados. Por favor, tente novamente mais tarde.'
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  };
-
   // Renderizar KPI cards
   const renderKpiCards = () => {
     if (!kpiData) return null;

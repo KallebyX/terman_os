@@ -64,13 +64,18 @@ def create_fornecedor():
 
 @pytest.fixture
 def admin_user(django_user_model):
-    return django_user_model.objects.create_superuser(
-        email='admin@example.com',
-        password='AdminPassword123',
-        first_name='Admin',
-        last_name='User',
-        is_admin=True
-    )
+    # Verificar se o usuário já existe para evitar erros de duplicação
+    try:
+        admin = django_user_model.objects.get(email='admin@example.com')
+    except django_user_model.DoesNotExist:
+        admin = django_user_model.objects.create_superuser(
+            email='admin@example.com',
+            password='AdminPassword123',
+            first_name='Admin',
+            last_name='User',
+            is_admin=True
+        )
+    return admin
 
 @pytest.mark.django_db
 class TestProdutosAPI:
@@ -92,3 +97,56 @@ class TestProdutosAPI:
         # Verificar resposta
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 3  # Verificar se há pelo menos 3 produtos
+        
+    def test_detalhe_produto(self, api_client, create_produto, admin_user, get_jwt_token):
+        """Teste de detalhe de produto."""
+        produto = create_produto(codigo='PROD004', nome='Produto Detalhe', preco=150.00)
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Fazer requisição para detalhe do produto
+        url = f'/api/products/produtos/{produto.id}/'
+        response = api_client.get(url)
+        
+        # Verificar resposta
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['codigo'] == 'PROD004'
+        assert response.data['nome'] == 'Produto Detalhe'
+        assert float(response.data['preco']) == 150.00
+        
+    def test_criar_produto(self, api_client, create_categoria, admin_user, get_jwt_token):
+        """Teste de criação de produto."""
+        categoria = create_categoria(nome='Categoria Nova', slug='categoria-nova')
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Dados para o novo produto
+        data = {
+            'codigo': 'PROD005',
+            'nome': 'Produto Novo',
+            'descricao': 'Descrição do produto novo',
+            'descricao_curta': 'Produto novo para testes',
+            'preco': 200.00,
+            'unidade': 'un',
+            'slug': 'prod005-produto-novo',
+            'ativo': True,
+            'categorias': [categoria.id]
+        }
+        
+        # Fazer requisição para criar produto
+        url = '/api/products/produtos/'
+        response = api_client.post(url, data, format='json')
+        
+        # Verificar resposta
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['codigo'] == 'PROD005'
+        assert response.data['nome'] == 'Produto Novo'
+        assert float(response.data['preco']) == 200.00
+        
+        # Verificar se o produto foi realmente criado no banco
+        produto = Produto.objects.get(codigo='PROD005')
+        assert produto.nome == 'Produto Novo'

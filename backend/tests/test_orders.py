@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from apps.orders.models import Order, OrderItem
 from apps.products.models import Produto
 from apps.accounts.models import User
+from apps.inventory.models import Estoque
 
 @pytest.fixture
 def api_client():
@@ -28,6 +29,28 @@ def create_produto():
         )
         return produto
     return _create_produto
+
+@pytest.fixture
+def create_estoque(create_produto):
+    def _create_estoque(produto=None, quantidade=50):
+        if produto is None:
+            produto = create_produto()
+        
+        estoque, created = Estoque.objects.get_or_create(
+            produto=produto,
+            defaults={
+                'quantidade_atual': quantidade,
+                'quantidade_reservada': 0
+            }
+        )
+        
+        if not created:
+            estoque.quantidade_atual = quantidade
+            estoque.quantidade_reservada = 0
+            estoque.save()
+            
+        return estoque
+    return _create_estoque
 
 @pytest.fixture
 def create_cliente(django_user_model):
@@ -124,7 +147,7 @@ class TestOrdersAPI:
         # Verificar se há pelo menos 3 pedidos no campo 'results' da resposta paginada
         assert len(response.data['results']) >= 3
     
-    def test_detalhe_order(self, api_client, create_order, create_produto, admin_user):
+    def test_detalhe_order(self, api_client, create_order, create_produto, admin_user, get_jwt_token):
         """Teste de detalhe de pedido."""
         # Criar pedido para o teste
         produto1 = create_produto(codigo='PROD003', nome='Produto Detalhe', preco=150.00)
@@ -135,8 +158,9 @@ class TestOrdersAPI:
             {'produto': produto2, 'quantidade': 1}
         ])
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Fazer requisição para detalhe do pedido
         url = f'/api/orders/orders/{order.id}/'
@@ -148,7 +172,7 @@ class TestOrdersAPI:
         assert float(response.data['total']) == 550.00  # (150*2) + (250*1)
         assert len(response.data['items']) == 2  # Verificar se há 2 itens no pedido
     
-    def test_cliente_ve_apenas_seus_orders(self, api_client, create_order, create_cliente, create_produto):
+    def test_cliente_ve_apenas_seus_orders(self, api_client, create_order, create_cliente, create_produto, get_jwt_token):
         """Teste de que cliente só vê seus próprios pedidos."""
         # Criar clientes e produtos
         cliente1 = create_cliente(email='cliente1_unique@example.com')
@@ -159,8 +183,9 @@ class TestOrdersAPI:
         order_cliente1 = create_order(customer=cliente1, produtos=[{'produto': produto, 'quantidade': 1}])
         order_cliente2 = create_order(customer=cliente2, produtos=[{'produto': produto, 'quantidade': 2}])
         
-        # Autenticar como cliente1
-        api_client.force_authenticate(user=cliente1)
+        # Autenticar usando JWT para cliente1
+        token = get_jwt_token(cliente1)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Fazer requisição para listar pedidos
         url = '/api/orders/my-orders/'
@@ -177,14 +202,15 @@ class TestOrdersAPI:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
     
-    def test_atualizar_status_order(self, api_client, create_order, create_produto, admin_user):
+    def test_atualizar_status_order(self, api_client, create_order, create_produto, admin_user, get_jwt_token):
         """Teste de atualização de status de pedido."""
         # Criar pedido para o teste
         produto = create_produto(codigo='PROD006', nome='Produto Status', preco=100.00)
         order = create_order(produtos=[{'produto': produto, 'quantidade': 1}], status_order='pending')
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Dados para atualização do status
         data = {
@@ -202,3 +228,44 @@ class TestOrdersAPI:
         # Verificar se o pedido foi realmente atualizado no banco
         order.refresh_from_db()
         assert order.status == 'processing'
+        
+    def test_criar_order_com_estoque(self, api_client, create_cliente, create_produto, create_estoque, get_jwt_token):
+        """Teste de criação de pedido com verificação de estoque."""
+        # Criar cliente e produtos com estoque
+        cliente = create_cliente(email='cliente_order@example.com')
+        produto1 = create_produto(codigo='PROD007', nome='Produto Order 1', preco=120.00)
+        produto2 = create_produto(codigo='PROD008', nome='Produto Order 2', preco=180.00)
+        
+        # Criar estoque para os produtos
+        create_estoque(produto=produto1, quantidade=10)
+        create_estoque(produto=produto2, quantidade=5)
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(cliente)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Dados para o novo pedido
+        data = {
+            'items': [
+                {'product_id': produto1.id, 'quantity': 2},
+                {'product_id': produto2.id, 'quantity': 1}
+            ],
+            'notes': 'Pedido de teste via API'
+        }
+        
+        # Fazer requisição para criar pedido
+        url = '/api/orders/create/'
+        response = api_client.post(url, data, format='json')
+        
+        # Verificar resposta
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['status'] == 'pending'
+        assert float(response.data['total']) == 420.00  # (120*2) + (180*1)
+        assert len(response.data['items']) == 2
+        
+        # Verificar se o estoque foi atualizado corretamente
+        estoque1 = Estoque.objects.get(produto=produto1)
+        estoque2 = Estoque.objects.get(produto=produto2)
+        
+        assert estoque1.quantidade_atual == 8  # 10 - 2
+        assert estoque2.quantidade_atual == 4  # 5 - 1
