@@ -62,7 +62,7 @@ def admin_user(django_user_model):
 
 @pytest.mark.django_db
 class TestInventoryAPI:
-    def test_listar_estoque(self, api_client, create_estoque, create_produto, admin_user):
+    def test_listar_estoque(self, api_client, create_estoque, create_produto, admin_user, get_jwt_token):
         """Teste de listagem de estoque."""
         # Criar alguns itens de estoque para o teste
         produto1 = create_produto(codigo='PROD001', nome='Produto 1')
@@ -73,8 +73,9 @@ class TestInventoryAPI:
         create_estoque(produto=produto2, quantidade=50)
         create_estoque(produto=produto3, quantidade=25)
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Fazer requisição para listar estoque
         url = '/api/inventory/estoque/'

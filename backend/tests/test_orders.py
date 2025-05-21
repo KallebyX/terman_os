@@ -98,7 +98,7 @@ def admin_user(django_user_model):
 
 @pytest.mark.django_db
 class TestOrdersAPI:
-    def test_listar_orders(self, api_client, create_order, create_produto, admin_user):
+    def test_listar_orders(self, api_client, create_order, create_produto, admin_user, get_jwt_token):
         """Teste de listagem de pedidos."""
         # Criar alguns pedidos para o teste
         produto1 = create_produto(codigo='PROD001', nome='Produto 1', preco=100.00)
@@ -111,8 +111,9 @@ class TestOrdersAPI:
             {'produto': produto2, 'quantidade': 1}
         ])
         
-        # Autenticar como admin
-        api_client.force_authenticate(user=admin_user)
+        # Autenticar usando JWT
+        token = get_jwt_token(admin_user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         
         # Fazer requisição para listar pedidos
         url = '/api/orders/orders/'

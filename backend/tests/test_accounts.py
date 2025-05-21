@@ -54,10 +54,12 @@ class TestUserAPI:
         assert 'refresh' in response.data
         assert 'user' in response.data
 
-    def test_user_profile(self, api_client, create_user):
+    def test_user_profile(self, api_client, create_user, get_jwt_token):
         """Teste de acesso ao perfil do usuário."""
         user = create_user()
-        api_client.force_authenticate(user=user)
+        # Autenticar usando JWT
+        token = get_jwt_token(user)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         url = reverse('accounts:me')
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
