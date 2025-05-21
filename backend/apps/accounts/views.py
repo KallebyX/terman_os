@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
@@ -31,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Usuários comuns podem apenas ver e editar seus próprios dados.
     """
     queryset = User.objects.all()
-    permission_classes = [IsAdminOrSelf]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSelf]
     
     def get_serializer_class(self):
         if self.action == 'create':
