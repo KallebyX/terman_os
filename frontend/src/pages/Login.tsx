@@ -19,6 +19,9 @@ const Login: React.FC = () => {
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         login(email, password);
+        return true;
+      } else {
+        setError('Erro ao fazer login. Verifique suas credenciais.');
       }
     } catch (err) {
       setError('Erro ao fazer login. Verifique suas credenciais.');

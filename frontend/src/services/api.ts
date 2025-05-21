@@ -21,9 +21,15 @@ export default api;
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Redirecionar para login ou tratar o erro de autenticação
-      console.error('Não autorizado, redirecionando para login...');
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Redirecionar para login ou tratar o erro de autenticação
+        console.error('Não autorizado, redirecionando para login...');
+      } else {
+        console.error(`Erro: ${error.response.status} - ${error.response.data}`);
+      }
+    } else {
+      console.error('Erro na rede ou no servidor.');
     }
     return Promise.reject(error);
   }

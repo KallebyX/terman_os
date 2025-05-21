@@ -65,31 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserRole(role);
         return true;
       }
-      // Verificação simplificada para demonstração
-      if (email && password) {
-        let role = 'client';
-        let name = 'Cliente';
-        
-        // Determinar o papel do usuário com base no email
-        if (email.includes('admin')) {
-          role = 'admin';
-          name = 'Administrador';
-        } else if (email.includes('funcionario') || email.includes('staff')) {
-          role = 'staff';
-          name = 'Funcionário';
-        }
-        
-        // Armazenar dados de autenticação
-        const authData = { email, role, name };
-        localStorage.setItem('auth', JSON.stringify(authData));
-        
-        setIsAuthenticated(true);
-        setUserRole(role);
-        setUserName(name);
-        
-        console.log(`Login bem-sucedido: ${email} como ${role}`);
-        return true;
-      }
+      // Remover verificação simplificada e usar dados reais da API
       return false;
     } catch (error) {
       console.error('Erro ao fazer login:', error);
