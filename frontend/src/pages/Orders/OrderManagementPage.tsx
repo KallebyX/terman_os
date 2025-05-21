@@ -47,14 +47,8 @@ const OrderManagementPage: React.FC = () => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        try {
-          const response = await api.get('/orders');
-          setOrders(response.data);
-        } catch (error) {
-          console.error('Erro ao carregar pedidos:', error);
-        } finally {
-          setIsLoading(false);
-        }
+        const response = await api.get('/orders');
+        setOrders(response.data);
       } catch (error) {
         console.error('Erro ao carregar pedidos:', error);
       } finally {

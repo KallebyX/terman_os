@@ -27,23 +27,25 @@ const InventoryPage = () => {
     fetchProducts();
   }, []);
   
-  // Categorias
-  const categories = [
-    { id: 'all', name: 'Todos os Produtos' },
-    { id: 'mangueiras', name: 'Mangueiras' },
-    { id: 'conexoes', name: 'Conexões' },
-    { id: 'adaptadores', name: 'Adaptadores' },
-    { id: 'acessorios', name: 'Acessórios' }
-  ];
-  
-  // Fornecedores
-  const suppliers = [
-    { id: 1, name: 'Fornecedor A', contact: 'contato@fornecedora.com.br', phone: '(11) 3456-7890' },
-    { id: 2, name: 'Fornecedor B', contact: 'vendas@fornecedorb.com.br', phone: '(11) 2345-6789' },
-    { id: 3, name: 'Fornecedor C', contact: 'comercial@fornecedorc.com.br', phone: '(11) 4567-8901' },
-    { id: 4, name: 'Fornecedor D', contact: 'atendimento@fornecedord.com.br', phone: '(11) 5678-9012' },
-    { id: 5, name: 'Fornecedor E', contact: 'vendas@fornecedore.com.br', phone: '(11) 6789-0123' }
-  ];
+  // Estados para categorias e fornecedores
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    const fetchCategoriesAndSuppliers = async () => {
+      try {
+        const categoriesResponse = await api.get('/categories');
+        setCategories(categoriesResponse.data);
+
+        const suppliersResponse = await api.get('/suppliers');
+        setSuppliers(suppliersResponse.data);
+      } catch (error) {
+        console.error('Erro ao buscar categorias e fornecedores:', error);
+      }
+    };
+
+    fetchCategoriesAndSuppliers();
+  }, []);
   
   // Filtrar produtos
   const filteredProducts = products.filter(product => {
