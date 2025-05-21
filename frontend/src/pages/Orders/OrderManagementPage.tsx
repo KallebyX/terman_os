@@ -97,6 +97,9 @@ const OrderManagementPage: React.FC = () => {
         throw new Error(`Erro na atualização: ${response.status}`);
       }
       
+      // Mostrar mensagem de sucesso
+      alert(`Status do pedido atualizado para: ${newStatus}`);
+      
       // Atualizar o estado local após confirmação da API
       setOrders(prevOrders => 
         prevOrders.map(order => 

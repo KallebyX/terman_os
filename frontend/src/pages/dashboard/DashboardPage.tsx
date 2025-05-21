@@ -91,6 +91,14 @@ const DashboardPage: React.FC = () => {
           api.get('/activities/recent')
         ]);
       
+      console.log('Dashboard data refreshed:', {
+        kpis: kpiResponse.data,
+        orders: ordersResponse.data,
+        products: productsResponse.data,
+        stockAlerts: stockAlertsResponse.data,
+        activities: activitiesResponse.data
+      });
+      
       // Verificar se as respostas têm o formato esperado
       setKpiData(kpiResponse.data.results || kpiResponse.data);
       setRecentOrders(ordersResponse.data.results || ordersResponse.data);

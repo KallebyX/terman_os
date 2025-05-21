@@ -83,6 +83,9 @@ const CustomerFormPage: React.FC = () => {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
       
+      // Mostrar mensagem de sucesso
+      alert('Cliente salvo com sucesso!');
+      
       // Redirecionar após salvar
       if (redirectTo === 'pdv') {
         navigate('/pdv', { state: { newCustomer: response.data } });

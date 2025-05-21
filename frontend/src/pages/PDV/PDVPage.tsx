@@ -22,6 +22,16 @@ const PDVPage = () => {
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
 
+  // Verificar se há um cliente recém-cadastrado na navegação
+  useEffect(() => {
+    const location = window.location;
+    if (location.state && location.state.newCustomer) {
+      setSelectedCustomer(location.state.newCustomer);
+      // Limpar o estado para evitar problemas ao recarregar a página
+      window.history.replaceState({}, document.title);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {

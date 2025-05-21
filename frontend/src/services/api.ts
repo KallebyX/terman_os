@@ -8,8 +8,15 @@ const apiUrl = isDocker
 
 console.log('API URL:', apiUrl); // Log para debug
 
+// Remover barras duplicadas em URLs
+const formatUrl = (url) => {
+  if (!url) return url;
+  // Remover barras duplicadas, exceto após o protocolo (http:// ou https://)
+  return url.replace(/(https?:\/\/)|(\/)+/g, "$1$2");
+};
+
 const api = axios.create({
-  baseURL: apiUrl || '/api',
+  baseURL: formatUrl(apiUrl) || '/api',
   timeout: 10000, // Timeout de 10 segundos
   headers: {
     'Content-Type': 'application/json',
