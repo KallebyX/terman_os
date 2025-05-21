@@ -1,7 +1,7 @@
 import os
 import pytest
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seu_projeto.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nome_do_seu_projeto.settings')
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @pytest.fixture
