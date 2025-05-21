@@ -8,11 +8,13 @@ const apiUrl = isDocker
 
 console.log('API URL:', apiUrl); // Log para debug
 
-// Remover barras duplicadas em URLs
+// Remover barras duplicadas em URLs e garantir barra final
 const formatUrl = (url) => {
   if (!url) return url;
   // Remover barras duplicadas, exceto após o protocolo (http:// ou https://)
-  return url.replace(/(https?:\/\/)|(\/)+/g, "$1$2");
+  const cleanUrl = url.replace(/(https?:\/\/)|(\/)+/g, "$1$2");
+  // Garantir que a URL termina com uma barra
+  return cleanUrl.endsWith('/') ? cleanUrl : `${cleanUrl}/`;
 };
 
 const api = axios.create({
@@ -69,7 +71,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
           const response = await axios.post(
-            `${api.defaults.baseURL}/api/accounts/token/refresh/`,
+            `${api.defaults.baseURL}/accounts/token/refresh/`,
             { refresh: refreshToken }
           );
           
@@ -103,15 +105,16 @@ api.interceptors.response.use(
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        // Não redirecionar automaticamente para evitar loops infinitos
+        // window.location.href = '/login';
       } else if (error.response.status === 403) {
         console.error('Acesso proibido: Você não tem permissão para acessar este recurso.');
       } else if (error.response.status === 404) {
         console.error('Recurso não encontrado.');
       } else if (error.response.status === 500) {
-        console.error('Erro interno do servidor.');
+        console.error('Erro interno do servidor:', error.response.data);
       } else {
-        console.error(`Erro: ${error.response.status} - ${error.response.data.message || JSON.stringify(error.response.data)}`);
+        console.error(`Erro: ${error.response.status} - ${error.response.data?.message || JSON.stringify(error.response.data)}`);
       }
     } else if (error.request) {
       console.error('Sem resposta do servidor. Verifique sua conexão com a internet.');
