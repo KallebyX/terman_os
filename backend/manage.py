@@ -24,8 +24,7 @@ def main():
             print("✅ Conexão com o banco de dados estabelecida com sucesso!")
         except Exception as e:
             print(f"❌ Erro ao conectar ao banco de dados: {e}")
-            if 'migrate' not in sys.argv:
-                print("⚠️ Continuando mesmo com erro de conexão...")
+            sys.exit(1)
     
     execute_from_command_line(sys.argv)
 

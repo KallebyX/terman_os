@@ -12,7 +12,7 @@ echo "⏳ Aguardando o PostgreSQL ficar disponível..."
 
 # Função para verificar se o PostgreSQL está pronto
 check_postgres() {
-  PGPASSWORD=$password psql -h "$host" -p "$port" -U "$user" -d "postgres" -c '\q' 2>/dev/null
+  pg_isready -h "$host" -p "$port" -U "$user"
   return $?
 }
 
@@ -22,38 +22,9 @@ check_database_exists() {
   return $?
 }
 
-# Verificar se o host está acessível primeiro
-echo "Verificando conectividade com o host $host..."
-timeout 30 bash -c "until nc -z $host $port; do echo 'Aguardando porta $port em $host...'; sleep 2; done" || {
-  echo "Não foi possível conectar ao host $host:$port após 30 segundos"
-  echo "Verificando status do contêiner PostgreSQL..."
-  docker ps | grep postgres || echo "Contêiner PostgreSQL não encontrado"
-  exit 1
-}
-
-echo "Host $host:$port está acessível!"
-
-# Contador para timeout
-count=0
-max_attempts=60
-
 # Espera até conseguir conectar no PostgreSQL
 until check_postgres; do
-  count=$((count+1))
-  echo "PostgreSQL não está disponível ainda - aguardando... (tentativa $count/$max_attempts)"
-  
-  # Verificar status do contêiner PostgreSQL a cada 5 tentativas
-  if [ $((count % 5)) -eq 0 ]; then
-    echo "Verificando status do contêiner PostgreSQL..."
-    docker ps | grep postgres || echo "Contêiner PostgreSQL não encontrado"
-  fi
-  
-  # Timeout após 60 tentativas (2 minutos)
-  if [ $count -ge $max_attempts ]; then
-    echo "Timeout ao aguardar PostgreSQL. Verifique se o serviço está rodando corretamente."
-    exit 1
-  fi
-  
+  echo "PostgreSQL não está disponível ainda - aguardando..."
   sleep 2
 done
 
