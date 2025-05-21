@@ -5,6 +5,28 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 
+interface Product {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  category: string;
+  price: number;
+  cost: number;
+  stock: number;
+  minStock: number;
+  supplier: string;
+  barcode: string;
+  lastUpdate: string;
+}
+
+interface Supplier {
+  id: string;
+  name: string;
+  contact: string;
+  phone: string;
+}
+
 const InventoryPage = () => {
   // Estados
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -12,7 +34,7 @@ const InventoryPage = () => {
   const [viewMode, setViewMode] = React.useState('cards'); // 'cards' ou 'table'
   
   // Estados para dados reais
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,8 +58,8 @@ const InventoryPage = () => {
   }, []);
   
   // Estados para categorias e fornecedores
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   useEffect(() => {
     const fetchCategoriesAndSuppliers = async () => {
@@ -81,7 +103,7 @@ const InventoryPage = () => {
   });
   
   // Verificar estoque baixo
-  const isLowStock = (product) => product.stock < product.minStock;
+  const isLowStock = (product: Product) => product.stock < product.minStock;
   
   // Renderizar cards de produtos
   const renderProductCards = () => {
@@ -267,7 +289,7 @@ const InventoryPage = () => {
                 <p className="text-yellow-700 mb-2">
                   {products.filter(isLowStock).length} produtos estão com estoque abaixo do mínimo recomendado.
                 </p>
-                <Button variant="text" size="sm" className="text-yellow-700">
+                <Button variant="link" size="sm" className="text-yellow-700">
                   Ver Detalhes
                 </Button>
               </div>
@@ -298,8 +320,6 @@ const InventoryPage = () => {
               <label className="block text-sm font-medium text-secondary-700 mb-1">Categoria</label>
               <select
                 className="w-full px-4 py-2 border border-secondary-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
-                title="Selecionar categoria"
-                title="Selecionar categoria"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -438,7 +458,7 @@ const InventoryPage = () => {
                 </div>
                 
                 <div className="flex justify-between items-center mt-4">
-                  <Button variant="text" size="sm" className="text-secondary-700">
+                  <Button variant="link" size="sm" className="text-secondary-700">
                     <i className="fas fa-file-alt mr-1"></i>
                     Cotações
                   </Button>
