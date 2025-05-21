@@ -47,8 +47,13 @@ const OrderManagementPage: React.FC = () => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        const response = await api.get('/orders');
-        setOrders(response.data);
+        // Usar endpoint correto com base no papel do usuário
+        const endpoint = userRole === 'admin' || userRole === 'staff' 
+          ? '/orders/orders/' 
+          : '/orders/my-orders/';
+          
+        const response = await api.get(endpoint);
+        setOrders(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao carregar pedidos:', error);
       } finally {
@@ -57,7 +62,7 @@ const OrderManagementPage: React.FC = () => {
     };
     
     fetchOrders();
-  }, []);
+  }, [userRole]);
   
   // Filtrar pedidos
   const filteredOrders = orders.filter(order => {
@@ -71,17 +76,28 @@ const OrderManagementPage: React.FC = () => {
   });
   
   // Atualizar status do pedido
-  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId 
-          ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } 
-          : order
-      )
-    );
-    
-    if (selectedOrder?.id === orderId) {
-      setSelectedOrder(prev => prev ? { ...prev, status: newStatus, updatedAt: new Date().toISOString() } : null);
+  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      // Chamar a API para atualizar o status
+      await api.patch(`/orders/orders/${orderId}/`, {
+        status: newStatus
+      });
+      
+      // Atualizar o estado local após confirmação da API
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId 
+            ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } 
+            : order
+        )
+      );
+      
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(prev => prev ? { ...prev, status: newStatus, updatedAt: new Date().toISOString() } : null);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status do pedido:', error);
+      alert('Não foi possível atualizar o status do pedido. Por favor, tente novamente.');
     }
   };
   

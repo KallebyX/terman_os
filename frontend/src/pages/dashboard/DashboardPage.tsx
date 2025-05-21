@@ -82,10 +82,6 @@ const DashboardPage: React.FC = () => {
       setError(null);
       
       try {
-        // Adicionar token JWT no cabeçalho para todas as requisições
-        const token = localStorage.getItem('access_token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
         const [kpiResponse, ordersResponse, productsResponse, stockAlertsResponse, activitiesResponse] = 
           await Promise.all([
             api.get(`/dashboard/kpis?range=${dateRange}`),

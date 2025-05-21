@@ -1,9 +1,16 @@
 import axios from 'axios';
 
+// Determinar a URL base da API com base no ambiente
+const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? import.meta.env.VITE_API_URL
+  : `http://${window.location.hostname}:8000/api/v1`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
+  baseURL: apiUrl || 'http://localhost:8000/api/v1',
+  timeout: 10000, // Timeout de 10 segundos
 });
 
+// Interceptor para adicionar token JWT em todas as requisições
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
@@ -17,18 +24,51 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratamento de respostas
+// Interceptor para tratamento de respostas e refresh de token
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response) {
-      if (error.response.status === 401) {
-        // Redirecionar para login ou tratar o erro de autenticação
-        console.error('Não autorizado, redirecionando para login...');
-        // Limpar dados de autenticação
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Se o erro for 401 (não autorizado) e não for uma tentativa de refresh
+    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/accounts/token/refresh/') {
+      originalRequest._retry = true;
+      
+      try {
+        // Tentar renovar o token
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          const response = await axios.post(
+            `${apiUrl}/accounts/token/refresh/`,
+            { refresh: refreshToken }
+          );
+          
+          // Armazenar novo token de acesso
+          localStorage.setItem('access_token', response.data.access);
+          
+          // Atualizar o cabeçalho da requisição original
+          originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
+          
+          // Repetir a requisição original
+          return axios(originalRequest);
+        }
+      } catch (refreshError) {
+        // Se não conseguir renovar, redirecionar para login
         localStorage.removeItem('auth');
         localStorage.removeItem('access_token');
-        // Redirecionar para a página de login
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    // Tratamento de outros erros
+    if (error.response) {
+      if (error.response.status === 401) {
+        console.error('Não autorizado, redirecionando para login...');
+        localStorage.removeItem('auth');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         window.location.href = '/login';
       } else if (error.response.status === 403) {
         console.error('Acesso proibido: Você não tem permissão para acessar este recurso.');
@@ -44,6 +84,7 @@ api.interceptors.response.use(
     } else {
       console.error('Erro na configuração da requisição:', error.message);
     }
+    
     return Promise.reject(error);
   }
 );

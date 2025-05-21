@@ -23,8 +23,8 @@ const PDVPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/products');
-        setProducts(response.data);
+        const response = await api.get('/products/produtos/');
+        setProducts(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
       }
@@ -32,8 +32,8 @@ const PDVPage = () => {
 
     const fetchCustomers = async () => {
       try {
-        const response = await api.get('/customers');
-        setCustomers(response.data);
+        const response = await api.get('/accounts/customers/');
+        setCustomers(response.data.results || response.data);
       } catch (error) {
         console.error('Erro ao buscar clientes:', error);
       }
@@ -95,20 +95,40 @@ const PDVPage = () => {
   };
   
   // Processar pagamento
-  const processPayment = () => {
+  const processPayment = async () => {
     if (!paymentMethod) {
       alert('Selecione um método de pagamento.');
       return;
     }
     
-    // Simulação de processamento de pagamento
-    alert(`Venda finalizada com sucesso!\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
-    
-    // Limpar carrinho e fechar modal
-    setCart([]);
-    setSelectedCustomer(null);
-    setPaymentMethod('');
-    setShowPaymentModal(false);
+    try {
+      // Preparar dados do pedido
+      const orderData = {
+        customer: selectedCustomer.id,
+        items: cart.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        payment_method: paymentMethod.toLowerCase().replace(' ', '_'),
+        notes: 'Pedido criado via PDV'
+      };
+      
+      // Enviar pedido para a API
+      const response = await api.post('/orders/create/', orderData);
+      
+      // Mostrar mensagem de sucesso
+      alert(`Venda finalizada com sucesso!\nPedido #${response.data.id}\nCliente: ${selectedCustomer.name}\nTotal: R$ ${cartTotal.toFixed(2)}\nForma de pagamento: ${paymentMethod}`);
+      
+      // Limpar carrinho e fechar modal
+      setCart([]);
+      setSelectedCustomer(null);
+      setPaymentMethod('');
+      setShowPaymentModal(false);
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      alert('Erro ao finalizar venda. Por favor, tente novamente.');
+    }
   };
   
   return (
