@@ -17,7 +17,7 @@ api.interceptors.request.use(
   }
 );
 
-export default api;
+// Interceptor para tratamento de respostas
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -47,3 +47,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export default api;
