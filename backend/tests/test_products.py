@@ -150,3 +150,53 @@ class TestProdutosAPI:
         # Verificar se o produto foi realmente criado no banco
         produto = Produto.objects.get(codigo='PROD005')
         assert produto.nome == 'Produto Novo'
+        
+    def test_unauthorized_access_products(self, api_client):
+        """Teste de acesso não autorizado a endpoints de produtos."""
+        # Tentar acessar lista de produtos sem autenticação
+        url = '/api/products/produtos/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+        # Tentar criar produto sem autenticação
+        url = '/api/products/produtos/'
+        data = {
+            'codigo': 'PROD006',
+            'nome': 'Produto Sem Auth',
+            'descricao': 'Descrição do produto sem autenticação',
+            'descricao_curta': 'Produto sem auth',
+            'preco': 150.00,
+            'unidade': 'un',
+            'slug': 'prod006-produto-sem-auth',
+            'ativo': True
+        }
+        response = api_client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        
+    def test_cliente_nao_pode_criar_produto(self, api_client, create_cliente, get_jwt_token):
+        """Teste de que cliente não pode criar produtos."""
+        # Criar cliente comum
+        cliente = create_cliente(email='cliente_produtos@example.com')
+        
+        # Autenticar usando JWT
+        token = get_jwt_token(cliente)
+        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        
+        # Dados para o novo produto
+        data = {
+            'codigo': 'PROD007',
+            'nome': 'Produto Cliente',
+            'descricao': 'Descrição do produto cliente',
+            'descricao_curta': 'Produto cliente',
+            'preco': 150.00,
+            'unidade': 'un',
+            'slug': 'prod007-produto-cliente',
+            'ativo': True
+        }
+        
+        # Fazer requisição para criar produto
+        url = '/api/products/produtos/'
+        response = api_client.post(url, data, format='json')
+        
+        # Verificar que cliente não tem permissão
+        assert response.status_code == status.HTTP_403_FORBIDDEN
