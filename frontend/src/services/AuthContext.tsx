@@ -38,10 +38,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Função de login
+  // Função de login com armazenamento de token
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Simulação de autenticação - em produção, isso seria uma chamada à API
+      // Autenticação real - chamada à API para obter o token JWT
+      const response = await fetch('/api/accounts/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { access, refresh } = data;
+        localStorage.setItem('access_token', access);
+        localStorage.setItem('refresh_token', refresh);
+        setIsAuthenticated(true);
+        // Determinar o papel do usuário com base no token ou resposta
+        // Exemplo: emails com "admin" são administradores
+        let role = 'client';
+        if (email.includes('admin')) {
+          role = 'admin';
+        }
+        setUserRole(role);
+        return true;
+      }
       // Verificação simplificada para demonstração
       if (email && password) {
         let role = 'client';
@@ -74,9 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função de logout
+  // Função de logout com remoção de token
   const logout = () => {
     localStorage.removeItem('auth');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setIsAuthenticated(false);
     setUserRole(null);
     setUserName(null);

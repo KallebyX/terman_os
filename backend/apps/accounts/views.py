@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth import get_user_model, authenticate
 from django.utils import timezone
 from django.conf import settings
@@ -93,7 +93,7 @@ class UserRegistrationView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-class UserLoginView(APIView):
+class UserLoginView(TokenObtainPairView):
     """
     View para login de usuários.
     """
