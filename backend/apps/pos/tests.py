@@ -466,3 +466,16 @@ class PosAPITests(TestCase):
         self.estoque1.refresh_from_db()
         self.assertEqual(float(self.estoque1.quantidade_reservada), 0.00)
         self.assertEqual(float(self.estoque1.quantidade_atual), 20.00)
+    def test_processar_venda_com_estoque_suficiente(self):
+        """Teste para processar venda com estoque suficiente."""
+        self.venda.adicionar_item(self.produto1, 2)
+        response = self.client.post(reverse('pos:processar-venda', args=[self.venda.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("Venda processada com sucesso", response.data['status'])
+
+    def test_processar_venda_com_estoque_insuficiente(self):
+        """Teste para processar venda com estoque insuficiente."""
+        self.venda.adicionar_item(self.produto1, 20)
+        response = self.client.post(reverse('pos:processar-venda', args=[self.venda.id]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Estoque insuficiente", response.data['error'])
