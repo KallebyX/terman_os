@@ -206,7 +206,7 @@ class RecebimentoCompra(db.Model):
     observacoes = db.Column(db.Text, nullable=True)
 
     # Relacionamento
-    recebedor = db.relationship('User', backref='recebimentos_realizados')
+    recebedor = db.relationship('User', backref='recebimentos_compra_realizados')
     itens = db.relationship('ItemRecebimento', backref='recebimento', lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -402,7 +402,7 @@ class RecebimentoCR(db.Model):
     observacoes = db.Column(db.Text, nullable=True)
 
     # Relacionamento
-    usuario = db.relationship('User', backref='recebimentos_realizados')
+    usuario = db.relationship('User', backref='recebimentos_cr_realizados')
 
     def __repr__(self):
         return f'<RecebimentoCR Valor: R$ {self.valor_recebido} | Data: {self.data_recebimento}>'

@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard BI - Terman OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        transition: transform 0.2s;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">📊 Dashboard Business Intelligence</h1>
+
+    <!-- KPIs Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card success kpi-card">
+                <div class="dashboard-icon success">💰</div>
+                <div class="dashboard-value">R$ {{ "%.2f"|format(total_vendas) }}</div>
+                <div class="dashboard-label">Total em Vendas</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card kpi-card">
+                <div class="dashboard-icon primary">📦</div>
+                <div class="dashboard-value">{{ total_pedidos }}</div>
+                <div class="dashboard-label">Pedidos Realizados</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card warning kpi-card">
+                <div class="dashboard-icon warning">💳</div>
+                <div class="dashboard-value">R$ {{ "%.2f"|format(ticket_medio) }}</div>
+                <div class="dashboard-label">Ticket Médio</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card info kpi-card">
+                <div class="dashboard-icon info">👥</div>
+                <div class="dashboard-value">{{ total_clientes }}</div>
+                <div class="dashboard-label">Clientes Ativos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📈 Vendas por Mês (Últimos 12 meses)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="vendasMesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Pedidos por Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="pedidosStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🏆 Top 10 Produtos Mais Vendidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="produtosMaisVendidosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚠️ Produtos com Estoque Crítico</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="estoqueCriticoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📂 Vendas por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="vendasCategoriaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🎯 Pipeline CRM</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="pipelineCrmChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financeiro Row -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Resumo Financeiro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="financeiroResumo">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-success" id="aReceberTotal">--</h3>
+                                <p>A Receber</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-danger" id="aPagarTotal">--</h3>
+                                <p>A Pagar</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-warning" id="aReceberVencidas">--</h3>
+                                <p>Recebíveis Vencidos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-primary" id="saldo">--</h3>
+                                <p>Saldo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Configurações globais do Chart.js
+Chart.defaults.font.family = 'Inter, sans-serif';
+Chart.defaults.color = '#6b7280';
+
+// Cores do tema
+const colors = {
+    primary: '#1e3a8a',
+    success: '#059669',
+    warning: '#f59e0b',
+    danger: '#dc2626',
+    info: '#0ea5e9',
+    purple: '#9333ea',
+    pink: '#ec4899',
+    teal: '#14b8a6'
+};
+
+// Função auxiliar para formatar moeda
+function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}
+
+// 1. Gráfico de Vendas por Mês
+fetch('{{ url_for("dashboard.api_vendas_mes") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('vendasMesChart'), {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Valor (R$)',
+                    data: data.valores,
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => formatCurrency(context.parsed.y)
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+// 2. Gráfico de Pedidos por Status
+fetch('{{ url_for("dashboard.api_pedidos_status") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('pedidosStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.valores,
+                    backgroundColor: [
+                        colors.warning,
+                        colors.info,
+                        colors.primary,
+                        colors.purple,
+                        colors.success,
+                        colors.teal,
+                        colors.danger
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    });
+
+// 3. Top 10 Produtos Mais Vendidos
+fetch('{{ url_for("dashboard.api_produtos_mais_vendidos") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('produtosMaisVendidosChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Quantidade Vendida',
+                    data: data.quantidades,
+                    backgroundColor: colors.success
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    });
+
+// 4. Estoque Crítico
+fetch('{{ url_for("dashboard.api_estoque_critico") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('estoqueCriticoChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Quantidade Atual',
+                    data: data.quantidades,
+                    backgroundColor: colors.danger
+                }, {
+                    label: 'Quantidade Mínima',
+                    data: data.minimas,
+                    backgroundColor: colors.warning
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y'
+            }
+        });
+    });
+
+// 5. Vendas por Categoria
+fetch('{{ url_for("dashboard.api_vendas_por_categoria") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('vendasCategoriaChart'), {
+            type: 'pie',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.valores,
+                    backgroundColor: [
+                        colors.primary,
+                        colors.success,
+                        colors.warning,
+                        colors.info,
+                        colors.purple,
+                        colors.pink,
+                        colors.teal
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                return context.label + ': ' + formatCurrency(context.parsed);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+// 6. Pipeline CRM
+fetch('{{ url_for("dashboard.api_pipeline_crm") }}')
+    .then(res => res.json())
+    .then(data => {
+        new Chart(document.getElementById('pipelineCrmChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Valor Ponderado (R$)',
+                    data: data.valores,
+                    backgroundColor: colors.info
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => formatCurrency(context.parsed.y)
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+// 7. Resumo Financeiro
+fetch('{{ url_for("dashboard.api_financeiro_resumo") }}')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('aReceberTotal').textContent = formatCurrency(data.a_receber_total);
+        document.getElementById('aPagarTotal').textContent = formatCurrency(data.a_pagar_total);
+        document.getElementById('aReceberVencidas').textContent = formatCurrency(data.a_receber_vencidas);
+        document.getElementById('saldo').textContent = formatCurrency(data.saldo);
+    });
+</script>
+{% endblock %}
