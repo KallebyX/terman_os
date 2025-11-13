@@ -29,8 +29,10 @@ def create_app():
     from .routes.conteudo import conteudo_bp
     from .routes.site import site_bp
     from .routes.cliente import cliente_bp
-    app.register_blueprint(cliente_bp, url_prefix='/painel')
+    from .routes.dashboard import dashboard_bp
 
+    app.register_blueprint(cliente_bp, url_prefix='/painel')
+    app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(marketplace_bp, url_prefix='/loja')
