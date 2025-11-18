@@ -1,30 +1,331 @@
 {% extends "base.html" %}
 {% block title %}Loja | Mangueiras Terman{% endblock %}
+
 {% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('site.homepage') }}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Loja</li>
+        </ol>
+    </nav>
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Catálogo de Produtos</h1>
-    <p class="text-center lead">Confira nossas mangueiras, conexões e soluções técnicas para uso agrícola, industrial e doméstico.</p>
-
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mt-4">
-        {% for produto in produtos %}
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                {% if produto.imagem_filename %}
-                <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}" class="card-img-top" alt="{{ produto.nome }}">
-                {% else %}
-                <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top" alt="Sem imagem">
-                {% endif %}
+    <div class="row">
+        <!-- Sidebar de Filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{ produto.nome }}</h5>
-                    <p class="card-text">{{ produto.descricao }}</p>
-                    <p class="text-success fw-bold">R$ {{ '%.2f'|format(produto.preco) }}</p>
-                    <a href="{{ url_for('marketplace.produto_detalhado', produto_id=produto.id) }}" class="btn btn-outline-primary w-100">Ver detalhes</a>
+                    <form method="GET" action="{{ url_for('marketplace.loja') }}" id="filterForm">
+                        <!-- Busca -->
+                        <div class="mb-3">
+                            <label for="search" class="form-label fw-bold">Buscar Produto</label>
+                            <div class="input-group">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="search"
+                                    name="q"
+                                    placeholder="Nome ou descrição..."
+                                    value="{{ search or '' }}"
+                                >
+                                <button class="btn btn-outline-secondary" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Categoria -->
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label fw-bold">Categoria</label>
+                            <select class="form-select" id="categoria" name="categoria" onchange="this.form.submit()">
+                                <option value="">Todas as categorias</option>
+                                {% for cat in categorias %}
+                                <option value="{{ cat.id }}" {% if categoria_id == cat.id %}selected{% endif %}>
+                                    {{ cat.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Faixa de Preço -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Faixa de Preço</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input
+                                        type="number"
+                                        class="form-control form-control-sm"
+                                        name="min_preco"
+                                        placeholder="Mín"
+                                        value="{{ min_preco or '' }}"
+                                        step="0.01"
+                                        min="0"
+                                    >
+                                </div>
+                                <div class="col-6">
+                                    <input
+                                        type="number"
+                                        class="form-control form-control-sm"
+                                        name="max_preco"
+                                        placeholder="Máx"
+                                        value="{{ max_preco or '' }}"
+                                        step="0.01"
+                                        min="0"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Aplicar Filtros
+                            </button>
+                            <a href="{{ url_for('marketplace.loja') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x-circle"></i> Limpar Filtros
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        {% endfor %}
+
+        <!-- Listagem de Produtos -->
+        <div class="col-lg-9">
+            <!-- Header com contador e ordenação -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="mb-0">Catálogo de Produtos</h2>
+                    <p class="text-muted mb-0">
+                        {% if pagination.total > 0 %}
+                            Mostrando {{ (pagination.current_page - 1) * pagination.per_page + 1 }} -
+                            {{ [pagination.current_page * pagination.per_page, pagination.total]|min }}
+                            de {{ pagination.total }} produto{{ 's' if pagination.total != 1 else '' }}
+                            {% if search %}
+                                para "<strong>{{ search }}</strong>"
+                            {% endif %}
+                        {% else %}
+                            Nenhum produto encontrado
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Ordenação -->
+                <div class="d-flex align-items-center gap-2">
+                    <label for="ordenar" class="form-label mb-0 text-nowrap">Ordenar por:</label>
+                    <select class="form-select form-select-sm" id="ordenar" name="ordenar" style="width: auto;" onchange="updateSort(this.value)">
+                        <option value="nome" {% if ordenar == 'nome' %}selected{% endif %}>Nome (A-Z)</option>
+                        <option value="preco_asc" {% if ordenar == 'preco_asc' %}selected{% endif %}>Menor Preço</option>
+                        <option value="preco_desc" {% if ordenar == 'preco_desc' %}selected{% endif %}>Maior Preço</option>
+                        <option value="mais_vendidos" {% if ordenar == 'mais_vendidos' %}selected{% endif %}>Mais Vendidos</option>
+                        <option value="mais_recentes" {% if ordenar == 'mais_recentes' %}selected{% endif %}>Mais Recentes</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid de Produtos -->
+            {% if pagination.items %}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                {% for produto in pagination.items %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        {% if produto.imagem_filename %}
+                        <img
+                            data-src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}"
+                            class="card-img-top lazy-load"
+                            alt="{{ produto.nome }}"
+                            loading="lazy"
+                        >
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ produto.nome }}</h5>
+
+                            {% if produto.descricao_curta %}
+                            <p class="card-text text-muted small">{{ produto.descricao_curta[:80] }}{{ '...' if produto.descricao_curta|length > 80 else '' }}</p>
+                            {% endif %}
+
+                            <div class="mt-auto">
+                                <p class="text-success fw-bold fs-5 mb-2">
+                                    R$ {{ '%.2f'|format(produto.preco) }}
+                                </p>
+
+                                {% if produto.estoque_total is defined and produto.estoque_total %}
+                                    {% if produto.estoque_total > 10 %}
+                                    <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> Em estoque</span>
+                                    {% elif produto.estoque_total > 0 %}
+                                    <span class="badge bg-warning mb-2"><i class="bi bi-exclamation-triangle"></i> Últimas unidades</span>
+                                    {% else %}
+                                    <span class="badge bg-danger mb-2"><i class="bi bi-x-circle"></i> Sem estoque</span>
+                                    {% endif %}
+                                {% endif %}
+
+                                <a href="{{ url_for('marketplace.produto_detalhado', produto_id=produto.id) }}" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-eye"></i> Ver detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação -->
+            {% if pagination.pages > 1 %}
+            <nav aria-label="Navegação de páginas" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <!-- Primeira página -->
+                    {% if pagination.current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('marketplace.loja', page=1, q=search, categoria=categoria_id, min_preco=min_preco, max_preco=max_preco, ordenar=ordenar) }}">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Página anterior -->
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('marketplace.loja', page=pagination.prev_page, q=search, categoria=categoria_id, min_preco=min_preco, max_preco=max_preco, ordenar=ordenar) }}">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-left"></i> Anterior</span>
+                    </li>
+                    {% endif %}
+
+                    <!-- Números de página -->
+                    {% set start_page = [pagination.current_page - 2, 1]|max %}
+                    {% set end_page = [pagination.current_page + 2, pagination.pages]|min %}
+
+                    {% if start_page > 1 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+
+                    {% for page_num in range(start_page, end_page + 1) %}
+                    <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('marketplace.loja', page=page_num, q=search, categoria=categoria_id, min_preco=min_preco, max_preco=max_preco, ordenar=ordenar) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if end_page < pagination.pages %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+
+                    <!-- Próxima página -->
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('marketplace.loja', page=pagination.next_page, q=search, categoria=categoria_id, min_preco=min_preco, max_preco=max_preco, ordenar=ordenar) }}">
+                            Próxima <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Próxima <i class="bi bi-chevron-right"></i></span>
+                    </li>
+                    {% endif %}
+
+                    <!-- Última página -->
+                    {% if pagination.current_page < pagination.pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('marketplace.loja', page=pagination.pages, q=search, categoria=categoria_id, min_preco=min_preco, max_preco=max_preco, ordenar=ordenar) }}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <i class="bi bi-search text-muted" style="font-size: 5rem;"></i>
+                <h3 class="mt-3">Nenhum produto encontrado</h3>
+                <p class="text-muted">
+                    {% if search %}
+                        Não encontramos produtos para "<strong>{{ search }}</strong>".
+                    {% else %}
+                        Não há produtos disponíveis no momento.
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('marketplace.loja') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Ver todos os produtos
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.lazy-load {
+    background: #f8f9fa;
+    min-height: 200px;
+    object-fit: cover;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+// Função para atualizar ordenação mantendo outros parâmetros
+function updateSort(value) {
+    const url = new URL(window.location);
+    url.searchParams.set('ordenar', value);
+    url.searchParams.set('page', '1'); // Reset para primeira página
+    window.location = url.toString();
+}
+
+// Lazy loading de imagens
+document.addEventListener('DOMContentLoaded', function() {
+    const lazyImages = document.querySelectorAll('.lazy-load');
+
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove('lazy-load');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+
+        lazyImages.forEach(img => imageObserver.observe(img));
+    } else {
+        // Fallback para navegadores sem IntersectionObserver
+        lazyImages.forEach(img => {
+            img.src = img.dataset.src;
+        });
+    }
+});
+</script>
 
 {% endblock %}
