@@ -1,15 +1,83 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app
 from flask_login import login_required, current_user
 from app.models.produto import Produto
 from app.models.pedido import Pedido, ItemPedido
-from app import db
+from app.models.categoria import Categoria
+from app import db, cache
+from app.utils import paginate_query
+from sqlalchemy import or_
 
 marketplace_bp = Blueprint('marketplace', __name__)
 
 @marketplace_bp.route('/')
+@cache.cached(timeout=300, query_string=True)
 def loja():
-    produtos = Produto.query.all()
-    return render_template('loja.html', produtos=produtos)
+    """Loja com busca, filtros e paginação"""
+    # Parâmetros de busca e filtro
+    search = request.args.get('q', '').strip()
+    categoria_id = request.args.get('categoria', type=int)
+    min_preco = request.args.get('min_preco', type=float)
+    max_preco = request.args.get('max_preco', type=float)
+    ordenar = request.args.get('ordenar', 'nome')  # nome, preco_asc, preco_desc, mais_vendidos
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+
+    # Query base - apenas produtos ativos
+    query = Produto.query.filter_by(ativo=True)
+
+    # Busca por nome ou descrição
+    if search:
+        query = query.filter(
+            or_(
+                Produto.nome.ilike(f'%{search}%'),
+                Produto.descricao.ilike(f'%{search}%'),
+                Produto.descricao_curta.ilike(f'%{search}%')
+            )
+        )
+
+    # Filtro por categoria
+    if categoria_id:
+        query = query.filter_by(categoria_id=categoria_id)
+
+    # Filtro por preço
+    if min_preco is not None:
+        query = query.filter(Produto.preco >= min_preco)
+    if max_preco is not None:
+        query = query.filter(Produto.preco <= max_preco)
+
+    # Ordenação
+    if ordenar == 'preco_asc':
+        query = query.order_by(Produto.preco.asc())
+    elif ordenar == 'preco_desc':
+        query = query.order_by(Produto.preco.desc())
+    elif ordenar == 'mais_vendidos':
+        query = query.order_by(Produto.vendas_total.desc())
+    elif ordenar == 'mais_recentes':
+        query = query.order_by(Produto.data_criacao.desc())
+    else:  # nome
+        query = query.order_by(Produto.nome.asc())
+
+    # Paginação
+    pagination = paginate_query(query, page, per_page)
+
+    # Carregar categorias para filtro
+    categorias = Categoria.query.all()
+
+    # Log da busca
+    if search:
+        current_app.logger.info(f"Busca realizada: '{search}' - {pagination['total']} resultados")
+
+    return render_template(
+        'loja.html',
+        produtos=pagination['items'],
+        pagination=pagination,
+        categorias=categorias,
+        search=search,
+        categoria_id=categoria_id,
+        min_preco=min_preco,
+        max_preco=max_preco,
+        ordenar=ordenar
+    )
 
 @marketplace_bp.route('/produto/<int:produto_id>')
 def produto_detalhado(produto_id):

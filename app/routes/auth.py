@@ -1,13 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required
 from app.models.user import User
-from app import db
+from app import db, limiter
 from app.forms.login_form import LoginForm
 from app.forms.cadastro_form import CadastroForm
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -29,6 +30,7 @@ def login():
     return render_template('login.html', form=form)
 
 @auth_bp.route('/cadastro', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def cadastro():
     form = CadastroForm()
     if form.validate_on_submit():
