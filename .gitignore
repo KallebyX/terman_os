@@ -22,6 +22,16 @@ instance/
 migrations/
 
 # Logs e arquivos temporários
+logs/
 *.log
 *.sqlite3
 .DS_Store
+
+# pytest e coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.idea/
+*.swp
