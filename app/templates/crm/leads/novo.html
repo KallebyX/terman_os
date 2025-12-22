@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Lead | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.listar_leads') }}">Leads</a></li>
+            <li class="breadcrumb-item active">Novo</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4"><i class="bi bi-person-plus me-2"></i>Novo Lead</h1>
+
+    <form method="POST" class="needs-validation" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Dados do Contato</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Nome Completo *</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="telefone" class="form-label">Telefone</label>
+                        <input type="text" class="form-control" id="telefone" name="telefone">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="celular" class="form-label">Celular</label>
+                        <input type="text" class="form-control" id="celular" name="celular">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="origem" class="form-label">Origem</label>
+                        <select class="form-select" id="origem" name="origem">
+                            <option value="">Selecione...</option>
+                            <option value="site">Site</option>
+                            <option value="indicacao">Indicação</option>
+                            <option value="telefone">Telefone</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="google">Google</option>
+                            <option value="feira">Feira/Evento</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informações da Empresa</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="empresa" class="form-label">Empresa</label>
+                        <input type="text" class="form-control" id="empresa" name="empresa">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="cargo" class="form-label">Cargo</label>
+                        <input type="text" class="form-control" id="cargo" name="cargo">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Detalhes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="interesse" class="form-label">Interesse</label>
+                        <textarea class="form-control" id="interesse" name="interesse" rows="3" placeholder="Produtos ou serviços de interesse..."></textarea>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="vendedor_id" class="form-label">Vendedor Responsável</label>
+                        <select class="form-select" id="vendedor_id" name="vendedor_id">
+                            <option value="">Selecione...</option>
+                            {% for vendedor in vendedores %}
+                            <option value="{{ vendedor.id }}">{{ vendedor.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i>Cadastrar Lead
+            </button>
+            <a href="{{ url_for('crm.listar_leads') }}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

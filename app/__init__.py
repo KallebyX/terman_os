@@ -46,6 +46,8 @@ def create_app():
     from .routes.site import site_bp
     from .routes.cliente import cliente_bp
     from .routes.dashboard import dashboard_bp
+    from .routes.crm import crm_bp
+    from .routes.erp import erp_bp
 
     app.register_blueprint(cliente_bp, url_prefix='/painel')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -54,6 +56,8 @@ def create_app():
     app.register_blueprint(marketplace_bp, url_prefix='/loja')
     app.register_blueprint(conteudo_bp, url_prefix='/conteudo')
     app.register_blueprint(site_bp)
+    app.register_blueprint(crm_bp, url_prefix='/crm')
+    app.register_blueprint(erp_bp, url_prefix='/erp')
 
     from .models.user import User
 
@@ -69,26 +73,39 @@ def create_app():
 
 def setup_logging(app):
     """Configurar sistema de logging"""
-    if not app.debug and not app.testing:
-        # Criar diretório de logs se não existir
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
+    log_level = getattr(logging, app.config.get('LOG_LEVEL', 'INFO').upper(), logging.INFO)
 
-        # Configurar file handler
-        file_handler = RotatingFileHandler(
-            'logs/terman_os.log',
-            maxBytes=10240000,  # 10MB
-            backupCount=10
-        )
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s '
-            '[in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
+    # Formato de log
+    log_format = logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    )
 
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('Terman OS inicializado')
+    # Sempre adicionar handler para stdout (necessário para Vercel, Render, etc)
+    if app.config.get('LOG_TO_STDOUT', True):
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(log_format)
+        stream_handler.setLevel(log_level)
+        app.logger.addHandler(stream_handler)
+
+    # Adicionar file handler apenas se não for produção/serverless
+    if not app.debug and not app.testing and not app.config.get('LOG_TO_STDOUT', True):
+        try:
+            if not os.path.exists('logs'):
+                os.mkdir('logs')
+
+            file_handler = RotatingFileHandler(
+                'logs/terman_os.log',
+                maxBytes=10240000,  # 10MB
+                backupCount=10
+            )
+            file_handler.setFormatter(log_format)
+            file_handler.setLevel(log_level)
+            app.logger.addHandler(file_handler)
+        except Exception as e:
+            app.logger.warning(f'Não foi possível criar logs em arquivo: {e}')
+
+    app.logger.setLevel(log_level)
+    app.logger.info('Terman OS inicializado')
 
 
 def register_error_handlers(app):

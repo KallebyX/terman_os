@@ -3,7 +3,8 @@ from flask_login import login_required, current_user
 from app.models.produto import Produto
 from app.models.pedido import Pedido, ItemPedido
 from app.models.categoria import Categoria
-from app import db, cache
+from app.models.estoque import Review
+from app import db, cache, limiter
 from app.utils import paginate_query
 from sqlalchemy import or_
 
@@ -153,3 +154,106 @@ def finalizar_pedido():
     session.pop('carrinho', None)
     flash('Pedido finalizado com sucesso!', 'success')
     return redirect(url_for('cliente.meus_pedidos'))
+
+
+@marketplace_bp.route('/produto/<int:produto_id>/review', methods=['POST'])
+@login_required
+@limiter.limit("5 per hour")
+def adicionar_review(produto_id):
+    """Adicionar review a um produto"""
+    produto = Produto.query.get_or_404(produto_id)
+
+    # Verificar se já avaliou este produto
+    review_existente = Review.query.filter_by(
+        produto_id=produto_id,
+        usuario_id=current_user.id
+    ).first()
+
+    if review_existente:
+        flash('Você já avaliou este produto.', 'warning')
+        return redirect(url_for('marketplace.produto_detalhado', produto_id=produto_id))
+
+    # Obter dados do formulário
+    rating = request.form.get('rating', type=int)
+    titulo = request.form.get('titulo', '').strip()
+    comentario = request.form.get('comentario', '').strip()
+
+    # Validações
+    if not rating or rating < 1 or rating > 5:
+        flash('Por favor, selecione uma nota de 1 a 5 estrelas.', 'danger')
+        return redirect(url_for('marketplace.produto_detalhado', produto_id=produto_id))
+
+    if not comentario:
+        flash('Por favor, escreva um comentário.', 'danger')
+        return redirect(url_for('marketplace.produto_detalhado', produto_id=produto_id))
+
+    # Verificar se o usuário comprou o produto (compra verificada)
+    comprou = ItemPedido.query.join(Pedido).filter(
+        Pedido.usuario_id == current_user.id,
+        ItemPedido.produto_id == produto_id
+    ).first()
+
+    # Criar review
+    review = Review(
+        produto_id=produto_id,
+        usuario_id=current_user.id,
+        rating=rating,
+        titulo=titulo if titulo else None,
+        comentario=comentario,
+        verificado=comprou is not None,
+        aprovado=True  # Auto-aprovar (pode mudar para moderação manual)
+    )
+
+    db.session.add(review)
+    db.session.commit()
+
+    current_app.logger.info(f"Review criada: Produto {produto_id}, User {current_user.id}, Rating {rating}")
+    flash('Avaliação enviada com sucesso! Obrigado pelo feedback.', 'success')
+    return redirect(url_for('marketplace.produto_detalhado', produto_id=produto_id))
+
+
+@marketplace_bp.route('/atualizar_quantidade/<int:produto_id>', methods=['POST'])
+def atualizar_quantidade_carrinho(produto_id):
+    """Atualizar quantidade de um item no carrinho"""
+    quantidade = request.form.get('quantidade', type=int)
+
+    if quantidade is None or quantidade < 1:
+        flash('Quantidade inválida.', 'danger')
+        return redirect(url_for('marketplace.carrinho'))
+
+    carrinho = session.get('carrinho', {})
+
+    if str(produto_id) in carrinho:
+        produto = Produto.query.get(produto_id)
+        if produto:
+            # Verificar estoque
+            estoque_disponivel = produto.estoque_total
+            if quantidade > estoque_disponivel:
+                flash(f'Apenas {estoque_disponivel} unidades disponíveis em estoque.', 'warning')
+                quantidade = estoque_disponivel
+
+            carrinho[str(produto_id)]['quantidade'] = quantidade
+            session['carrinho'] = carrinho
+            flash('Quantidade atualizada.', 'success')
+        else:
+            flash('Produto não encontrado.', 'danger')
+    else:
+        flash('Produto não está no carrinho.', 'warning')
+
+    return redirect(url_for('marketplace.carrinho'))
+
+
+@marketplace_bp.route('/limpar_carrinho', methods=['POST'])
+def limpar_carrinho():
+    """Limpar todos os itens do carrinho"""
+    session.pop('carrinho', None)
+    flash('Carrinho limpo com sucesso.', 'info')
+    return redirect(url_for('marketplace.loja'))
+
+
+@marketplace_bp.context_processor
+def cart_context():
+    """Adicionar contagem do carrinho ao contexto de todos os templates"""
+    carrinho = session.get('carrinho', {})
+    total_itens = sum(item.get('quantidade', 0) for item in carrinho.values())
+    return {'cart_count': total_itens}

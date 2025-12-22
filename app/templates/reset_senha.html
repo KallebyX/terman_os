@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Redefinir Senha | Mangueiras Terman{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm mt-5">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-shield-lock" style="font-size: 3rem; color: var(--primary);"></i>
+                        <h2 class="h4 mt-3">Criar Nova Senha</h2>
+                        <p class="text-muted">Digite sua nova senha abaixo.</p>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Nova Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="senha" name="senha"
+                                       placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="senha_confirmacao" class="form-label">Confirmar Nova Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="senha_confirmacao"
+                                       name="senha_confirmacao" placeholder="Repita a senha" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="bi bi-check-lg me-2"></i>Redefinir Senha
+                        </button>
+                    </form>
+
+                    <div class="text-center">
+                        <p class="mb-0">
+                            <a href="{{ url_for('auth.login') }}">Voltar para login</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Validar senhas iguais
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const senha = document.getElementById('senha').value;
+        const confirmacao = document.getElementById('senha_confirmacao').value;
+
+        if (senha !== confirmacao) {
+            e.preventDefault();
+            alert('As senhas não coincidem!');
+        }
+    });
+</script>
+{% endblock %}
