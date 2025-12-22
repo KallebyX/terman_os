@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}CRM - Dashboard | Terman OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item active">CRM</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3"><i class="bi bi-people me-2"></i>CRM - Gestão de Relacionamentos</h1>
+        <div>
+            <a href="{{ url_for('crm.novo_lead') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Novo Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Cards de Métricas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Clientes Ativos</h6>
+                            <h2 class="card-title mb-0">{{ total_clientes }}</h2>
+                        </div>
+                        <i class="bi bi-people-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{{ url_for('crm.listar_clientes') }}" class="text-white text-decoration-none">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Leads Ativos</h6>
+                            <h2 class="card-title mb-0">{{ total_leads }}</h2>
+                        </div>
+                        <i class="bi bi-person-plus-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{{ url_for('crm.listar_leads') }}" class="text-white text-decoration-none">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Oportunidades</h6>
+                            <h2 class="card-title mb-0">{{ total_oportunidades }}</h2>
+                        </div>
+                        <i class="bi bi-bullseye" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{{ url_for('crm.listar_oportunidades') }}" class="text-dark text-decoration-none">
+                        Ver pipeline <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Valor Pipeline</h6>
+                            <h2 class="card-title mb-0">R$ {{ "%.2f"|format(pipeline_valor) }}</h2>
+                        </div>
+                        <i class="bi bi-currency-dollar" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <small class="opacity-75">Valor ponderado</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Atividades Pendentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-task me-2"></i>Minhas Atividades Pendentes</h5>
+                    <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                </div>
+                <div class="card-body">
+                    {% if atividades_pendentes %}
+                    <div class="list-group list-group-flush">
+                        {% for atividade in atividades_pendentes %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <span class="badge bg-{{ 'danger' if atividade.prioridade == 'urgente' else 'warning' if atividade.prioridade == 'alta' else 'secondary' }} me-2">
+                                    {{ atividade.prioridade }}
+                                </span>
+                                <strong>{{ atividade.titulo }}</strong>
+                                {% if atividade.data_vencimento %}
+                                <br>
+                                <small class="text-muted">Vence em: {{ atividade.data_vencimento.strftime('%d/%m/%Y') }}</small>
+                                {% endif %}
+                            </div>
+                            <form action="{{ url_for('crm.concluir_atividade', atividade_id=atividade.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como concluída">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0">Nenhuma atividade pendente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimos Leads -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Últimos Leads</h5>
+                    <a href="{{ url_for('crm.novo_lead') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> Novo
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if ultimos_leads %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Empresa</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lead in ultimos_leads %}
+                                <tr>
+                                    <td>{{ lead.nome }}</td>
+                                    <td>{{ lead.empresa or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if lead.status == 'qualificado' else 'info' if lead.status == 'contatado' else 'secondary' }}">
+                                            {{ lead.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('crm.visualizar_lead', lead_id=lead.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0">Nenhum lead cadastrado</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Links Rápidos -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acesso Rápido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{{ url_for('crm.listar_leads') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bi bi-person-plus d-block" style="font-size: 1.5rem;"></i>
+                                Leads
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{{ url_for('crm.listar_clientes') }}" class="btn btn-outline-success w-100 py-3">
+                                <i class="bi bi-people d-block" style="font-size: 1.5rem;"></i>
+                                Clientes
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{{ url_for('crm.listar_oportunidades') }}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="bi bi-kanban d-block" style="font-size: 1.5rem;"></i>
+                                Pipeline
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-outline-info w-100 py-3">
+                                <i class="bi bi-calendar-check d-block" style="font-size: 1.5rem;"></i>
+                                Atividades
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

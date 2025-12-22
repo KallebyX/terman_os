@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lead.nome }} | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.listar_leads') }}">Leads</a></li>
+            <li class="breadcrumb-item active">{{ lead.nome }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">
+            <i class="bi bi-person me-2"></i>{{ lead.nome }}
+            <span class="badge bg-{{ 'success' if lead.status == 'ganho' else 'danger' if lead.status == 'perdido' else 'warning' if lead.status == 'negociacao' else 'info' if lead.status == 'qualificado' else 'secondary' }} ms-2">
+                {{ lead.status }}
+            </span>
+        </h1>
+        <div>
+            <a href="{{ url_for('crm.editar_lead', lead_id=lead.id) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i>Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Informações do Lead -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Informações de Contato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Email</label>
+                            <p class="mb-0">{{ lead.email or '-' }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">Telefone</label>
+                            <p class="mb-0">{{ lead.telefone or '-' }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">Celular</label>
+                            <p class="mb-0">{{ lead.celular or '-' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Empresa</label>
+                            <p class="mb-0">{{ lead.empresa or '-' }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">Cargo</label>
+                            <p class="mb-0">{{ lead.cargo or '-' }}</p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="text-muted small">Origem</label>
+                            <p class="mb-0">{{ lead.origem or '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico de Interações -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Histórico de Interações</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#novaInteracaoModal">
+                        <i class="bi bi-plus"></i> Nova Interação
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if interacoes %}
+                    <div class="timeline">
+                        {% for interacao in interacoes %}
+                        <div class="timeline-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-secondary me-2">{{ interacao.tipo }}</span>
+                                    <strong>{{ interacao.assunto or 'Sem assunto' }}</strong>
+                                </div>
+                                <small class="text-muted">{{ interacao.data_interacao.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                            <p class="mt-2 mb-0 text-muted">{{ interacao.descricao }}</p>
+                            <small class="text-muted">Por: {{ interacao.usuario.nome if interacao.usuario else '-' }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-chat-left-text" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0">Nenhuma interação registrada</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Card de Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Detalhes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small">Status</label>
+                        <p class="mb-0">
+                            <span class="badge bg-{{ 'success' if lead.status == 'ganho' else 'danger' if lead.status == 'perdido' else 'warning' if lead.status == 'negociacao' else 'info' if lead.status == 'qualificado' else 'secondary' }}">
+                                {{ lead.status }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Qualificação</label>
+                        <p class="mb-0">{{ lead.qualificacao or '-' }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Vendedor Responsável</label>
+                        <p class="mb-0">{{ lead.vendedor.nome if lead.vendedor else '-' }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Data de Criação</label>
+                        <p class="mb-0">{{ lead.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Última Interação</label>
+                        <p class="mb-0">{{ lead.data_ultima_interacao.strftime('%d/%m/%Y') if lead.data_ultima_interacao else 'Nunca' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interesse -->
+            {% if lead.interesse %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Interesse</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ lead.interesse }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Observações -->
+            {% if lead.observacoes %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Observações</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ lead.observacoes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Interação -->
+<div class="modal fade" id="novaInteracaoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('crm.adicionar_interacao_lead', lead_id=lead.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Interação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo *</label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="telefone">Telefone</option>
+                            <option value="email">Email</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="reuniao">Reunião</option>
+                            <option value="visita">Visita</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Direção</label>
+                        <select name="direcao" class="form-select">
+                            <option value="saida">Saída (Você contatou)</option>
+                            <option value="entrada">Entrada (Você foi contatado)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Assunto</label>
+                        <input type="text" name="assunto" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição *</label>
+                        <textarea name="descricao" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Duração (minutos)</label>
+                        <input type="number" name="duracao_minutos" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Interação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
