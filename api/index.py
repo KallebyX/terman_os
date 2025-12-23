@@ -19,17 +19,25 @@ app = create_app()
 def home():
     return redirect('/admin/')
 
-# Criar tabelas do banco de dados na primeira execução
-with app.app_context():
-    try:
-        db.create_all()
-    except Exception as e:
-        app.logger.warning(f"Não foi possível criar tabelas: {e}")
+# Inicializar banco de dados sob demanda (lazy initialization)
+_db_initialized = False
 
-# Handler para Vercel
-def handler(request, context):
-    """Handler para Vercel serverless functions"""
-    return app(request.environ, context)
+def init_db():
+    """Inicializa o banco de dados apenas uma vez por instância"""
+    global _db_initialized
+    if not _db_initialized:
+        with app.app_context():
+            try:
+                db.create_all()
+                _db_initialized = True
+            except Exception as e:
+                app.logger.warning(f"Não foi possível criar tabelas: {e}")
 
-# Para compatibilidade com Vercel
+# Hook before_request para garantir que DB está inicializado
+@app.before_request
+def ensure_db():
+    init_db()
+
+# Exportar app para Vercel (WSGI compatível)
+# Vercel detecta automaticamente o objeto 'app' ou 'application'
 application = app
