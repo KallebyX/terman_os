@@ -215,7 +215,7 @@ class OrdemProducao(db.Model):
     # Relacionamentos
     produto = db.relationship('Produto', backref='ordens_producao')
     pedido = db.relationship('Pedido', backref='ordens_producao')
-    ordem_servico = db.relationship('OrdemServico', backref='ordens_producao')
+    ordem_servico = db.relationship('app.models.manufatura.OrdemServico', backref='ordens_producao')
     supervisor = db.relationship('User', backref='ordens_producao_supervisionadas')
     inspecoes = db.relationship('InspecaoQualidade', backref='ordem_producao', lazy='dynamic', cascade='all, delete-orphan')
 
@@ -273,7 +273,7 @@ class InspecaoQualidade(db.Model):
 
     # Relacionamentos
     inspetor = db.relationship('User', backref='inspecoes_realizadas')
-    ordem_servico = db.relationship('OrdemServico', backref='inspecoes')
+    ordem_servico = db.relationship('app.models.manufatura.OrdemServico', backref='inspecoes')
 
     def __repr__(self):
         return f'<InspecaoQualidade {self.numero_inspecao} | Resultado: {self.resultado}>'
