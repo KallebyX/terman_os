@@ -142,7 +142,7 @@ Documentação completa com:
 ## 📄 Licença e Direitos
 
 Este sistema é de uso exclusivo da empresa **Mangueiras Terman LTDA**  
-Desenvolvido pela **Oryum Tech (CNPJ: 04.625.577/0001-40)**.  
+Desenvolvido pela **Oryum Tech (CNPJ: 49.549.704/0001-07)**.  
 Reprodução, redistribuição ou modificação só são permitidas mediante autorização contratual.
 
 ---

@@ -17,7 +17,7 @@ Fundador da Biomove e CEO da Oryum Tech
 ## 🧪 Empresa Desenvolvedora
 
 **Oryum Tech**  
-CNPJ: 04.625.577/0001-40  
+CNPJ: 49.549.704/0001-07  
 Empresa especializada em sistemas personalizados, automação e tecnologia social.
 
 ---
