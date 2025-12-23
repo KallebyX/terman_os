@@ -1,6 +1,100 @@
 {% extends "base.html" %}
-{% block title %}Mangueiras Terman | Soluções Hidráulicas desde 2001{% endblock %}
-{% block meta_description %}Líder em mangueiras hidráulicas, industriais e para agronegócio no RS. Qualidade, resistência e atendimento especializado há mais de 20 anos.{% endblock %}
+{% block title %}Mangueiras Hidráulicas | Comprar Mangueiras Industriais Online | Mangueiras Terman{% endblock %}
+{% block meta_description %}Compre mangueiras hidráulicas de alta pressão, mangueiras industriais e conexões. Líder nacional desde 2001. Prensagem especializada, entrega para todo Brasil. Orçamento grátis: (55) 99999-9999. Qualidade garantida!{% endblock %}
+{% block meta_keywords %}comprar mangueiras hidráulicas, mangueiras hidráulicas preço, mangueiras industriais online, loja mangueiras, mangueiras alta pressão, conexões hidráulicas, prensagem mangueiras, mangueiras para trator, mangueiras agrícolas, mangueiras parker, mangueiras gates, mangueiras para colheitadeira, mangueiras pneumáticas, adaptadores hidráulicos, terminais hidráulicos, engates rápidos, mangueiras brasil, melhor loja mangueiras{% endblock %}
+
+{% block extra_schema %}
+<!-- Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        }
+    ]
+}
+</script>
+
+<!-- Schema.org FAQPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Quais tipos de mangueiras hidráulicas a Terman vende?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A Mangueiras Terman oferece uma linha completa de mangueiras hidráulicas de alta e baixa pressão, mangueiras industriais, pneumáticas, para agronegócio, conexões, terminais e engates rápidos das melhores marcas do mercado."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "A Mangueiras Terman entrega para todo o Brasil?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim! Realizamos entregas para todo o território nacional com rapidez e segurança. Consulte prazos e valores através do nosso WhatsApp ou telefone."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "A Terman faz prensagem de mangueiras?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim, oferecemos serviço especializado de prensagem de mangueiras hidráulicas com equipamentos de precisão e profissionais qualificados. Atendemos com agilidade, inclusive urgências."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Qual o horário de funcionamento da Mangueiras Terman?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Funcionamos de segunda a sexta-feira, das 8h às 18h. Também atendemos via WhatsApp para maior comodidade."
+            }
+        }
+    ]
+}
+</script>
+
+<!-- Schema.org ItemList for Featured Products -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Categorias de Mangueiras",
+    "description": "Principais categorias de mangueiras e conexões hidráulicas",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Mangueiras Hidráulicas",
+            "url": "{{ request.url_root }}loja?categoria=1",
+            "description": "Mangueiras de alta pressão para sistemas hidráulicos industriais e agrícolas"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Mangueiras Industriais",
+            "url": "{{ request.url_root }}loja?categoria=2",
+            "description": "Soluções para ar comprimido, vapor, água e produtos químicos"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Conexões e Terminais",
+            "url": "{{ request.url_root }}loja?categoria=3",
+            "description": "Adaptadores, engates rápidos e terminais hidráulicos de qualidade"
+        }
+    ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
