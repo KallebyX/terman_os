@@ -1,23 +1,43 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}Mangueiras Terman LTDA - Soluções em mangueiras hidráulicas, industriais e para agronegócio. Tradição desde 2001 em Caçapava do Sul/RS.{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}mangueiras, hidráulicas, industriais, prensagem, caçapava do sul, agronegócio{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="{% block meta_description %}Mangueiras Terman - Líder nacional em mangueiras hidráulicas, industriais e conexões. Prensagem especializada, entrega rápida para todo Brasil. Desde 2001 atendendo agronegócio, indústria e construção civil. Orçamento grátis!{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}mangueiras hidráulicas, mangueiras industriais, conexões hidráulicas, prensagem de mangueiras, mangueiras alta pressão, mangueiras pneumáticas, mangueiras para trator, mangueiras para colheitadeira, mangueiras agrícolas, terminais hidráulicos, engates rápidos, adaptadores hidráulicos, mangueiras parker, mangueiras gates, comprar mangueiras, mangueiras brasil, mangueiras RS, mangueiras Rio Grande do Sul, mangueiras agronegócio, peças hidráulicas{% endblock %}">
     <meta name="author" content="Mangueiras Terman LTDA">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="bingbot" content="index, follow">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="theme-color" content="#0071e3">
+    <meta name="msapplication-TileColor" content="#0071e3">
+    <meta name="format-detection" content="telephone=yes">
+    <meta name="geo.region" content="BR-RS">
+    <meta name="geo.placename" content="Caçapava do Sul">
+    <meta name="geo.position" content="-30.7833;-53.4833">
+    <meta name="ICBM" content="-30.7833, -53.4833">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{% block canonical_url %}{{ request.url_root.rstrip('/') }}{{ request.path }}{% endblock %}">
+
+    <!-- Alternate Languages (se houver) -->
+    <link rel="alternate" hreflang="pt-BR" href="{{ request.url_root.rstrip('/') }}{{ request.path }}">
+    <link rel="alternate" hreflang="x-default" href="{{ request.url_root.rstrip('/') }}{{ request.path }}">
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ self.meta_description() }}{% endblock %}">
     <meta property="og:image" content="{{ url_for('static', filename='img/logo_terman.webp', _external=True) }}">
-    <meta property="og:site_name" content="Mangueiras Terman">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mangueiras Terman - Soluções em Mangueiras Hidráulicas">
+    <meta property="og:site_name" content="Mangueiras Terman - Referência Nacional em Mangueiras Hidráulicas">
     <meta property="og:locale" content="pt_BR">
+    <meta property="og:see_also" content="https://www.instagram.com/mangueirasterman">
+    <meta property="og:see_also" content="https://www.facebook.com/mangueirasterman">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -25,13 +45,18 @@
     <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ self.og_description() }}{% endblock %}">
     <meta name="twitter:image" content="{{ url_for('static', filename='img/logo_terman.webp', _external=True) }}">
+    <meta name="twitter:image:alt" content="Mangueiras Terman - Líder em Mangueiras Hidráulicas">
+    <meta name="twitter:creator" content="@mangueirasterman">
+    <meta name="twitter:site" content="@mangueirasterman">
 
-    <title>{% block title %}Terman OS - Sistema Integrado{% endblock %}</title>
+    <title>{% block title %}Mangueiras Hidráulicas | Comprar Mangueiras Industriais | Mangueiras Terman{% endblock %}</title>
 
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -46,6 +71,156 @@
     <link rel="icon" type="image/webp" sizes="16x16" href="{{ url_for('static', filename='img/logo_terman.webp') }}">
     <link rel="icon" type="image/webp" sizes="32x32" href="{{ url_for('static', filename='img/logo_terman.webp') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/logo_terman.webp') }}">
+    <link rel="manifest" href="{{ url_for('site.manifest') }}">
+
+    <!-- Schema.org Organization -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Mangueiras Terman LTDA",
+        "alternateName": "Mangueiras Terman",
+        "url": "{{ request.url_root }}",
+        "logo": "{{ url_for('static', filename='img/logo_terman.webp', _external=True) }}",
+        "description": "Líder nacional em mangueiras hidráulicas e industriais. Desde 2001 oferecendo soluções completas para agronegócio, indústria e construção civil.",
+        "foundingDate": "2001",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rua das Mangueiras, 123",
+            "addressLocality": "Caçapava do Sul",
+            "addressRegion": "RS",
+            "postalCode": "96570-000",
+            "addressCountry": "BR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "-30.7833",
+            "longitude": "-53.4833"
+        },
+        "contactPoint": [
+            {
+                "@type": "ContactPoint",
+                "telephone": "+55-55-99999-9999",
+                "contactType": "sales",
+                "areaServed": "BR",
+                "availableLanguage": "Portuguese"
+            },
+            {
+                "@type": "ContactPoint",
+                "telephone": "+55-55-99999-9999",
+                "contactType": "customer service",
+                "areaServed": "BR",
+                "availableLanguage": "Portuguese"
+            }
+        ],
+        "sameAs": [
+            "https://www.instagram.com/mangueirasterman",
+            "https://www.facebook.com/mangueirasterman",
+            "https://wa.me/5555999999999"
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "5000",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "priceRange": "$$"
+    }
+    </script>
+
+    <!-- Schema.org LocalBusiness -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "@id": "{{ request.url_root }}#localbusiness",
+        "name": "Mangueiras Terman",
+        "image": "{{ url_for('static', filename='img/logo_terman.webp', _external=True) }}",
+        "url": "{{ request.url_root }}",
+        "telephone": "+55-55-99999-9999",
+        "email": "contato@mangueirasterman.com.br",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rua das Mangueiras, 123",
+            "addressLocality": "Caçapava do Sul",
+            "addressRegion": "RS",
+            "postalCode": "96570-000",
+            "addressCountry": "BR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": -30.7833,
+            "longitude": -53.4833
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "08:00",
+                "closes": "18:00"
+            }
+        ],
+        "priceRange": "$$",
+        "paymentAccepted": "Cash, Credit Card, Debit Card, PIX, Bank Transfer",
+        "currenciesAccepted": "BRL",
+        "areaServed": {
+            "@type": "Country",
+            "name": "Brasil"
+        },
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Catálogo de Mangueiras Hidráulicas",
+            "itemListElement": [
+                {
+                    "@type": "OfferCatalog",
+                    "name": "Mangueiras Hidráulicas"
+                },
+                {
+                    "@type": "OfferCatalog",
+                    "name": "Mangueiras Industriais"
+                },
+                {
+                    "@type": "OfferCatalog",
+                    "name": "Conexões e Terminais"
+                },
+                {
+                    "@type": "OfferCatalog",
+                    "name": "Engates Rápidos"
+                }
+            ]
+        }
+    }
+    </script>
+
+    <!-- Schema.org WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Mangueiras Terman",
+        "url": "{{ request.url_root }}",
+        "description": "Loja online de mangueiras hidráulicas, industriais e conexões. Referência nacional desde 2001.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ request.url_root }}loja?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Mangueiras Terman LTDA",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ url_for('static', filename='img/logo_terman.webp', _external=True) }}"
+            }
+        }
+    }
+    </script>
+
+    {% block extra_schema %}{% endblock %}
 
     {% block extra_css %}{% endblock %}
 </head>

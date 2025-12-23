@@ -1,11 +1,134 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ produto.nome }} - Mangueiras Terman{% endblock %}
-{% block meta_description %}{{ produto.descricao_curta or produto.descricao[:160] if produto.descricao else 'Produto de qualidade da Mangueiras Terman' }}{% endblock %}
-{% block meta_keywords %}{{ produto.nome }}, mangueiras, {{ produto.categoria.nome if produto.categoria else 'produtos' }}, terman{% endblock %}
+{% block title %}{{ produto.nome }} | Comprar {{ produto.categoria.nome if produto.categoria else 'Mangueiras' }} | Mangueiras Terman{% endblock %}
+{% block meta_description %}Compre {{ produto.nome }} com o melhor preço. {{ produto.descricao_curta or (produto.descricao[:120] if produto.descricao else 'Qualidade garantida') }}. Entrega para todo Brasil. Orçamento grátis!{% endblock %}
+{% block meta_keywords %}{{ produto.nome }}, comprar {{ produto.nome }}, {{ produto.nome }} preço, mangueiras {{ produto.categoria.nome if produto.categoria else '' }}, {{ produto.categoria.nome if produto.categoria else 'mangueiras' }} terman, {{ produto.codigo if produto.codigo else '' }}{% endblock %}
 
-{% block og_title %}{{ produto.nome }} - Mangueiras Terman{% endblock %}
-{% block og_description %}{{ produto.descricao_curta or produto.descricao[:160] if produto.descricao else 'Produto de qualidade da Mangueiras Terman' }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ produto.nome }} | R$ {{ '%.2f'|format(produto.preco_promocional if produto.preco_promocional and produto.preco_promocional < produto.preco else produto.preco) }} | Mangueiras Terman{% endblock %}
+{% block og_description %}Compre {{ produto.nome }} com o melhor preço. {{ produto.descricao_curta or 'Qualidade garantida Mangueiras Terman' }}. Entrega rápida!{% endblock %}
+
+{% block extra_schema %}
+<!-- Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Loja",
+            "item": "{{ request.url_root }}loja"
+        },
+        {% if produto.categoria %}
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "{{ produto.categoria.nome }}",
+            "item": "{{ request.url_root }}loja?categoria={{ produto.categoria_id }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "{{ produto.nome }}",
+            "item": "{{ request.url }}"
+        }
+        {% else %}
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "{{ produto.nome }}",
+            "item": "{{ request.url }}"
+        }
+        {% endif %}
+    ]
+}
+</script>
+
+<!-- Schema.org Product -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ produto.nome }}",
+    "description": "{{ produto.descricao_curta or produto.descricao or 'Produto de alta qualidade Mangueiras Terman' }}",
+    "image": "{{ produto.imagem_url or url_for('static', filename='img/logo_terman.webp', _external=True) }}",
+    "sku": "{{ produto.codigo or produto.id }}",
+    "mpn": "{{ produto.codigo or '' }}",
+    "brand": {
+        "@type": "Brand",
+        "name": "Mangueiras Terman"
+    },
+    "manufacturer": {
+        "@type": "Organization",
+        "name": "Mangueiras Terman LTDA"
+    },
+    {% if produto.categoria %}
+    "category": "{{ produto.categoria.nome }}",
+    {% endif %}
+    "offers": {
+        "@type": "Offer",
+        "url": "{{ request.url }}",
+        "priceCurrency": "BRL",
+        "price": "{{ '%.2f'|format(produto.preco_promocional if produto.preco_promocional and produto.preco_promocional < produto.preco else produto.preco) }}",
+        {% if produto.preco_promocional and produto.preco_promocional < produto.preco %}
+        "priceValidUntil": "{{ (now|default(none) or '')|string[:10] if now else '' }}",
+        {% endif %}
+        "availability": "{% if produto.estoque_total > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition",
+        "seller": {
+            "@type": "Organization",
+            "name": "Mangueiras Terman LTDA"
+        },
+        "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "BR"
+            },
+            "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 1,
+                    "maxValue": 3,
+                    "unitCode": "DAY"
+                },
+                "transitTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 1,
+                    "maxValue": 15,
+                    "unitCode": "DAY"
+                }
+            }
+        },
+        "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "BR",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 7,
+            "returnMethod": "https://schema.org/ReturnByMail"
+        }
+    }
+    {% if produto.rating_medio > 0 %}
+    ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ produto.rating_medio }}",
+        "reviewCount": "{{ produto.reviews.count() if produto.reviews else 0 }}",
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+    {% endif %}
+}
+</script>
+{% endblock %}
 
 {% block extra_css %}
 <style>

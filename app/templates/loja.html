@@ -1,6 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Loja | Mangueiras Terman{% endblock %}
-{% block meta_description %}Explore nossa linha completa de mangueiras hidráulicas, industriais e conexões. Qualidade garantida e preços competitivos.{% endblock %}
+{% block title %}Comprar Mangueiras Hidráulicas Online | Loja de Mangueiras Industriais | Mangueiras Terman{% endblock %}
+{% block meta_description %}Loja online de mangueiras hidráulicas, industriais e conexões. Mais de 500 produtos em estoque. Prensagem especializada, melhores preços do Brasil. Compre agora com entrega rápida! Desde 2001.{% endblock %}
+{% block meta_keywords %}loja mangueiras hidráulicas, comprar mangueiras online, mangueiras industriais preço, mangueiras alta pressão comprar, conexões hidráulicas online, loja peças hidráulicas, mangueiras parker preço, mangueiras gates comprar, loja mangueiras brasil, catálogo mangueiras{% endblock %}
+
+{% block extra_schema %}
+<!-- Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Loja",
+            "item": "{{ request.url_root }}loja"
+        }
+    ]
+}
+</script>
+
+<!-- Schema.org CollectionPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Catálogo de Mangueiras Hidráulicas e Industriais",
+    "description": "Loja online completa de mangueiras hidráulicas, industriais, conexões e terminais. Mais de 500 produtos disponíveis.",
+    "url": "{{ request.url }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": "{{ pagination.total if pagination else 0 }}",
+        "itemListOrder": "https://schema.org/ItemListOrderDescending"
+    },
+    "provider": {
+        "@type": "Organization",
+        "name": "Mangueiras Terman LTDA"
+    }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">

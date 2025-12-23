@@ -1,6 +1,56 @@
 {% extends "base.html" %}
-{% block title %}Contato | Mangueiras Terman{% endblock %}
-{% block meta_description %}Entre em contato com a Mangueiras Terman. Atendemos em Caçapava do Sul/RS e região. Orçamentos, dúvidas e sugestões.{% endblock %}
+{% block title %}Contato | Orçamento de Mangueiras Hidráulicas | Mangueiras Terman{% endblock %}
+{% block meta_description %}Entre em contato com a Mangueiras Terman. Orçamentos grátis de mangueiras hidráulicas e industriais. WhatsApp: (55) 99999-9999. Atendemos todo Brasil! Resposta rápida, melhores preços.{% endblock %}
+{% block meta_keywords %}contato mangueiras terman, orçamento mangueiras hidráulicas, telefone mangueiras terman, whatsapp mangueiras, contato loja mangueiras, orçamento mangueiras industriais{% endblock %}
+
+{% block extra_schema %}
+<!-- Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Contato",
+            "item": "{{ request.url }}"
+        }
+    ]
+}
+</script>
+
+<!-- Schema.org ContactPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contato - Mangueiras Terman",
+    "description": "Entre em contato conosco para orçamentos, dúvidas e sugestões sobre mangueiras hidráulicas e industriais.",
+    "url": "{{ request.url }}",
+    "mainEntity": {
+        "@type": "Organization",
+        "name": "Mangueiras Terman LTDA",
+        "telephone": "+55-55-99999-9999",
+        "email": "contato@mangueirasterman.com.br",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rua das Mangueiras, 123",
+            "addressLocality": "Caçapava do Sul",
+            "addressRegion": "RS",
+            "postalCode": "96570-000",
+            "addressCountry": "BR"
+        }
+    }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero -->

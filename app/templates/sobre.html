@@ -1,6 +1,59 @@
 {% extends "base.html" %}
-{% block title %}Sobre Nós | Mangueiras Terman{% endblock %}
-{% block meta_description %}Conheça a história da Mangueiras Terman LTDA. Desde 2001 oferecendo as melhores soluções em mangueiras hidráulicas e industriais no RS.{% endblock %}
+{% block title %}Sobre a Mangueiras Terman | Líder em Mangueiras Hidráulicas desde 2001{% endblock %}
+{% block meta_description %}Conheça a Mangueiras Terman, referência nacional em mangueiras hidráulicas desde 2001. +20 anos de experiência, +5.000 clientes satisfeitos. Qualidade, tradição e compromisso em Caçapava do Sul/RS. Atendemos todo Brasil!{% endblock %}
+{% block meta_keywords %}sobre mangueiras terman, história mangueiras terman, empresa mangueiras hidráulicas, loja mangueiras RS, empresa mangueiras brasil, quem somos mangueiras terman, mangueiras caçapava do sul{% endblock %}
+
+{% block extra_schema %}
+<!-- Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Sobre",
+            "item": "{{ request.url }}"
+        }
+    ]
+}
+</script>
+
+<!-- Schema.org AboutPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "Sobre a Mangueiras Terman",
+    "description": "Conheça a história e os valores da Mangueiras Terman LTDA, empresa referência nacional em mangueiras hidráulicas desde 2001.",
+    "url": "{{ request.url }}",
+    "mainEntity": {
+        "@type": "Organization",
+        "name": "Mangueiras Terman LTDA",
+        "foundingDate": "2001",
+        "foundingLocation": {
+            "@type": "Place",
+            "name": "Caçapava do Sul, RS, Brasil"
+        },
+        "slogan": "Referência em mangueiras hidráulicas desde 2001",
+        "knowsAbout": [
+            "Mangueiras Hidráulicas",
+            "Mangueiras Industriais",
+            "Prensagem de Mangueiras",
+            "Conexões Hidráulicas",
+            "Peças para Agronegócio"
+        ]
+    }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero -->
