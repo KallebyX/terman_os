@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuario: {{ usuario.nome }} | Super Admin | Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.listar_usuarios') }}">Usuarios</a></li>
+                <li class="breadcrumb-item active">{{ usuario.nome }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- User Header -->
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 p-4 rounded-circle me-4">
+                            <i class="bi bi-person-fill text-primary fs-1"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-1">{{ usuario.nome }}</h2>
+                            <p class="text-muted mb-2">{{ usuario.email }}</p>
+                            <div class="d-flex gap-2">
+                                {% if usuario.tipo_usuario == 'super_admin' %}
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="bi bi-shield-lock-fill me-1"></i>
+                                        Super Admin
+                                    </span>
+                                {% elif usuario.tipo_usuario == 'admin' %}
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        <i class="bi bi-person-badge-fill me-1"></i>
+                                        Administrador
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary fs-6">
+                                        <i class="bi bi-person-fill me-1"></i>
+                                        Cliente
+                                    </span>
+                                {% endif %}
+
+                                {% if usuario.ativo %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Ativo
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary fs-6">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Inativo
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- User Details -->
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">ID do Usuario</small>
+                                <strong>#{{ usuario.id }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">Email</small>
+                                <strong>{{ usuario.email }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">Data de Cadastro</small>
+                                <strong>
+                                    {% if usuario.data_criacao %}
+                                        {{ usuario.data_criacao.strftime('%d/%m/%Y as %H:%M') }}
+                                    {% else %}
+                                        Nao registrado
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">Ultimo Acesso</small>
+                                <strong>
+                                    {% if usuario.ultimo_acesso %}
+                                        {{ usuario.ultimo_acesso.strftime('%d/%m/%Y as %H:%M') }}
+                                    {% else %}
+                                        Nunca acessou
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>
+                        Acoes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('super_admin.editar_usuario', user_id=usuario.id) }}"
+                           class="btn btn-primary">
+                            <i class="bi bi-pencil me-2"></i>
+                            Editar Usuario
+                        </a>
+
+                        {% if usuario.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('super_admin.toggle_status_usuario', user_id=usuario.id) }}">
+                            <button type="submit" class="btn btn-{{ 'warning' if usuario.ativo else 'success' }} w-100">
+                                <i class="bi bi-{{ 'toggle-off' if usuario.ativo else 'toggle-on' }} me-2"></i>
+                                {{ 'Desativar' if usuario.ativo else 'Ativar' }}
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusao()">
+                            <i class="bi bi-trash me-2"></i>
+                            Excluir Usuario
+                        </button>
+                        {% endif %}
+
+                        <hr>
+
+                        <a href="{{ url_for('super_admin.listar_usuarios') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Exclusao -->
+{% if usuario.id != current_user.id %}
+<div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Exclusao</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir <strong>{{ usuario.nome }}</strong>?</p>
+                <p class="text-danger mb-0">Esta acao nao pode ser desfeita!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('super_admin.excluir_usuario', user_id=usuario.id) }}">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmarExclusao() {
+    var modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+    modal.show();
+}
+</script>
+{% endblock %}
+{% endif %}
+{% endblock %}

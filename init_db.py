@@ -103,20 +103,45 @@ def create_initial_data():
         try:
             from app.models import User, Categoria
 
-            # Verificar se já existem usuários
-            if User.query.count() == 0:
-                print("📝 Criando usuário admin padrão...")
+            # Criar Super Admin se nao existir
+            super_admin_email = 'kallebyevangelho03@gmail.com'
+            super_admin = User.query.filter_by(email=super_admin_email).first()
+
+            if not super_admin:
+                print("📝 Criando Super Admin...")
+                from werkzeug.security import generate_password_hash
+
+                super_admin = User(
+                    nome="Kalleby Evangelho",
+                    email=super_admin_email,
+                    senha_hash=generate_password_hash("kk030904K.k"),
+                    tipo_usuario="super_admin",
+                    ativo=True
+                )
+                db.session.add(super_admin)
+                db.session.commit()
+                print(f"✅ Super Admin criado ({super_admin_email})")
+            elif super_admin.tipo_usuario != 'super_admin':
+                super_admin.tipo_usuario = 'super_admin'
+                super_admin.ativo = True
+                db.session.commit()
+                print(f"✅ Usuario {super_admin_email} promovido a Super Admin")
+
+            # Verificar se já existem outros usuarios
+            if User.query.count() <= 1:
+                print("📝 Criando usuario admin padrao...")
                 from werkzeug.security import generate_password_hash
 
                 admin = User(
                     nome="Administrador",
                     email="admin@terman.com",
                     senha_hash=generate_password_hash("admin123"),
-                    tipo_usuario="admin"
+                    tipo_usuario="admin",
+                    ativo=True
                 )
                 db.session.add(admin)
                 db.session.commit()
-                print("✅ Usuário admin criado (admin@terman.com / admin123)")
+                print("✅ Usuario admin criado (admin@terman.com / admin123)")
 
             # Verificar se já existem categorias
             if Categoria.query.count() == 0:

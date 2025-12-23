@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario | Super Admin | Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.listar_usuarios') }}">Usuarios</a></li>
+                <li class="breadcrumb-item active">Editar</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-pencil-fill text-primary me-2"></i>
+            Editar Usuario
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                            <i class="bi bi-person-fill text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">{{ usuario.nome }}</h5>
+                            <small class="text-muted">{{ usuario.email }}</small>
+                        </div>
+                        <div class="ms-auto">
+                            {% if usuario.tipo_usuario == 'super_admin' %}
+                                <span class="badge bg-danger">Super Admin</span>
+                            {% elif usuario.tipo_usuario == 'admin' %}
+                                <span class="badge bg-warning text-dark">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Cliente</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('super_admin.editar_usuario', user_id=usuario.id) }}">
+                        <div class="row g-4">
+                            <!-- Nome -->
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nome" name="nome"
+                                       value="{{ usuario.nome }}" required>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ usuario.email }}" required>
+                            </div>
+
+                            <!-- Tipo de Usuario -->
+                            <div class="col-md-6">
+                                <label for="tipo_usuario" class="form-label">Tipo de Usuario</label>
+                                <select class="form-select" id="tipo_usuario" name="tipo_usuario">
+                                    <option value="cliente" {% if usuario.tipo_usuario == 'cliente' %}selected{% endif %}>Cliente</option>
+                                    <option value="admin" {% if usuario.tipo_usuario == 'admin' %}selected{% endif %}>Administrador</option>
+                                    <option value="super_admin" {% if usuario.tipo_usuario == 'super_admin' %}selected{% endif %}>Super Admin</option>
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="ativo" name="ativo"
+                                           {% if usuario.ativo %}checked{% endif %}
+                                           {% if usuario.id == current_user.id %}disabled{% endif %}>
+                                    <label class="form-check-label" for="ativo">
+                                        Usuario Ativo
+                                    </label>
+                                </div>
+                                {% if usuario.id == current_user.id %}
+                                <div class="form-text text-warning">Voce nao pode desativar sua propria conta</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nova Senha -->
+                            <div class="col-12">
+                                <hr>
+                                <h6 class="mb-3">
+                                    <i class="bi bi-key me-2"></i>
+                                    Alterar Senha
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nova_senha" class="form-label">Nova Senha</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="nova_senha" name="nova_senha"
+                                           placeholder="Deixe em branco para manter" minlength="6">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha('nova_senha')">
+                                        <i class="bi bi-eye" id="nova_senha-icon"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Deixe em branco para manter a senha atual</div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="col-12">
+                                <div class="alert alert-secondary mb-0">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <small class="text-muted">ID:</small>
+                                            <br><strong>#{{ usuario.id }}</strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted">Cadastrado em:</small>
+                                            <br><strong>
+                                                {% if usuario.data_criacao %}
+                                                    {{ usuario.data_criacao.strftime('%d/%m/%Y %H:%M') }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted">Ultimo acesso:</small>
+                                            <br><strong>
+                                                {% if usuario.ultimo_acesso %}
+                                                    {{ usuario.ultimo_acesso.strftime('%d/%m/%Y %H:%M') }}
+                                                {% else %}
+                                                    Nunca
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-lg me-2"></i>
+                                            Salvar Alteracoes
+                                        </button>
+                                        <a href="{{ url_for('super_admin.listar_usuarios') }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-lg me-2"></i>
+                                            Cancelar
+                                        </a>
+                                    </div>
+
+                                    {% if usuario.id != current_user.id %}
+                                    <button type="button" class="btn btn-outline-danger"
+                                            onclick="confirmarExclusao()">
+                                        <i class="bi bi-trash me-2"></i>
+                                        Excluir
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>
+                        Acoes Rapidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if usuario.id != current_user.id %}
+                    <form method="POST" action="{{ url_for('super_admin.toggle_status_usuario', user_id=usuario.id) }}" class="mb-3">
+                        <button type="submit" class="btn btn-{{ 'warning' if usuario.ativo else 'success' }} w-100">
+                            <i class="bi bi-{{ 'toggle-off' if usuario.ativo else 'toggle-on' }} me-2"></i>
+                            {{ 'Desativar' if usuario.ativo else 'Ativar' }} Usuario
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <a href="{{ url_for('super_admin.listar_usuarios') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Voltar para Lista
+                    </a>
+                </div>
+            </div>
+
+            <!-- Permissions Info -->
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Permissoes do Tipo
+                    </h6>
+                    <div id="permissoes-info">
+                        {% if usuario.tipo_usuario == 'super_admin' %}
+                        <ul class="mb-0 small">
+                            <li class="text-success">Gerenciar todos os usuarios</li>
+                            <li class="text-success">Acesso ao painel admin</li>
+                            <li class="text-success">Gerenciar produtos e categorias</li>
+                            <li class="text-success">Visualizar todos os pedidos</li>
+                            <li class="text-success">Acesso ao CRM e ERP</li>
+                            <li class="text-success">Configuracoes do sistema</li>
+                        </ul>
+                        {% elif usuario.tipo_usuario == 'admin' %}
+                        <ul class="mb-0 small">
+                            <li class="text-danger">Nao pode gerenciar usuarios</li>
+                            <li class="text-success">Acesso ao painel admin</li>
+                            <li class="text-success">Gerenciar produtos e categorias</li>
+                            <li class="text-success">Visualizar todos os pedidos</li>
+                            <li class="text-success">Acesso ao CRM e ERP</li>
+                        </ul>
+                        {% else %}
+                        <ul class="mb-0 small">
+                            <li class="text-danger">Sem acesso administrativo</li>
+                            <li class="text-success">Acesso a loja</li>
+                            <li class="text-success">Gerenciar carrinho</li>
+                            <li class="text-success">Ver pedidos pessoais</li>
+                            <li class="text-success">Editar perfil</li>
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Exclusao -->
+<div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Exclusao
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o usuario <strong>{{ usuario.nome }}</strong>?</p>
+                <p class="text-danger mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Esta acao nao pode ser desfeita!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('super_admin.excluir_usuario', user_id=usuario.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSenha(inputId) {
+    var input = document.getElementById(inputId);
+    var icon = document.getElementById(inputId + '-icon');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+function confirmarExclusao() {
+    var modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+    modal.show();
+}
+</script>
+{% endblock %}
+{% endblock %}

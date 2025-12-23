@@ -287,7 +287,39 @@
                                         Configurações
                                     </a>
                                 </li>
-                                {% if current_user.tipo_usuario == 'admin' %}
+                                {% if current_user.tipo_usuario == 'super_admin' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="/super-admin">
+                                        <i class="bi bi-shield-lock-fill"></i>
+                                        Super Admin
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/super-admin/usuarios">
+                                        <i class="bi bi-people-fill"></i>
+                                        Gerenciar Usuarios
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/admin">
+                                        <i class="bi bi-speedometer2"></i>
+                                        Painel Admin
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/dashboard">
+                                        <i class="bi bi-graph-up"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/crm">
+                                        <i class="bi bi-people"></i>
+                                        CRM
+                                    </a>
+                                </li>
+                                {% elif current_user.tipo_usuario == 'admin' %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="/admin">
@@ -413,7 +445,10 @@
                         {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('cliente.perfil') }}">Meu Perfil</a></li>
                         <li><a href="{{ url_for('marketplace.carrinho') }}">Carrinho</a></li>
-                        {% if current_user.tipo_usuario == 'admin' %}
+                        {% if current_user.tipo_usuario == 'super_admin' %}
+                        <li><a href="/super-admin" class="text-danger">Super Admin</a></li>
+                        <li><a href="/admin">Painel Admin</a></li>
+                        {% elif current_user.tipo_usuario == 'admin' %}
                         <li><a href="/admin">Painel Admin</a></li>
                         {% endif %}
                         {% else %}

@@ -49,21 +49,37 @@ def send_reset_email(user, token):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        usuario = User.query.filter_by(email=form.email.data).first()
+        usuario = User.query.filter_by(email=form.email.data.lower().strip()).first()
         if usuario and usuario.verificar_senha(form.senha.data):
+            # Verificar se usuario esta ativo
+            if hasattr(usuario, 'ativo') and not usuario.ativo:
+                flash('Sua conta esta desativada. Entre em contato com o administrador.', 'danger')
+                return render_template('login.html', form=form)
+
             login_user(usuario, remember=form.lembrar.data)
+
+            # Atualizar ultimo acesso
+            if hasattr(usuario, 'ultimo_acesso'):
+                from datetime import datetime
+                usuario.ultimo_acesso = datetime.utcnow()
+                db.session.commit()
+
             flash('Login realizado com sucesso!', 'success')
             next_page = request.args.get('next')
-            if usuario.tipo_usuario == 'admin':
+
+            # Redirecionar baseado no tipo de usuario
+            if usuario.tipo_usuario == 'super_admin':
+                return redirect(next_page) if next_page else redirect(url_for('super_admin.dashboard'))
+            elif usuario.tipo_usuario == 'admin':
                 return redirect(next_page) if next_page else redirect(url_for('admin.listar_produtos'))
             elif usuario.tipo_usuario == 'cliente':
                 return redirect(next_page) if next_page else redirect(url_for('cliente.perfil'))
             else:
                 logout_user()
-                flash('Tipo de usuário inválido.', 'danger')
+                flash('Tipo de usuario invalido.', 'danger')
                 return redirect(url_for('auth.login'))
         else:
-            flash('E-mail ou senha inválidos.', 'danger')
+            flash('E-mail ou senha invalidos.', 'danger')
     return render_template('login.html', form=form)
 
 @auth_bp.route('/cadastro', methods=['GET', 'POST'])

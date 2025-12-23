@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Usuario | Super Admin | Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('super_admin.listar_usuarios') }}">Usuarios</a></li>
+                <li class="breadcrumb-item active">Novo</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-person-plus-fill text-danger me-2"></i>
+            Criar Novo Usuario
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('super_admin.novo_usuario') }}">
+                        <div class="row g-4">
+                            <!-- Nome -->
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nome" name="nome"
+                                       placeholder="Digite o nome completo" required>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       placeholder="email@exemplo.com" required>
+                            </div>
+
+                            <!-- Senha -->
+                            <div class="col-md-6">
+                                <label for="senha" class="form-label">Senha <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="senha" name="senha"
+                                           placeholder="Minimo 6 caracteres" minlength="6" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha('senha')">
+                                        <i class="bi bi-eye" id="senha-icon"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Minimo 6 caracteres</div>
+                            </div>
+
+                            <!-- Tipo de Usuario -->
+                            <div class="col-md-6">
+                                <label for="tipo_usuario" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
+                                <select class="form-select" id="tipo_usuario" name="tipo_usuario" required>
+                                    <option value="cliente">Cliente</option>
+                                    <option value="admin">Administrador</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                                <div class="form-text">Define as permissoes do usuario</div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                                    <label class="form-check-label" for="ativo">
+                                        Usuario Ativo
+                                    </label>
+                                </div>
+                                <div class="form-text">Usuarios inativos nao podem fazer login</div>
+                            </div>
+
+                            <!-- Permissoes Info -->
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    <h6 class="alert-heading mb-2">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Niveis de Permissao
+                                    </h6>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Cliente:</strong> Acesso a loja, carrinho e pedidos pessoais</li>
+                                        <li><strong>Administrador:</strong> Gerenciar produtos, categorias e pedidos</li>
+                                        <li><strong>Super Admin:</strong> Acesso total - gerenciar usuarios e todo o sistema</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-check-lg me-2"></i>
+                                        Criar Usuario
+                                    </button>
+                                    <a href="{{ url_for('super_admin.listar_usuarios') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg me-2"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Dicas
+                    </h5>
+                    <ul class="mb-0 small">
+                        <li class="mb-2">Use senhas fortes com letras, numeros e caracteres especiais</li>
+                        <li class="mb-2">Emails devem ser unicos no sistema</li>
+                        <li class="mb-2">Super Admins tem acesso total - use com cautela</li>
+                        <li>Usuarios inativos nao podem acessar o sistema</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function toggleSenha(inputId) {
+    var input = document.getElementById(inputId);
+    var icon = document.getElementById(inputId + '-icon');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

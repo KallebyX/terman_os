@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Super Admin Dashboard | Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-shield-lock-fill text-danger me-2"></i>
+                Super Admin Dashboard
+            </h1>
+            <p class="text-muted mb-0">Controle total do sistema - Bem-vindo, {{ current_user.nome }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('super_admin.novo_usuario') }}" class="btn btn-danger">
+                <i class="bi bi-person-plus-fill me-2"></i>
+                Novo Usuario
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Usuarios</p>
+                            <h2 class="mb-0">{{ total_usuarios }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-people-fill text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="text-success">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ usuarios_ativos }} ativos
+                        </span>
+                        <span class="text-muted ms-2">
+                            {{ usuarios_inativos }} inativos
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Super Admins</p>
+                            <h2 class="mb-0 text-danger">{{ total_super_admins }}</h2>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-shield-lock-fill text-danger fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">Acesso total ao sistema</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Administradores</p>
+                            <h2 class="mb-0 text-warning">{{ total_admins }}</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-person-badge-fill text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">Gerenciam produtos e pedidos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Clientes</p>
+                            <h2 class="mb-0 text-success">{{ total_clientes }}</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-person-fill text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">Usuarios da loja</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h4 class="mb-4">
+                <i class="bi bi-lightning-fill text-warning me-2"></i>
+                Acesso Rapido
+            </h4>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('super_admin.listar_usuarios') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                            <i class="bi bi-people-fill text-danger fs-3"></i>
+                        </div>
+                        <h5 class="mb-1">Gerenciar Usuarios</h5>
+                        <p class="text-muted mb-0 small">Criar, editar e excluir usuarios</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                            <i class="bi bi-speedometer2 text-primary fs-3"></i>
+                        </div>
+                        <h5 class="mb-1">Painel Admin</h5>
+                        <p class="text-muted mb-0 small">Produtos, categorias e pedidos</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <a href="/dashboard" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                            <i class="bi bi-graph-up-arrow text-success fs-3"></i>
+                        </div>
+                        <h5 class="mb-1">Dashboard BI</h5>
+                        <p class="text-muted mb-0 small">Relatorios e metricas</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <a href="/crm" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center py-4">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                            <i class="bi bi-person-rolodex text-info fs-3"></i>
+                        </div>
+                        <h5 class="mb-1">CRM</h5>
+                        <p class="text-muted mb-0 small">Gestao de clientes</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- More Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Produtos</p>
+                            <h3 class="mb-0">{{ total_produtos }}</h3>
+                        </div>
+                        <i class="bi bi-box-seam text-primary fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Pedidos</p>
+                            <h3 class="mb-0">{{ total_pedidos }}</h3>
+                        </div>
+                        <i class="bi bi-bag-check text-success fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Categorias</p>
+                            <h3 class="mb-0">{{ total_categorias }}</h3>
+                        </div>
+                        <i class="bi bi-tags text-warning fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-clock-history me-2"></i>
+                Ultimos Usuarios Cadastrados
+            </h5>
+            <a href="{{ url_for('super_admin.listar_usuarios') }}" class="btn btn-sm btn-outline-primary">
+                Ver Todos
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Data Cadastro</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in ultimos_usuarios %}
+                        <tr>
+                            <td>
+                                <strong>{{ usuario.nome }}</strong>
+                            </td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                                {% if usuario.tipo_usuario == 'super_admin' %}
+                                    <span class="badge bg-danger">Super Admin</span>
+                                {% elif usuario.tipo_usuario == 'admin' %}
+                                    <span class="badge bg-warning text-dark">Admin</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Cliente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.ativo %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.data_criacao %}
+                                    {{ usuario.data_criacao.strftime('%d/%m/%Y %H:%M') }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('super_admin.editar_usuario', user_id=usuario.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}
