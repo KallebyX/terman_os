@@ -1,54 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Erro Interno - Terman OS{% endblock %}
+{% block title %}Erro no Servidor | Mangueiras Terman{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="error-page">
-                <h1 class="display-1 text-danger mb-4">500</h1>
-                <h2 class="mb-4">Erro Interno do Servidor</h2>
-                <p class="lead mb-4">
-                    Desculpe, algo deu errado em nosso servidor. Nossa equipe já foi notificada e está trabalhando para resolver o problema.
-                </p>
-                <div class="error-actions">
-                    <a href="{{ url_for('site.homepage') }}" class="btn btn-primary btn-lg me-2">
-                        <i class="bi bi-house"></i> Voltar para Home
-                    </a>
-                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-arrow-left"></i> Voltar
-                    </a>
-                </div>
-                <div class="mt-5">
-                    <p class="text-muted">
-                        <small>Se o problema persistir, entre em contato com o suporte.</small>
-                    </p>
-                </div>
-            </div>
+<div class="auth-container" style="min-height: calc(100vh - 200px);">
+    <div class="text-center" style="max-width: 500px;">
+        <div class="mb-4">
+            <span style="font-size: 8rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">500</span>
+        </div>
+        <h1 class="h2 mb-3">Erro interno do servidor</h1>
+        <p class="text-muted mb-4">
+            Algo deu errado do nosso lado. Estamos trabalhando para resolver o problema. Por favor, tente novamente em alguns minutos.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="/" class="btn btn-primary btn-lg">
+                <i class="bi bi-house me-2"></i>
+                Ir para Home
+            </a>
+            <button onclick="location.reload()" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Tentar Novamente
+            </button>
+        </div>
+        <div class="mt-5">
+            <p class="text-muted mb-2">O problema persiste?</p>
+            <a href="https://wa.me/5555999999999?text=Olá! Estou enfrentando um erro no site." target="_blank" class="text-primary">
+                <i class="bi bi-whatsapp me-1"></i>
+                Fale conosco pelo WhatsApp
+            </a>
         </div>
     </div>
 </div>
-
-<style>
-.error-page {
-    padding: 60px 0;
-}
-
-.error-page .display-1 {
-    font-size: 8rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-
-.error-actions {
-    margin-top: 2rem;
-}
-
-@media (max-width: 768px) {
-    .error-page .display-1 {
-        font-size: 5rem;
-    }
-}
-</style>
 {% endblock %}

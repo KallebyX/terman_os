@@ -1,39 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Entrar | Mangueiras Terman{% endblock %}
-{% block content %}
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Entrar na Plataforma</h1>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form method="POST">
-                {{ form.hidden_tag() }}
-                <div class="mb-3">
-                    {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control", placeholder="Digite seu e-mail") }}
-                    {% for error in form.email.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="mb-3">
-                    {{ form.senha.label(class="form-label") }}
-                    {{ form.senha(class="form-control", placeholder="Digite sua senha") }}
-                    {% for error in form.senha.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="mb-3 form-check">
-                    {{ form.lembrar(class="form-check-input") }}
-                    {{ form.lembrar.label(class="form-check-label") }}
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Entrar</button>
-            </form>
-            <div class="text-center mt-3">
-                <p><a href="{{ url_for('auth.esqueci_senha') }}">Esqueci minha senha</a></p>
-                <p>Ainda não tem conta? <a href="/cadastro">Cadastrar</a></p>
-            </div>
+{% block main_class %}auth-container{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <img src="{{ url_for('static', filename='img/logo_terman.webp') }}" alt="Terman" class="auth-logo">
+        <h1>Bem-vindo de volta</h1>
+        <p>Entre com sua conta para continuar</p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            {{ form.email(class="form-control", placeholder="seu@email.com", id="email") }}
+            {% for error in form.email.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
         </div>
+
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <div class="position-relative">
+                {{ form.senha(class="form-control", placeholder="Sua senha", id="senha", type="password") }}
+            </div>
+            {% for error in form.senha.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+                {{ form.lembrar(class="form-check-input", id="lembrar") }}
+                <label class="form-check-label" for="lembrar">Lembrar de mim</label>
+            </div>
+            <a href="{{ url_for('auth.esqueci_senha') }}" class="text-primary" style="font-size: var(--text-sm);">
+                Esqueci a senha
+            </a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+            Entrar
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        <p>
+            Não tem uma conta?
+            <a href="/cadastro" class="text-primary fw-500">Criar conta gratuita</a>
+        </p>
     </div>
 </div>
-
 {% endblock %}

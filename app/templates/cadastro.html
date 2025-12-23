@@ -1,48 +1,67 @@
 {% extends "base.html" %}
-{% block title %}Cadastro | Mangueiras Terman{% endblock %}
-{% block content %}
+{% block title %}Criar Conta | Mangueiras Terman{% endblock %}
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Criar Conta</h1>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form method="POST">
-                {{ form.hidden_tag() }}
-                <div class="mb-3">
-                    {{ form.nome.label(class="form-label") }}
-                    {{ form.nome(class="form-control", placeholder="Digite seu nome completo") }}
-                    {% for error in form.nome.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="mb-3">
-                    {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control", placeholder="Digite seu e-mail") }}
-                    {% for error in form.email.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="mb-3">
-                    {{ form.senha.label(class="form-label") }}
-                    {{ form.senha(class="form-control", placeholder="Crie uma senha") }}
-                    {% for error in form.senha.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <div class="mb-3">
-                    {{ form.confirmar_senha.label(class="form-label") }}
-                    {{ form.confirmar_senha(class="form-control", placeholder="Confirme a senha") }}
-                    {% for error in form.confirmar_senha.errors %}
-                        <div class="text-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                <button type="submit" class="btn btn-success w-100">Cadastrar</button>
-            </form>
-            <div class="text-center mt-3">
-                <p>Já tem conta? <a href="/login">Entrar</a></p>
-            </div>
+{% block main_class %}auth-container{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <img src="{{ url_for('static', filename='img/logo_terman.webp') }}" alt="Terman" class="auth-logo">
+        <h1>Criar conta</h1>
+        <p>Preencha os dados para começar</p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome completo</label>
+            {{ form.nome(class="form-control", placeholder="Seu nome completo", id="nome") }}
+            {% for error in form.nome.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
         </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            {{ form.email(class="form-control", placeholder="seu@email.com", id="email") }}
+            {% for error in form.email.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            {{ form.senha(class="form-control", placeholder="Mínimo 6 caracteres", id="senha", type="password") }}
+            {% for error in form.senha.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-4">
+            <label for="confirmar_senha" class="form-label">Confirmar senha</label>
+            {{ form.confirmar_senha(class="form-control", placeholder="Digite a senha novamente", id="confirmar_senha", type="password") }}
+            {% for error in form.confirmar_senha.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100">
+            Criar Conta
+        </button>
+
+        <p class="text-center text-muted mt-4" style="font-size: var(--text-sm);">
+            Ao criar uma conta, você concorda com nossos<br>
+            <a href="#" class="text-primary">Termos de Uso</a> e
+            <a href="#" class="text-primary">Política de Privacidade</a>
+        </p>
+    </form>
+
+    <div class="auth-footer">
+        <p>
+            Já tem uma conta?
+            <a href="/login" class="text-primary fw-500">Fazer login</a>
+        </p>
     </div>
 </div>
-
 {% endblock %}
