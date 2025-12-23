@@ -64,6 +64,24 @@ from .conteudo import (
 # Modelo legado (manter por compatibilidade)
 from .ordem_servico import OrdemServico as OrdemServicoLegacy
 
+# Modelos Fiscais (NFe, Orçamentos, Configurações)
+from .fiscal import (
+    ConfiguracaoEmpresa,
+    CertificadoDigital,
+    Contabilista,
+    Orcamento,
+    ItemOrcamento,
+    HistoricoOrcamento,
+    NotaFiscal,
+    ItemNotaFiscal,
+    CartaCorrecao,
+    EnvioEmailNFe,
+    ContaBancaria,
+    TransacaoBancaria,
+    ConfiguracaoImposto,
+    InutilizacaoNFe
+)
+
 __all__ = [
     # Core
     'User',
@@ -112,4 +130,19 @@ __all__ = [
     'Contato',
     'Newsletter',
     'Banner',
+    # Fiscal/NFe
+    'ConfiguracaoEmpresa',
+    'CertificadoDigital',
+    'Contabilista',
+    'Orcamento',
+    'ItemOrcamento',
+    'HistoricoOrcamento',
+    'NotaFiscal',
+    'ItemNotaFiscal',
+    'CartaCorrecao',
+    'EnvioEmailNFe',
+    'ContaBancaria',
+    'TransacaoBancaria',
+    'ConfiguracaoImposto',
+    'InutilizacaoNFe',
 ]
