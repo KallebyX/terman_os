@@ -92,7 +92,7 @@ class ConfiguracaoEmpresa(db.Model):
     # Auditoria
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    usuario_atualizacao_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_atualizacao_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     # Relacionamentos
     usuario_atualizacao = db.relationship('User', foreign_keys=[usuario_atualizacao_id])
@@ -156,7 +156,7 @@ class CertificadoDigital(db.Model):
     # Auditoria
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    usuario_cadastro_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_cadastro_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     usuario_cadastro = db.relationship('User', foreign_keys=[usuario_cadastro_id])
 
@@ -246,7 +246,7 @@ class Orcamento(db.Model):
     numero_orcamento = db.Column(db.String(20), unique=True, nullable=False)
 
     # Cliente
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'))
     cliente_nome = db.Column(db.String(200), nullable=False)
     cliente_cpf_cnpj = db.Column(db.String(18))
     cliente_email = db.Column(db.String(200))
@@ -257,7 +257,7 @@ class Orcamento(db.Model):
     cliente_cep = db.Column(db.String(10))
 
     # Vendedor
-    vendedor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    vendedor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     # Status
     status = db.Column(db.String(20), default='rascunho')
@@ -298,8 +298,8 @@ class Orcamento(db.Model):
     token_visualizacao = db.Column(db.String(100), unique=True)
 
     # Conversão para Pedido/OS/NFe
-    pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id'))
-    ordem_servico_id = db.Column(db.Integer, db.ForeignKey('ordem_servico.id'))
+    pedido_id = db.Column(db.Integer, db.ForeignKey('pedidos.id'))
+    ordem_servico_id = db.Column(db.Integer, db.ForeignKey('ordens_servico.id'))
     nota_fiscal_id = db.Column(db.Integer, db.ForeignKey('nota_fiscal.id'))
 
     # Relacionamentos
@@ -356,7 +356,7 @@ class ItemOrcamento(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     orcamento_id = db.Column(db.Integer, db.ForeignKey('orcamento.id'), nullable=False)
-    produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'))
+    produto_id = db.Column(db.Integer, db.ForeignKey('produtos.id'))
 
     # Dados do produto (snapshot)
     codigo = db.Column(db.String(50))
@@ -397,7 +397,7 @@ class HistoricoOrcamento(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     orcamento_id = db.Column(db.Integer, db.ForeignKey('orcamento.id'), nullable=False)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     tipo = db.Column(db.String(50), nullable=False)  # criacao, edicao, envio, visualizacao, aprovacao, reprovacao
     descricao = db.Column(db.Text)
@@ -534,12 +534,12 @@ class NotaFiscal(db.Model):
 
     # Referências
     orcamento_id = db.Column(db.Integer, db.ForeignKey('orcamento.id'))
-    pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id'))
-    ordem_servico_id = db.Column(db.Integer, db.ForeignKey('ordem_servico.id'))
+    pedido_id = db.Column(db.Integer, db.ForeignKey('pedidos.id'))
+    ordem_servico_id = db.Column(db.Integer, db.ForeignKey('ordens_servico.id'))
     nfe_referenciada = db.Column(db.String(44))  # Chave NFe referenciada
 
     # Usuário
-    usuario_emissao_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_emissao_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     # Auditoria
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
@@ -550,7 +550,7 @@ class NotaFiscal(db.Model):
     cartas_correcao = db.relationship('CartaCorrecao', backref='nota_fiscal', lazy='dynamic')
     envios_email = db.relationship('EnvioEmailNFe', backref='nota_fiscal', lazy='dynamic')
     usuario_emissao = db.relationship('User', foreign_keys=[usuario_emissao_id])
-    orcamento = db.relationship('Orcamento', backref='notas_fiscais')
+    orcamento = db.relationship('Orcamento', foreign_keys=[orcamento_id], backref='notas_fiscais')
 
     def get_duplicatas(self):
         if self.duplicatas:
@@ -610,7 +610,7 @@ class ItemNotaFiscal(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nota_fiscal_id = db.Column(db.Integer, db.ForeignKey('nota_fiscal.id'), nullable=False)
-    produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'))
+    produto_id = db.Column(db.Integer, db.ForeignKey('produtos.id'))
 
     # Número do item na NFe
     numero_item = db.Column(db.Integer, nullable=False)
@@ -758,7 +758,7 @@ class CartaCorrecao(db.Model):
     xml_evento = db.Column(db.Text)
     xml_retorno = db.Column(db.Text)
 
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     usuario = db.relationship('User')
 
     def __repr__(self):
@@ -779,7 +779,7 @@ class EnvioEmailNFe(db.Model):
     enviado = db.Column(db.Boolean, default=False)
     erro = db.Column(db.Text)
 
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     usuario = db.relationship('User')
 
 
@@ -873,13 +873,13 @@ class TransacaoBancaria(db.Model):
 
     # Conciliação
     conciliada = db.Column(db.Boolean, default=False)
-    conta_pagar_id = db.Column(db.Integer, db.ForeignKey('conta_pagar.id'))
-    conta_receber_id = db.Column(db.Integer, db.ForeignKey('conta_receber.id'))
-    pedido_id = db.Column(db.Integer, db.ForeignKey('pedido.id'))
+    conta_pagar_id = db.Column(db.Integer, db.ForeignKey('contas_pagar.id'))
+    conta_receber_id = db.Column(db.Integer, db.ForeignKey('contas_receber.id'))
+    pedido_id = db.Column(db.Integer, db.ForeignKey('pedidos.id'))
 
     # Auditoria
     data_importacao = db.Column(db.DateTime, default=datetime.utcnow)
-    importado_por_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    importado_por_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     importado_por = db.relationship('User')
 
@@ -962,7 +962,7 @@ class InutilizacaoNFe(db.Model):
     xml_retorno = db.Column(db.Text)
 
     # Auditoria
-    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
     usuario = db.relationship('User')
