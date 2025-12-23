@@ -18,7 +18,15 @@ mail = Mail()
 cache = Cache()
 
 def create_app():
-    app = Flask(__name__)
+    # On Vercel/serverless, the filesystem is read-only except /tmp
+    # Set instance_path to /tmp to avoid OSError on instance folder creation
+    is_serverless = os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME')
+
+    if is_serverless:
+        app = Flask(__name__, instance_path='/tmp')
+    else:
+        app = Flask(__name__)
+
     if os.getenv('FLASK_ENV') == 'production':
         app.config['DEBUG'] = False
     else:
