@@ -1,30 +1,178 @@
 {% extends "base.html" %}
 {% block title %}Sobre Nós | Mangueiras Terman{% endblock %}
+{% block meta_description %}Conheça a história da Mangueiras Terman LTDA. Desde 2001 oferecendo as melhores soluções em mangueiras hidráulicas e industriais no RS.{% endblock %}
+
 {% block content %}
+<!-- Hero -->
+<section class="hero" style="min-height: 50vh;">
+    <div class="hero-content">
+        <h1>Sobre a Mangueiras Terman</h1>
+        <p>
+            Há mais de 20 anos servindo o setor agroindustrial com qualidade, tradição e confiança.
+        </p>
+    </div>
+</section>
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Sobre a Mangueiras Terman</h1>
-    <p class="lead text-center">Há mais de 20 anos servindo o setor agroindustrial com qualidade, tradição e confiança.</p>
-    
-    <div class="row mt-5">
-        <div class="col-md-6">
-            <h4>Nossa História</h4>
-            <p>A Mangueiras Terman LTDA foi fundada em 2001, em Caçapava do Sul – RS, com a missão de oferecer soluções em mangueiras hidráulicas, pneumáticas, de jardim e industriais para a região central do estado. Com forte presença no agronegócio, somos referência em atendimento técnico e produtos de alta durabilidade.</p>
-        </div>
-        <div class="col-md-6">
-            <h4>O que fazemos</h4>
-            <ul>
-                <li>Venda de mangueiras e conexões para diversas aplicações</li>
-                <li>Serviço especializado de prensagem técnica</li>
-                <li>Atendimento rápido e personalizado</li>
-                <li>Estoque variado para pronta entrega</li>
-            </ul>
+<!-- História -->
+<section class="section">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <span class="hero-badge mb-4">
+                    <i class="bi bi-award"></i>
+                    Desde 2001
+                </span>
+                <h2>Nossa História</h2>
+                <p class="lead">
+                    A Mangueiras Terman LTDA nasceu em Caçapava do Sul/RS com a missão de fornecer soluções de qualidade para o agronegócio e indústria da região.
+                </p>
+                <p>
+                    Fundada em 2001, nossa empresa se especializou no fornecimento de mangueiras hidráulicas, pneumáticas, de jardim e industriais. Com forte presença no agronegócio gaúcho, somos referência em atendimento técnico e produtos de alta durabilidade.
+                </p>
+                <p>
+                    Ao longo dessas mais de duas décadas, construímos relacionamentos sólidos baseados na confiança, qualidade e compromisso com nossos clientes.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div style="background: var(--primary-subtle); border-radius: var(--radius-2xl); height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <div class="text-center">
+                        <i class="bi bi-building" style="font-size: 5rem; color: var(--primary); opacity: 0.3;"></i>
+                        <p class="mt-3 mb-0 text-primary fw-600">Mangueiras Terman LTDA</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div class="mt-5 text-center">
-        <a href="/loja" class="btn btn-outline-primary btn-lg">Conheça nossos produtos</a>
-    </div>
-</div>
+</section>
 
+<!-- O que fazemos -->
+<section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>O que fazemos</h2>
+            <p class="lead" style="max-width: 600px; margin: 0 auto;">
+                Oferecemos soluções completas para diversas necessidades.
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+                <h3>Mangueiras e Conexões</h3>
+                <p>
+                    Ampla variedade de mangueiras hidráulicas, pneumáticas e industriais para diversas aplicações.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-gear-wide-connected"></i>
+                </div>
+                <h3>Prensagem Técnica</h3>
+                <p>
+                    Serviço especializado de prensagem com equipamentos de precisão e profissionais qualificados.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-lightning"></i>
+                </div>
+                <h3>Atendimento Rápido</h3>
+                <p>
+                    Entendemos a urgência dos nossos clientes e priorizamos agilidade no atendimento.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h3>Estoque Variado</h3>
+                <p>
+                    Grande variedade de produtos em estoque para pronta entrega, evitando paradas na sua operação.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Valores -->
+<section class="section">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5">
+                <h2>Nossos Valores</h2>
+                <p class="lead">
+                    Os princípios que guiam nossa empresa e nosso relacionamento com os clientes.
+                </p>
+            </div>
+            <div class="col-lg-7">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="d-flex gap-3">
+                            <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.25rem; flex-shrink: 0;">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <h5>Qualidade</h5>
+                                <p class="text-muted mb-0">Trabalhamos apenas com as melhores marcas do mercado.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-3">
+                            <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.25rem; flex-shrink: 0;">
+                                <i class="bi bi-heart"></i>
+                            </div>
+                            <div>
+                                <h5>Compromisso</h5>
+                                <p class="text-muted mb-0">O sucesso do cliente é o nosso sucesso.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-3">
+                            <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.25rem; flex-shrink: 0;">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div>
+                                <h5>Respeito</h5>
+                                <p class="text-muted mb-0">Tratamos cada cliente de forma única e especial.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-3">
+                            <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.25rem; flex-shrink: 0;">
+                                <i class="bi bi-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h5>Inovação</h5>
+                                <p class="text-muted mb-0">Buscamos sempre as melhores soluções.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="container">
+    <div class="cta-section">
+        <h2>Conheça nossos produtos</h2>
+        <p>
+            Explore nossa linha completa de mangueiras e conexões.
+            Qualidade garantida e preços competitivos.
+        </p>
+        <a href="/loja" class="btn btn-lg">
+            <i class="bi bi-bag me-2"></i>
+            Acessar a Loja
+        </a>
+    </div>
+</section>
 {% endblock %}

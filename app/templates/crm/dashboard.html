@@ -3,126 +3,104 @@
 {% block title %}CRM - Dashboard | Terman OS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container py-5">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
             <li class="breadcrumb-item active">CRM</li>
         </ol>
     </nav>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3"><i class="bi bi-people me-2"></i>CRM - Gestão de Relacionamentos</h1>
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
         <div>
-            <a href="{{ url_for('crm.novo_lead') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>Novo Lead
-            </a>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-people me-2"></i>
+                CRM - Gestão de Relacionamentos
+            </h1>
+            <p class="text-muted mb-0">Gerencie leads, clientes e oportunidades</p>
+        </div>
+        <a href="{{ url_for('crm.novo_lead') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            Novo Lead
+        </a>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="dashboard-grid">
+        <a href="{{ url_for('crm.listar_clientes') }}" class="text-decoration-none">
+            <div class="dashboard-card">
+                <div class="dashboard-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="dashboard-value">{{ total_clientes }}</div>
+                <div class="dashboard-label">Clientes Ativos</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('crm.listar_leads') }}" class="text-decoration-none">
+            <div class="dashboard-card info">
+                <div class="dashboard-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <div class="dashboard-value">{{ total_leads }}</div>
+                <div class="dashboard-label">Leads Ativos</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('crm.listar_oportunidades') }}" class="text-decoration-none">
+            <div class="dashboard-card warning">
+                <div class="dashboard-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <div class="dashboard-value">{{ total_oportunidades }}</div>
+                <div class="dashboard-label">Oportunidades</div>
+            </div>
+        </a>
+
+        <div class="dashboard-card success">
+            <div class="dashboard-icon">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="dashboard-value" style="font-size: var(--text-2xl);">R$ {{ "%.2f"|format(pipeline_valor) }}</div>
+            <div class="dashboard-label">Valor do Pipeline</div>
         </div>
     </div>
 
-    <!-- Cards de Métricas -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2 opacity-75">Clientes Ativos</h6>
-                            <h2 class="card-title mb-0">{{ total_clientes }}</h2>
-                        </div>
-                        <i class="bi bi-people-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ url_for('crm.listar_clientes') }}" class="text-white text-decoration-none">
-                        Ver todos <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2 opacity-75">Leads Ativos</h6>
-                            <h2 class="card-title mb-0">{{ total_leads }}</h2>
-                        </div>
-                        <i class="bi bi-person-plus-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ url_for('crm.listar_leads') }}" class="text-white text-decoration-none">
-                        Ver todos <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2 opacity-75">Oportunidades</h6>
-                            <h2 class="card-title mb-0">{{ total_oportunidades }}</h2>
-                        </div>
-                        <i class="bi bi-bullseye" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ url_for('crm.listar_oportunidades') }}" class="text-dark text-decoration-none">
-                        Ver pipeline <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2 opacity-75">Valor Pipeline</h6>
-                            <h2 class="card-title mb-0">R$ {{ "%.2f"|format(pipeline_valor) }}</h2>
-                        </div>
-                        <i class="bi bi-currency-dollar" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <small class="opacity-75">Valor ponderado</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
+    <div class="row g-4 mt-4">
         <!-- Atividades Pendentes -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-list-task me-2"></i>Minhas Atividades Pendentes</h5>
-                    <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-task me-2"></i>
+                        Atividades Pendentes
+                    </h5>
+                    <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-sm btn-outline-primary">
+                        Ver todas
+                    </a>
                 </div>
                 <div class="card-body">
                     {% if atividades_pendentes %}
-                    <div class="list-group list-group-flush">
+                    <div class="d-flex flex-column gap-3">
                         {% for atividade in atividades_pendentes %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-lg">
                             <div>
-                                <span class="badge bg-{{ 'danger' if atividade.prioridade == 'urgente' else 'warning' if atividade.prioridade == 'alta' else 'secondary' }} me-2">
+                                <span class="badge {% if atividade.prioridade == 'urgente' %}bg-danger{% elif atividade.prioridade == 'alta' %}bg-warning text-dark{% else %}bg-secondary{% endif %} me-2">
                                     {{ atividade.prioridade }}
                                 </span>
                                 <strong>{{ atividade.titulo }}</strong>
                                 {% if atividade.data_vencimento %}
                                 <br>
-                                <small class="text-muted">Vence em: {{ atividade.data_vencimento.strftime('%d/%m/%Y') }}</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    {{ atividade.data_vencimento.strftime('%d/%m/%Y') }}
+                                </small>
                                 {% endif %}
                             </div>
                             <form action="{{ url_for('crm.concluir_atividade', atividade_id=atividade.id) }}" method="POST">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como concluída">
+                                <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluída">
                                     <i class="bi bi-check-lg"></i>
                                 </button>
                             </form>
@@ -130,9 +108,11 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
-                        <p class="mt-2 mb-0">Nenhuma atividade pendente</p>
+                    <div class="empty-state py-4">
+                        <div class="empty-state-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <p class="text-muted mb-0">Nenhuma atividade pendente</p>
                     </div>
                     {% endif %}
                 </div>
@@ -140,10 +120,13 @@
         </div>
 
         <!-- Últimos Leads -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Últimos Leads</h5>
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Últimos Leads
+                    </h5>
                     <a href="{{ url_for('crm.novo_lead') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus"></i> Novo
                     </a>
@@ -151,7 +134,7 @@
                 <div class="card-body">
                     {% if ultimos_leads %}
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table mb-0">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -163,10 +146,10 @@
                             <tbody>
                                 {% for lead in ultimos_leads %}
                                 <tr>
-                                    <td>{{ lead.nome }}</td>
-                                    <td>{{ lead.empresa or '-' }}</td>
+                                    <td class="fw-500">{{ lead.nome }}</td>
+                                    <td class="text-muted">{{ lead.empresa or '-' }}</td>
                                     <td>
-                                        <span class="badge bg-{{ 'success' if lead.status == 'qualificado' else 'info' if lead.status == 'contatado' else 'secondary' }}">
+                                        <span class="badge {% if lead.status == 'qualificado' %}bg-success{% elif lead.status == 'contatado' %}bg-info{% else %}bg-secondary{% endif %}">
                                             {{ lead.status }}
                                         </span>
                                     </td>
@@ -181,9 +164,11 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                        <p class="mt-2 mb-0">Nenhum lead cadastrado</p>
+                    <div class="empty-state py-4">
+                        <div class="empty-state-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <p class="text-muted mb-0">Nenhum lead cadastrado</p>
                     </div>
                     {% endif %}
                 </div>
@@ -191,40 +176,39 @@
         </div>
     </div>
 
-    <!-- Links Rápidos -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acesso Rápido</h5>
+    <!-- Quick Access -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-lightning me-2"></i>
+                Acesso Rápido
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <a href="{{ url_for('crm.listar_leads') }}" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-person-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                        Leads
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-6 col-md-3 mb-3">
-                            <a href="{{ url_for('crm.listar_leads') }}" class="btn btn-outline-primary w-100 py-3">
-                                <i class="bi bi-person-plus d-block" style="font-size: 1.5rem;"></i>
-                                Leads
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <a href="{{ url_for('crm.listar_clientes') }}" class="btn btn-outline-success w-100 py-3">
-                                <i class="bi bi-people d-block" style="font-size: 1.5rem;"></i>
-                                Clientes
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <a href="{{ url_for('crm.listar_oportunidades') }}" class="btn btn-outline-warning w-100 py-3">
-                                <i class="bi bi-kanban d-block" style="font-size: 1.5rem;"></i>
-                                Pipeline
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-outline-info w-100 py-3">
-                                <i class="bi bi-calendar-check d-block" style="font-size: 1.5rem;"></i>
-                                Atividades
-                            </a>
-                        </div>
-                    </div>
+                <div class="col-6 col-md-3">
+                    <a href="{{ url_for('crm.listar_clientes') }}" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
+                        Clientes
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="{{ url_for('crm.listar_oportunidades') }}" class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-kanban d-block mb-2" style="font-size: 1.5rem;"></i>
+                        Pipeline
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="{{ url_for('crm.listar_atividades') }}" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-calendar-check d-block mb-2" style="font-size: 1.5rem;"></i>
+                        Atividades
+                    </a>
                 </div>
             </div>
         </div>

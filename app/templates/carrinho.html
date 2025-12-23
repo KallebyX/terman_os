@@ -1,39 +1,111 @@
 {% extends "base.html" %}
-{% block title %}Meu Carrinho{% endblock %}
+{% block title %}Meu Carrinho | Mangueiras Terman{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2>Meu Carrinho</h2>
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/loja">Loja</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Carrinho</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4">Meu Carrinho</h1>
+
     {% if itens %}
-    <form method="POST" action="{{ url_for('marketplace.finalizar_pedido') }}">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Produto</th>
-                    <th>Quantidade</th>
-                    <th>Subtotal</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in itens %}
-                <tr>
-                    <td>{{ item.produto.nome }}</td>
-                    <td>{{ item.quantidade }}</td>
-                    <td>R$ {{ '%.2f' | format(item.subtotal) }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('marketplace.remover_item_carrinho', produto_id=item.produto_id) }}">
-                            <button type="submit" class="btn btn-sm btn-danger">Remover</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h4>Total: R$ {{ '%.2f' | format(total) }}</h4>
-        <button type="submit" class="btn btn-success mt-3">Finalizar Pedido</button>
-    </form>
+    <div class="row g-5">
+        <!-- Lista de Itens -->
+        <div class="col-lg-8">
+            {% for item in itens %}
+            <div class="cart-item">
+                {% if item.produto.imagem_filename %}
+                <img src="{{ url_for('static', filename='produtos/' ~ item.produto.imagem_filename) }}"
+                     alt="{{ item.produto.nome }}"
+                     class="cart-item-image">
+                {% else %}
+                <div class="cart-item-image bg-light d-flex align-items-center justify-content-center">
+                    <i class="bi bi-image" style="font-size: 2rem; color: var(--gray-300);"></i>
+                </div>
+                {% endif %}
+
+                <div class="cart-item-info">
+                    <h4 class="cart-item-title">{{ item.produto.nome }}</h4>
+                    <p class="text-muted mb-2">Quantidade: {{ item.quantidade }}</p>
+                    <p class="cart-item-price mb-0">R$ {{ '%.2f' | format(item.subtotal) }}</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('marketplace.remover_item_carrinho', produto_id=item.produto_id) }}">
+                    <button type="submit" class="btn btn-ghost btn-sm text-danger" title="Remover item">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Resumo do Pedido -->
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h4 class="mb-4">Resumo do Pedido</h4>
+
+                <div class="cart-summary-row">
+                    <span class="text-muted">Subtotal</span>
+                    <span>R$ {{ '%.2f' | format(total) }}</span>
+                </div>
+
+                <div class="cart-summary-row">
+                    <span class="text-muted">Frete</span>
+                    <span class="text-success">A calcular</span>
+                </div>
+
+                <div class="cart-summary-row">
+                    <span>Total</span>
+                    <span class="text-success">R$ {{ '%.2f' | format(total) }}</span>
+                </div>
+
+                <form method="POST" action="{{ url_for('marketplace.finalizar_pedido') }}">
+                    <button type="submit" class="btn btn-success btn-lg w-100 mt-4">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Finalizar Pedido
+                    </button>
+                </form>
+
+                <a href="/loja" class="btn btn-outline-primary w-100 mt-3">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Continuar Comprando
+                </a>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-2" style="font-size: var(--text-sm);">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Compra 100% segura
+                    </p>
+                    <a href="https://wa.me/5555999999999?text=Olá! Tenho dúvidas sobre meu pedido." target="_blank" class="text-primary" style="font-size: var(--text-sm);">
+                        <i class="bi bi-whatsapp me-1"></i>
+                        Precisa de ajuda?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% else %}
-    <p>Seu carrinho está vazio.</p>
+    <!-- Empty Cart -->
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-bag"></i>
+        </div>
+        <h3>Seu carrinho está vazio</h3>
+        <p>
+            Explore nossa loja e encontre os melhores produtos para você.
+        </p>
+        <a href="/loja" class="btn btn-primary btn-lg">
+            <i class="bi bi-bag me-2"></i>
+            Explorar Produtos
+        </a>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

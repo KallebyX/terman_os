@@ -1,55 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Acesso Negado - Terman OS{% endblock %}
+{% block title %}Acesso Negado | Mangueiras Terman{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="error-page">
-                <h1 class="display-1 text-warning mb-4">403</h1>
-                <h2 class="mb-4">Acesso Negado</h2>
-                <p class="lead mb-4">
-                    Você não tem permissão para acessar esta página.
-                </p>
-                <div class="error-actions">
-                    <a href="{{ url_for('site.homepage') }}" class="btn btn-primary btn-lg me-2">
-                        <i class="bi bi-house"></i> Voltar para Home
-                    </a>
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('cliente.painel') }}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-person"></i> Meu Painel
-                    </a>
-                    {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-box-arrow-in-right"></i> Fazer Login
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+<div class="auth-container" style="min-height: calc(100vh - 200px);">
+    <div class="text-center" style="max-width: 500px;">
+        <div class="mb-4">
+            <span style="font-size: 8rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">403</span>
+        </div>
+        <h1 class="h2 mb-3">Acesso negado</h1>
+        <p class="text-muted mb-4">
+            Você não tem permissão para acessar esta página. Se você acredita que isso é um erro, entre em contato com o suporte.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="/" class="btn btn-primary btn-lg">
+                <i class="bi bi-house me-2"></i>
+                Ir para Home
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('cliente.perfil') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-person me-2"></i>
+                Meu Perfil
+            </a>
+            {% else %}
+            <a href="/login" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Fazer Login
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
-
-<style>
-.error-page {
-    padding: 60px 0;
-}
-
-.error-page .display-1 {
-    font-size: 8rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-
-.error-actions {
-    margin-top: 2rem;
-}
-
-@media (max-width: 768px) {
-    .error-page .display-1 {
-        font-size: 5rem;
-    }
-}
-</style>
 {% endblock %}
