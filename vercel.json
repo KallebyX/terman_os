@@ -3,18 +3,13 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "app/static/**",
-      "use": "@vercel/static"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     }
   ],
   "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/app/static/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/api/index.py"
@@ -22,12 +17,13 @@
   ],
   "env": {
     "FLASK_ENV": "production",
-    "LOG_TO_STDOUT": "True"
+    "LOG_TO_STDOUT": "true",
+    "PYTHONUNBUFFERED": "1"
   },
   "functions": {
     "api/index.py": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }
