@@ -5,7 +5,9 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "50mb"
+        "maxLambdaSize": "50mb",
+        "memory": 1024,
+        "maxDuration": 60
       }
     }
   ],
@@ -19,11 +21,5 @@
     "FLASK_ENV": "production",
     "LOG_TO_STDOUT": "true",
     "PYTHONUNBUFFERED": "1"
-  },
-  "functions": {
-    "api/index.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
   }
 }
