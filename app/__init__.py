@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail
 from flask_caching import Cache
+from flask_wtf.csrf import CSRFProtect
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -16,6 +17,7 @@ login_manager.login_view = 'auth.login'
 limiter = Limiter(key_func=get_remote_address)
 mail = Mail()
 cache = Cache()
+csrf = CSRFProtect()
 
 def create_app():
     # On Vercel/serverless, the filesystem is read-only except /tmp
@@ -40,6 +42,7 @@ def create_app():
     limiter.init_app(app)
     mail.init_app(app)
     cache.init_app(app)
+    csrf.init_app(app)
 
     # Configurar logging
     setup_logging(app)
