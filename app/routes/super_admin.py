@@ -350,18 +350,24 @@ def reset_senha_usuario(user_id):
 @super_admin_required
 def configuracoes():
     """Pagina de configuracoes do sistema"""
-    # Inicializar configuracoes padrao se necessario
-    try:
-        Configuracao.init_defaults()
-    except Exception as e:
-        current_app.logger.warning(f'Erro ao inicializar configs: {e}')
-
-    # Agrupar configuracoes por categoria
     categorias = ['geral', 'email', 'api', 'pagamento', 'comunicacao', 'seguranca', 'loja']
-    configs_por_categoria = {}
+    configs_por_categoria = {cat: [] for cat in categorias}
 
-    for cat in categorias:
-        configs_por_categoria[cat] = Configuracao.get_by_categoria(cat)
+    try:
+        # Tentar criar tabela se nao existir (Vercel/serverless)
+        from app import db
+        db.create_all()
+
+        # Inicializar configuracoes padrao se necessario
+        Configuracao.init_defaults()
+
+        # Agrupar configuracoes por categoria
+        for cat in categorias:
+            configs_por_categoria[cat] = Configuracao.get_by_categoria(cat)
+
+    except Exception as e:
+        current_app.logger.warning(f'Erro ao carregar configs: {e}')
+        flash('Erro ao carregar configuracoes. Tente novamente.', 'warning')
 
     return render_template('super_admin/configuracoes.html',
         configs_por_categoria=configs_por_categoria,

@@ -73,6 +73,7 @@ def create_app():
     app.register_blueprint(super_admin_bp, url_prefix='/super-admin')
 
     from .models.user import User
+    from .models.configuracao import Configuracao
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -80,6 +81,15 @@ def create_app():
 
     # Registrar error handlers
     register_error_handlers(app)
+
+    # Criar tabelas automaticamente (para Vercel/serverless)
+    with app.app_context():
+        try:
+            # Criar tabela de configuracoes se nao existir
+            db.create_all()
+            app.logger.info('Tabelas verificadas/criadas com sucesso')
+        except Exception as e:
+            app.logger.warning(f'Aviso ao verificar tabelas: {e}')
 
     return app
 
