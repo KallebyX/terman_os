@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Editar' if contabilista else 'Novo' }} Contador | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .form-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-card h5 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+
+    .form-check {
+        padding: 0.75rem 1rem;
+        background: var(--background);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container" style="max-width: 800px;">
+        <!-- Header -->
+        <div class="mb-4">
+            <a href="{{ url_for('fiscal.contabilistas') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <h1 class="h3 fw-bold mb-0">{{ 'Editar Contador' if contabilista else 'Novo Contador' }}</h1>
+        </div>
+
+        <form action="{{ url_for('fiscal.contabilista_salvar') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if contabilista %}
+            <input type="hidden" name="id" value="{{ contabilista.id }}">
+            {% endif %}
+
+            <!-- Dados Pessoais -->
+            <div class="form-card">
+                <h5><i class="bi bi-person me-2 text-primary"></i>Dados do Contador</h5>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Nome Completo</label>
+                        <input type="text" class="form-control" name="nome" value="{{ contabilista.nome if contabilista else '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">CPF</label>
+                        <input type="text" class="form-control" name="cpf" value="{{ contabilista.cpf if contabilista else '' }}" placeholder="000.000.000-00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">CRC</label>
+                        <input type="text" class="form-control" name="crc" value="{{ contabilista.crc if contabilista else '' }}" required placeholder="Numero do CRC">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">UF CRC</label>
+                        <select class="form-select" name="uf_crc" required>
+                            <option value="">Selecione</option>
+                            {% for uf in ufs %}
+                            <option value="{{ uf }}" {{ 'selected' if contabilista and contabilista.uf_crc == uf else '' }}>{{ uf }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">CNPJ do Escritorio</label>
+                        <input type="text" class="form-control" name="cnpj" value="{{ contabilista.cnpj if contabilista else '' }}" placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contato -->
+            <div class="form-card">
+                <h5><i class="bi bi-telephone me-2 text-primary"></i>Contato</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">E-mail Principal</label>
+                        <input type="email" class="form-control" name="email" value="{{ contabilista.email if contabilista else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">E-mail Secundario</label>
+                        <input type="email" class="form-control" name="email_secundario" value="{{ contabilista.email_secundario if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Telefone</label>
+                        <input type="text" class="form-control" name="telefone" value="{{ contabilista.telefone if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Celular</label>
+                        <input type="text" class="form-control" name="celular" value="{{ contabilista.celular if contabilista else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escritorio -->
+            <div class="form-card">
+                <h5><i class="bi bi-building me-2 text-primary"></i>Escritorio de Contabilidade</h5>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Nome do Escritorio</label>
+                        <input type="text" class="form-control" name="escritorio_nome" value="{{ contabilista.escritorio_nome if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Logradouro</label>
+                        <input type="text" class="form-control" name="logradouro" value="{{ contabilista.logradouro if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Numero</label>
+                        <input type="text" class="form-control" name="numero" value="{{ contabilista.numero if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Bairro</label>
+                        <input type="text" class="form-control" name="bairro" value="{{ contabilista.bairro if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Cidade</label>
+                        <input type="text" class="form-control" name="cidade" value="{{ contabilista.cidade if contabilista else '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">UF</label>
+                        <select class="form-select" name="uf">
+                            <option value="">-</option>
+                            {% for uf in ufs %}
+                            <option value="{{ uf }}" {{ 'selected' if contabilista and contabilista.uf == uf else '' }}>{{ uf }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">CEP</label>
+                        <input type="text" class="form-control" name="cep" value="{{ contabilista.cep if contabilista else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuracoes de Envio -->
+            <div class="form-card">
+                <h5><i class="bi bi-envelope me-2 text-primary"></i>Configuracoes de Envio</h5>
+                <p class="text-muted">Selecione quais documentos devem ser enviados automaticamente</p>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="receber_nfe_xml" id="xml" {{ 'checked' if not contabilista or contabilista.receber_nfe_xml else '' }}>
+                            <label class="form-check-label" for="xml">
+                                <strong>XML da NFe</strong>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="receber_nfe_pdf" id="pdf" {{ 'checked' if not contabilista or contabilista.receber_nfe_pdf else '' }}>
+                            <label class="form-check-label" for="pdf">
+                                <strong>DANFE (PDF)</strong>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="receber_nfe_cancelamento" id="cancelamento" {{ 'checked' if not contabilista or contabilista.receber_nfe_cancelamento else '' }}>
+                            <label class="form-check-label" for="cancelamento">
+                                <strong>Cancelamentos</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="receber_nfe_carta_correcao" id="cce" {{ 'checked' if not contabilista or contabilista.receber_nfe_carta_correcao else '' }}>
+                            <label class="form-check-label" for="cce">
+                                <strong>Cartas de Correcao</strong>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="receber_relatorios" id="relatorios" {{ 'checked' if contabilista and contabilista.receber_relatorios else '' }}>
+                            <label class="form-check-label" for="relatorios">
+                                <strong>Relatorios Periodicos</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Frequencia de Relatorios</label>
+                        <select class="form-select" name="frequencia_relatorios">
+                            <option value="diario" {{ 'selected' if contabilista and contabilista.frequencia_relatorios == 'diario' else '' }}>Diario</option>
+                            <option value="semanal" {{ 'selected' if contabilista and contabilista.frequencia_relatorios == 'semanal' else '' }}>Semanal</option>
+                            <option value="mensal" {{ 'selected' if not contabilista or contabilista.frequencia_relatorios == 'mensal' else '' }}>Mensal</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="form-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="ativo" id="ativo" {{ 'checked' if not contabilista or contabilista.ativo else '' }}>
+                            <label class="form-check-label" for="ativo">
+                                <strong>Contador Ativo</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="principal" id="principal" {{ 'checked' if contabilista and contabilista.principal else '' }}>
+                            <label class="form-check-label" for="principal">
+                                <strong>Contador Principal</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('fiscal.contabilistas') }}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-check-lg me-2"></i>Salvar Contador
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

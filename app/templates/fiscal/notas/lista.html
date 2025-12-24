@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}Notas Fiscais | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .table-card {
+        background: var(--surface);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .table-card table {
+        margin-bottom: 0;
+    }
+
+    .table-card th {
+        background: var(--background);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table-card td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table-card tbody tr:hover {
+        background: rgba(0, 113, 227, 0.03);
+    }
+
+    .badge-status {
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge-autorizada { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .badge-cancelada { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .badge-rejeitada { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .badge-rascunho { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+    .badge-assinada { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+
+    .filter-bar {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+
+    .modelo-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .chave-acesso {
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .pagination-wrapper {
+        padding: 1rem;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.index') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Notas Fiscais Eletronicas</h1>
+                <p class="text-muted mb-0">Gerenciamento de NF-e e NFC-e</p>
+            </div>
+            <a href="{{ url_for('fiscal.pdv') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Nova Venda
+            </a>
+        </div>
+
+        <!-- Filtros -->
+        <form class="filter-bar" method="GET">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        <option value="rascunho" {{ 'selected' if status_atual == 'rascunho' else '' }}>Rascunho</option>
+                        <option value="autorizada" {{ 'selected' if status_atual == 'autorizada' else '' }}>Autorizada</option>
+                        <option value="cancelada" {{ 'selected' if status_atual == 'cancelada' else '' }}>Cancelada</option>
+                        <option value="rejeitada" {{ 'selected' if status_atual == 'rejeitada' else '' }}>Rejeitada</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Modelo</label>
+                    <select name="modelo" class="form-select form-select-sm">
+                        <option value="">Todos</option>
+                        <option value="55" {{ 'selected' if modelo_atual == '55' else '' }}>NF-e (55)</option>
+                        <option value="65" {{ 'selected' if modelo_atual == '65' else '' }}>NFC-e (65)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Data Inicio</label>
+                    <input type="date" name="data_inicio" class="form-control form-control-sm" value="{{ request.args.get('data_inicio', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Data Fim</label>
+                    <input type="date" name="data_fim" class="form-control form-control-sm" value="{{ request.args.get('data_fim', '') }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">
+                        <i class="bi bi-funnel me-1"></i>Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a href="{{ url_for('fiscal.notas') }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="bi bi-x-lg me-1"></i>Limpar
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Tabela -->
+        <div class="table-card">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Numero/Serie</th>
+                        <th>Modelo</th>
+                        <th>Destinatario</th>
+                        <th>Valor Total</th>
+                        <th>Data Emissao</th>
+                        <th>Status</th>
+                        <th>Chave de Acesso</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if notas.items %}
+                        {% for nota in notas.items %}
+                        <tr>
+                            <td>
+                                <strong>{{ nota.numero }}</strong>
+                                <span class="text-muted">/ {{ nota.serie }}</span>
+                            </td>
+                            <td>
+                                {% if nota.modelo == '55' %}
+                                <span class="modelo-badge bg-primary text-white">NF-e</span>
+                                {% else %}
+                                <span class="modelo-badge bg-info text-white">NFC-e</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ nota.destinatario_razao_social or 'Consumidor' }}
+                                {% if nota.destinatario_cpf_cnpj %}
+                                <br><small class="text-muted">{{ nota.destinatario_cpf_cnpj }}</small>
+                                {% endif %}
+                            </td>
+                            <td><strong>R$ {{ "%.2f"|format(nota.valor_total or 0) }}</strong></td>
+                            <td>{{ nota.data_emissao.strftime('%d/%m/%Y %H:%M') if nota.data_emissao else '-' }}</td>
+                            <td>
+                                {% if nota.cancelada %}
+                                <span class="badge-status badge-cancelada">Cancelada</span>
+                                {% elif nota.status == 'autorizada' %}
+                                <span class="badge-status badge-autorizada">Autorizada</span>
+                                {% elif nota.status == 'rejeitada' %}
+                                <span class="badge-status badge-rejeitada">Rejeitada</span>
+                                {% elif nota.status == 'assinada' %}
+                                <span class="badge-status badge-assinada">Assinada</span>
+                                {% else %}
+                                <span class="badge-status badge-rascunho">{{ nota.status|capitalize }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if nota.chave_acesso %}
+                                <span class="chave-acesso" title="{{ nota.chave_acesso }}">
+                                    {{ nota.chave_acesso[:20] }}...
+                                </span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ url_for('fiscal.nota_detalhe', id=nota.id) }}" class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if nota.status == 'autorizada' and nota.xml_nfe %}
+                                    <a href="{{ url_for('fiscal.nota_xml', id=nota.id) }}" class="btn btn-sm btn-outline-secondary" title="Baixar XML">
+                                        <i class="bi bi-code-slash"></i>
+                                    </a>
+                                    <a href="{{ url_for('fiscal.nota_danfe', id=nota.id) }}" class="btn btn-sm btn-outline-secondary" title="DANFE PDF" target="_blank">
+                                        <i class="bi bi-file-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-file-earmark-x" style="font-size: 3rem;"></i>
+                                <p class="mt-3 mb-0">Nenhuma nota fiscal encontrada</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            {% if notas.pages > 1 %}
+            <div class="pagination-wrapper">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if notas.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('fiscal.notas', page=notas.prev_num, status=status_atual, modelo=modelo_atual) }}">Anterior</a>
+                        </li>
+                        {% endif %}
+
+                        {% for p in notas.iter_pages() %}
+                            {% if p %}
+                            <li class="page-item {{ 'active' if p == notas.page else '' }}">
+                                <a class="page-link" href="{{ url_for('fiscal.notas', page=p, status=status_atual, modelo=modelo_atual) }}">{{ p }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if notas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('fiscal.notas', page=notas.next_num, status=status_atual, modelo=modelo_atual) }}">Proximo</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

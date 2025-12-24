@@ -1,0 +1,960 @@
+{% extends 'base.html' %}
+
+{% block title %}PDV - Ponto de Venda | NFC-e{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --pdv-bg: #0a0a0a;
+        --pdv-surface: #1a1a1a;
+        --pdv-card: #242424;
+        --pdv-border: #333;
+        --pdv-text: #fff;
+        --pdv-muted: #888;
+        --pdv-primary: #0071e3;
+        --pdv-success: #22c55e;
+        --pdv-danger: #ef4444;
+    }
+
+    body {
+        background: var(--pdv-bg) !important;
+    }
+
+    .pdv-container {
+        min-height: calc(100vh - 52px);
+        padding: 1rem;
+    }
+
+    .pdv-header {
+        background: var(--pdv-surface);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pdv-header h1 {
+        color: var(--pdv-text);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .pdv-status {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-online {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+    }
+
+    .status-offline {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .pdv-main {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 1rem;
+        height: calc(100vh - 180px);
+    }
+
+    .pdv-left {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .pdv-right {
+        background: var(--pdv-surface);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .search-bar {
+        background: var(--pdv-card);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .search-input {
+        background: var(--pdv-surface);
+        border: 2px solid var(--pdv-border);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        color: var(--pdv-text);
+        font-size: 1.125rem;
+        width: 100%;
+        transition: all 0.2s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--pdv-primary);
+    }
+
+    .search-input::placeholder {
+        color: var(--pdv-muted);
+    }
+
+    .items-grid {
+        background: var(--pdv-card);
+        border-radius: 12px;
+        padding: 1rem;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .items-table {
+        width: 100%;
+        color: var(--pdv-text);
+    }
+
+    .items-table th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--pdv-muted);
+        border-bottom: 1px solid var(--pdv-border);
+    }
+
+    .items-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--pdv-border);
+        vertical-align: middle;
+    }
+
+    .items-table tr:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .item-qty {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: var(--pdv-surface);
+        color: var(--pdv-text);
+        font-size: 1.25rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qty-btn:hover {
+        background: var(--pdv-primary);
+    }
+
+    .qty-value {
+        min-width: 40px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .remove-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        cursor: pointer;
+    }
+
+    .remove-btn:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .cart-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--pdv-border);
+    }
+
+    .cart-header h2 {
+        color: var(--pdv-text);
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .cart-items {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--pdv-border);
+    }
+
+    .cart-item-name {
+        color: var(--pdv-text);
+        font-weight: 500;
+    }
+
+    .cart-item-details {
+        color: var(--pdv-muted);
+        font-size: 0.875rem;
+    }
+
+    .cart-item-total {
+        color: var(--pdv-text);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .cart-totals {
+        padding: 1.5rem;
+        background: var(--pdv-card);
+        border-top: 1px solid var(--pdv-border);
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: var(--pdv-muted);
+    }
+
+    .total-row.grand {
+        color: var(--pdv-text);
+        font-size: 1.5rem;
+        font-weight: 700;
+        padding-top: 1rem;
+        border-top: 1px solid var(--pdv-border);
+    }
+
+    .cart-actions {
+        padding: 1rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-pdv {
+        padding: 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-finalizar {
+        background: var(--pdv-success);
+        color: white;
+    }
+
+    .btn-finalizar:hover {
+        background: #16a34a;
+    }
+
+    .btn-finalizar:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-cancelar {
+        background: var(--pdv-danger);
+        color: white;
+    }
+
+    .btn-cancelar:hover {
+        background: #dc2626;
+    }
+
+    .btn-pagamento {
+        background: var(--pdv-card);
+        color: var(--pdv-text);
+        border: 2px solid var(--pdv-border);
+    }
+
+    .btn-pagamento:hover, .btn-pagamento.active {
+        border-color: var(--pdv-primary);
+        background: rgba(0, 113, 227, 0.2);
+    }
+
+    .payment-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .payment-btn {
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 2px solid var(--pdv-border);
+        background: var(--pdv-card);
+        color: var(--pdv-muted);
+        cursor: pointer;
+        text-align: center;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .payment-btn:hover, .payment-btn.selected {
+        border-color: var(--pdv-primary);
+        color: var(--pdv-primary);
+        background: rgba(0, 113, 227, 0.1);
+    }
+
+    .payment-btn i {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .empty-cart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--pdv-muted);
+    }
+
+    .empty-cart i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--pdv-surface);
+        border: 1px solid var(--pdv-border);
+        border-radius: 10px;
+        margin-top: 0.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+    }
+
+    .search-results.show {
+        display: block;
+    }
+
+    .search-result-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--pdv-border);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        color: var(--pdv-text);
+    }
+
+    .search-result-item:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-code {
+        color: var(--pdv-muted);
+        font-size: 0.875rem;
+    }
+
+    .product-price {
+        color: var(--pdv-success);
+        font-weight: 600;
+    }
+
+    .cliente-info {
+        background: var(--pdv-card);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .cliente-info input {
+        background: var(--pdv-surface);
+        border: 1px solid var(--pdv-border);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        color: var(--pdv-text);
+        font-size: 0.875rem;
+        width: 100%;
+    }
+
+    .cliente-info input:focus {
+        outline: none;
+        border-color: var(--pdv-primary);
+    }
+
+    .cliente-info label {
+        color: var(--pdv-muted);
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .shortcut-hint {
+        color: var(--pdv-muted);
+        font-size: 0.75rem;
+        text-align: center;
+        padding: 0.5rem;
+    }
+
+    .modal-pdv .modal-content {
+        background: var(--pdv-surface);
+        border: 1px solid var(--pdv-border);
+        border-radius: 16px;
+    }
+
+    .modal-pdv .modal-header {
+        border-bottom: 1px solid var(--pdv-border);
+        padding: 1.5rem;
+    }
+
+    .modal-pdv .modal-title {
+        color: var(--pdv-text);
+        font-weight: 700;
+    }
+
+    .modal-pdv .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-pdv .btn-close {
+        filter: invert(1);
+    }
+
+    .nfe-resultado {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .nfe-resultado.sucesso i {
+        color: var(--pdv-success);
+        font-size: 4rem;
+    }
+
+    .nfe-resultado.erro i {
+        color: var(--pdv-danger);
+        font-size: 4rem;
+    }
+
+    .nfe-chave {
+        background: var(--pdv-card);
+        padding: 1rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.875rem;
+        color: var(--pdv-text);
+        word-break: break-all;
+        margin: 1rem 0;
+    }
+
+    @media (max-width: 1024px) {
+        .pdv-main {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+
+        .pdv-right {
+            min-height: 400px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pdv-container">
+    <!-- Header -->
+    <div class="pdv-header">
+        <div>
+            <h1><i class="bi bi-cart-check me-2"></i>PDV - Ponto de Venda</h1>
+            <small style="color: var(--pdv-muted)">{{ empresa.nome_fantasia or empresa.razao_social }}</small>
+        </div>
+        <div class="pdv-status">
+            <div class="status-badge {{ 'status-online' if empresa.ambiente_nfe == 1 else 'status-offline' }}" id="sefazStatus">
+                <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                {{ 'PRODUCAO' if empresa.ambiente_nfe == 1 else 'HOMOLOGACAO' }}
+            </div>
+            <a href="{{ url_for('fiscal.index') }}" class="btn btn-sm" style="background: var(--pdv-card); color: var(--pdv-text);">
+                <i class="bi bi-arrow-left me-1"></i>Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="pdv-main">
+        <!-- Left Panel - Products -->
+        <div class="pdv-left">
+            <div class="search-bar" style="position: relative;">
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar produto (codigo, nome ou codigo de barras)..." autofocus>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="items-grid">
+                <table class="items-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">#</th>
+                            <th>Produto</th>
+                            <th style="width: 120px;">Quantidade</th>
+                            <th style="width: 120px;">Preco Unit.</th>
+                            <th style="width: 120px;">Total</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <!-- Items serao adicionados via JS -->
+                    </tbody>
+                </table>
+
+                <div class="empty-cart" id="emptyMessage">
+                    <i class="bi bi-cart-x"></i>
+                    <p>Nenhum produto adicionado</p>
+                    <small>Digite o codigo ou nome do produto para buscar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Cart Summary -->
+        <div class="pdv-right">
+            <div class="cart-header">
+                <h2><i class="bi bi-receipt me-2"></i>Resumo da Venda</h2>
+            </div>
+
+            <div class="cart-items">
+                <!-- Cliente -->
+                <div class="cliente-info">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label>CPF/CNPJ</label>
+                            <input type="text" id="clienteCpfCnpj" placeholder="Opcional">
+                        </div>
+                        <div class="col-6">
+                            <label>Nome</label>
+                            <input type="text" id="clienteNome" placeholder="Consumidor">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forma de Pagamento -->
+                <div class="payment-options">
+                    <div class="payment-btn selected" data-forma="01">
+                        <i class="bi bi-cash"></i>
+                        Dinheiro
+                    </div>
+                    <div class="payment-btn" data-forma="04">
+                        <i class="bi bi-credit-card"></i>
+                        Debito
+                    </div>
+                    <div class="payment-btn" data-forma="03">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        Credito
+                    </div>
+                    <div class="payment-btn" data-forma="17">
+                        <i class="bi bi-qr-code"></i>
+                        PIX
+                    </div>
+                    <div class="payment-btn" data-forma="15">
+                        <i class="bi bi-upc"></i>
+                        Boleto
+                    </div>
+                    <div class="payment-btn" data-forma="99">
+                        <i class="bi bi-three-dots"></i>
+                        Outros
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-totals">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="total-row">
+                    <span>Desconto</span>
+                    <span id="desconto">R$ 0,00</span>
+                </div>
+                <div class="total-row grand">
+                    <span>TOTAL</span>
+                    <span id="total">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="cart-actions">
+                <button class="btn-pdv btn-finalizar" id="btnFinalizar" disabled>
+                    <i class="bi bi-check-circle"></i>
+                    Finalizar Venda (F12)
+                </button>
+                <button class="btn-pdv btn-cancelar" id="btnCancelar">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar (ESC)
+                </button>
+            </div>
+
+            <div class="shortcut-hint">
+                F2: Buscar | F12: Finalizar | ESC: Cancelar | +/-: Quantidade
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Resultado -->
+<div class="modal fade modal-pdv" id="modalResultado" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Resultado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteudo dinamico -->
+            </div>
+            <div class="modal-footer border-0" id="modalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btnNovaVenda">Nova Venda</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Estado da venda
+    let itens = [];
+    let itemAtual = 0;
+    let formaPagamento = '01';
+    let processando = false;
+
+    // Elementos
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const itemsBody = document.getElementById('itemsBody');
+    const emptyMessage = document.getElementById('emptyMessage');
+    const btnFinalizar = document.getElementById('btnFinalizar');
+    const btnCancelar = document.getElementById('btnCancelar');
+
+    // Formatar moeda
+    function formatarMoeda(valor) {
+        return 'R$ ' + valor.toFixed(2).replace('.', ',');
+    }
+
+    // Buscar produtos
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const termo = this.value.trim();
+
+        if (termo.length < 2) {
+            searchResults.classList.remove('show');
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/fiscal/pdv/buscar-produto?q=${encodeURIComponent(termo)}`)
+                .then(r => r.json())
+                .then(produtos => {
+                    if (produtos.length === 0) {
+                        searchResults.innerHTML = '<div class="search-result-item" style="color: var(--pdv-muted);">Nenhum produto encontrado</div>';
+                    } else {
+                        searchResults.innerHTML = produtos.map(p => `
+                            <div class="search-result-item" onclick="adicionarProduto(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                                <div>
+                                    <div>${p.nome}</div>
+                                    <div class="product-code">Cod: ${p.codigo}</div>
+                                </div>
+                                <div class="product-price">${formatarMoeda(p.preco)}</div>
+                            </div>
+                        `).join('');
+                    }
+                    searchResults.classList.add('show');
+                });
+        }, 300);
+    });
+
+    // Fechar busca ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.remove('show');
+        }
+    });
+
+    // Adicionar produto
+    function adicionarProduto(produto) {
+        // Verificar se ja existe
+        const existente = itens.find(i => i.produto_id === produto.id);
+        if (existente) {
+            existente.quantidade++;
+            existente.total = existente.quantidade * existente.valor_unitario;
+        } else {
+            itemAtual++;
+            itens.push({
+                numero: itemAtual,
+                produto_id: produto.id,
+                codigo: produto.codigo,
+                descricao: produto.nome,
+                ncm: produto.ncm,
+                cfop: produto.cfop || '5102',
+                unidade: produto.unidade,
+                quantidade: 1,
+                valor_unitario: produto.preco,
+                total: produto.preco,
+                desconto: 0
+            });
+        }
+
+        searchInput.value = '';
+        searchResults.classList.remove('show');
+        atualizarTabela();
+        searchInput.focus();
+    }
+
+    // Atualizar tabela
+    function atualizarTabela() {
+        if (itens.length === 0) {
+            emptyMessage.style.display = 'flex';
+            itemsBody.innerHTML = '';
+            btnFinalizar.disabled = true;
+        } else {
+            emptyMessage.style.display = 'none';
+            itemsBody.innerHTML = itens.map((item, idx) => `
+                <tr>
+                    <td>${item.numero}</td>
+                    <td>
+                        <div>${item.descricao}</div>
+                        <small style="color: var(--pdv-muted);">${item.codigo}</small>
+                    </td>
+                    <td>
+                        <div class="item-qty">
+                            <button class="qty-btn" onclick="alterarQuantidade(${idx}, -1)">-</button>
+                            <span class="qty-value">${item.quantidade}</span>
+                            <button class="qty-btn" onclick="alterarQuantidade(${idx}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td>${formatarMoeda(item.valor_unitario)}</td>
+                    <td><strong>${formatarMoeda(item.total)}</strong></td>
+                    <td>
+                        <button class="remove-btn" onclick="removerItem(${idx})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            btnFinalizar.disabled = false;
+        }
+
+        atualizarTotais();
+    }
+
+    // Alterar quantidade
+    function alterarQuantidade(idx, delta) {
+        const item = itens[idx];
+        item.quantidade += delta;
+        if (item.quantidade < 1) item.quantidade = 1;
+        item.total = item.quantidade * item.valor_unitario - item.desconto;
+        atualizarTabela();
+    }
+
+    // Remover item
+    function removerItem(idx) {
+        itens.splice(idx, 1);
+        atualizarTabela();
+    }
+
+    // Atualizar totais
+    function atualizarTotais() {
+        const subtotal = itens.reduce((sum, i) => sum + i.total, 0);
+        const desconto = 0;
+        const total = subtotal - desconto;
+
+        document.getElementById('subtotal').textContent = formatarMoeda(subtotal);
+        document.getElementById('desconto').textContent = formatarMoeda(desconto);
+        document.getElementById('total').textContent = formatarMoeda(total);
+    }
+
+    // Formas de pagamento
+    document.querySelectorAll('.payment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            formaPagamento = this.dataset.forma;
+        });
+    });
+
+    // Finalizar venda
+    btnFinalizar.addEventListener('click', finalizarVenda);
+
+    async function finalizarVenda() {
+        if (processando || itens.length === 0) return;
+        processando = true;
+        btnFinalizar.disabled = true;
+        btnFinalizar.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
+
+        const dados = {
+            modelo: '65', // NFC-e
+            natureza_operacao: 'Venda de Mercadoria',
+            cliente_cpf_cnpj: document.getElementById('clienteCpfCnpj').value,
+            cliente_nome: document.getElementById('clienteNome').value || 'CONSUMIDOR NAO IDENTIFICADO',
+            forma_pagamento: formaPagamento,
+            itens: itens.map(i => ({
+                produto_id: i.produto_id,
+                codigo: i.codigo,
+                descricao: i.descricao,
+                ncm: i.ncm,
+                cfop: i.cfop,
+                quantidade: i.quantidade,
+                valor_unitario: i.valor_unitario,
+                desconto: i.desconto || 0
+            })),
+            desconto_total: 0
+        };
+
+        try {
+            const response = await fetch('/fiscal/pdv/emitir-nfe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(dados)
+            });
+
+            const resultado = await response.json();
+
+            const modal = new bootstrap.Modal(document.getElementById('modalResultado'));
+
+            if (resultado.sucesso) {
+                document.getElementById('modalTitulo').textContent = 'Venda Finalizada com Sucesso!';
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="nfe-resultado sucesso">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <h4 class="mt-3">NFC-e Autorizada</h4>
+                        <p class="text-muted">Protocolo: ${resultado.protocolo}</p>
+                        <div class="nfe-chave">${resultado.chave_acesso}</div>
+                        <div class="d-flex gap-2 justify-content-center mt-3">
+                            <a href="/fiscal/notas/${resultado.nota_id}/danfe" target="_blank" class="btn btn-primary">
+                                <i class="bi bi-printer me-1"></i>Imprimir DANFE
+                            </a>
+                        </div>
+                    </div>
+                `;
+                // Limpar venda
+                itens = [];
+                itemAtual = 0;
+                document.getElementById('clienteCpfCnpj').value = '';
+                document.getElementById('clienteNome').value = '';
+                atualizarTabela();
+            } else {
+                document.getElementById('modalTitulo').textContent = 'Erro na Emissao';
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="nfe-resultado erro">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <h4 class="mt-3">Nota Rejeitada</h4>
+                        <p class="text-danger">${resultado.erro}</p>
+                        ${resultado.codigo ? `<p class="text-muted">Codigo: ${resultado.codigo}</p>` : ''}
+                    </div>
+                `;
+            }
+
+            modal.show();
+        } catch (error) {
+            alert('Erro ao processar: ' + error.message);
+        }
+
+        processando = false;
+        btnFinalizar.disabled = false;
+        btnFinalizar.innerHTML = '<i class="bi bi-check-circle"></i> Finalizar Venda (F12)';
+    }
+
+    // Cancelar venda
+    btnCancelar.addEventListener('click', function() {
+        if (itens.length > 0 && !confirm('Tem certeza que deseja cancelar esta venda?')) {
+            return;
+        }
+        itens = [];
+        itemAtual = 0;
+        document.getElementById('clienteCpfCnpj').value = '';
+        document.getElementById('clienteNome').value = '';
+        atualizarTabela();
+        searchInput.focus();
+    });
+
+    // Nova venda
+    document.getElementById('btnNovaVenda').addEventListener('click', function() {
+        bootstrap.Modal.getInstance(document.getElementById('modalResultado')).hide();
+        searchInput.focus();
+    });
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F2') {
+            e.preventDefault();
+            searchInput.focus();
+        } else if (e.key === 'F12') {
+            e.preventDefault();
+            if (!btnFinalizar.disabled) {
+                finalizarVenda();
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            btnCancelar.click();
+        }
+    });
+
+    // Verificar status SEFAZ
+    function verificarSefaz() {
+        fetch('/fiscal/status-sefaz')
+            .then(r => r.json())
+            .then(status => {
+                const badge = document.getElementById('sefazStatus');
+                if (status.online) {
+                    badge.classList.remove('status-offline');
+                    badge.classList.add('status-online');
+                } else {
+                    badge.classList.remove('status-online');
+                    badge.classList.add('status-offline');
+                }
+            });
+    }
+
+    // Verificar status a cada 5 minutos
+    setInterval(verificarSefaz, 300000);
+</script>
+{% endblock %}

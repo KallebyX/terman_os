@@ -1,0 +1,523 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuracao de Impostos | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .config-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .config-card h5 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .tax-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .tax-icon.icms { background: rgba(0, 113, 227, 0.15); color: #0071e3; }
+    .tax-icon.ipi { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+    .tax-icon.pis { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
+    .tax-icon.cofins { background: rgba(175, 82, 222, 0.15); color: #af52de; }
+    .tax-icon.iss { background: rgba(90, 200, 250, 0.15); color: #5ac8fa; }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .nav-pills .nav-link.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .aliquota-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .aliquota-item {
+        background: var(--background);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .aliquota-item label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .aliquota-item input {
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .cst-table {
+        width: 100%;
+    }
+
+    .cst-table th, .cst-table td {
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .cst-table th {
+        background: var(--background);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .cst-table tr:hover td {
+        background: var(--background);
+    }
+
+    .regime-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 2px solid var(--border);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .regime-card:hover {
+        border-color: var(--primary);
+    }
+
+    .regime-card.selected {
+        border-color: var(--primary);
+        background: rgba(0, 113, 227, 0.05);
+    }
+
+    .regime-card input[type="radio"] {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.dashboard') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Configuracao de Impostos</h1>
+                <p class="text-muted mb-0">Configure aliquotas e CST/CSOSN padrao</p>
+            </div>
+            <button type="submit" form="form-impostos" class="btn btn-primary px-4">
+                <i class="bi bi-check-lg me-2"></i>Salvar Configuracoes
+            </button>
+        </div>
+
+        <form id="form-impostos" action="{{ url_for('fiscal.impostos_salvar') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Regime Tributario -->
+            <div class="config-card">
+                <h5><i class="bi bi-building me-2 text-primary"></i>Regime Tributario</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="regime-card {{ 'selected' if config.regime_tributario == 1 else '' }}">
+                            <input type="radio" name="regime_tributario" value="1" {{ 'checked' if config.regime_tributario == 1 else '' }}>
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <div class="tax-icon icms"><i class="bi bi-1-circle"></i></div>
+                                <h6 class="fw-bold mb-0">Simples Nacional</h6>
+                            </div>
+                            <p class="text-muted small mb-0">ME e EPP com receita bruta ate R$ 4.8 milhoes/ano. Utiliza CSOSN.</p>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="regime-card {{ 'selected' if config.regime_tributario == 2 else '' }}">
+                            <input type="radio" name="regime_tributario" value="2" {{ 'checked' if config.regime_tributario == 2 else '' }}>
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <div class="tax-icon ipi"><i class="bi bi-2-circle"></i></div>
+                                <h6 class="fw-bold mb-0">SN Excesso Sublimite</h6>
+                            </div>
+                            <p class="text-muted small mb-0">Simples Nacional com receita acima do sublimite estadual.</p>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="regime-card {{ 'selected' if config.regime_tributario == 3 else '' }}">
+                            <input type="radio" name="regime_tributario" value="3" {{ 'checked' if config.regime_tributario == 3 else '' }}>
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <div class="tax-icon pis"><i class="bi bi-3-circle"></i></div>
+                                <h6 class="fw-bold mb-0">Regime Normal</h6>
+                            </div>
+                            <p class="text-muted small mb-0">Lucro Presumido ou Lucro Real. Utiliza CST.</p>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs de Impostos -->
+            <ul class="nav nav-pills mb-4" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#icms-tab">
+                        <i class="bi bi-percent me-2"></i>ICMS
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#ipi-tab">
+                        <i class="bi bi-box me-2"></i>IPI
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pis-cofins-tab">
+                        <i class="bi bi-cash me-2"></i>PIS/COFINS
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#cst-tab">
+                        <i class="bi bi-list-ol me-2"></i>CST/CSOSN Padrao
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- ICMS Tab -->
+                <div class="tab-pane fade show active" id="icms-tab">
+                    <div class="config-card">
+                        <h5><i class="bi bi-percent me-2 text-primary"></i>Aliquotas ICMS</h5>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Aliquota Interna Padrao (%)</label>
+                                <input type="number" class="form-control" name="icms_aliquota_interna" value="{{ config.icms_aliquota_interna or 17 }}" step="0.01" min="0" max="100">
+                                <small class="text-muted">Aliquota para operacoes dentro do estado</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Reducao Base de Calculo (%)</label>
+                                <input type="number" class="form-control" name="icms_reducao_bc" value="{{ config.icms_reducao_bc or 0 }}" step="0.01" min="0" max="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">MVA ICMS-ST (%)</label>
+                                <input type="number" class="form-control" name="icms_mva" value="{{ config.icms_mva or 0 }}" step="0.01" min="0">
+                                <small class="text-muted">Margem de Valor Agregado</small>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3">Aliquotas Interestaduais</h6>
+                        <div class="aliquota-grid">
+                            <div class="aliquota-item">
+                                <label>Sul/Sudeste</label>
+                                <input type="number" class="form-control" name="icms_interestadual_sul" value="{{ config.icms_interestadual_sul or 12 }}" step="0.01">
+                            </div>
+                            <div class="aliquota-item">
+                                <label>N/NE/CO/ES</label>
+                                <input type="number" class="form-control" name="icms_interestadual_norte" value="{{ config.icms_interestadual_norte or 7 }}" step="0.01">
+                            </div>
+                            <div class="aliquota-item">
+                                <label>Importacao</label>
+                                <input type="number" class="form-control" name="icms_importacao" value="{{ config.icms_importacao or 4 }}" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IPI Tab -->
+                <div class="tab-pane fade" id="ipi-tab">
+                    <div class="config-card">
+                        <h5><i class="bi bi-box me-2 text-success"></i>Configuracao IPI</h5>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Aliquota IPI Padrao (%)</label>
+                                <input type="number" class="form-control" name="ipi_aliquota" value="{{ config.ipi_aliquota or 0 }}" step="0.01" min="0" max="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">CST IPI Entrada</label>
+                                <select class="form-select" name="ipi_cst_entrada">
+                                    <option value="00" {{ 'selected' if config.ipi_cst_entrada == '00' else '' }}>00 - Entrada com recuperacao de credito</option>
+                                    <option value="01" {{ 'selected' if config.ipi_cst_entrada == '01' else '' }}>01 - Entrada tributada com aliquota zero</option>
+                                    <option value="02" {{ 'selected' if config.ipi_cst_entrada == '02' else '' }}>02 - Entrada isenta</option>
+                                    <option value="03" {{ 'selected' if config.ipi_cst_entrada == '03' else '' }}>03 - Entrada nao-tributada</option>
+                                    <option value="04" {{ 'selected' if config.ipi_cst_entrada == '04' else '' }}>04 - Entrada imune</option>
+                                    <option value="05" {{ 'selected' if config.ipi_cst_entrada == '05' else '' }}>05 - Entrada com suspensao</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">CST IPI Saida</label>
+                                <select class="form-select" name="ipi_cst_saida">
+                                    <option value="50" {{ 'selected' if config.ipi_cst_saida == '50' else '' }}>50 - Saida tributada</option>
+                                    <option value="51" {{ 'selected' if config.ipi_cst_saida == '51' else '' }}>51 - Saida tributada com aliquota zero</option>
+                                    <option value="52" {{ 'selected' if config.ipi_cst_saida == '52' else '' }}>52 - Saida isenta</option>
+                                    <option value="53" {{ 'selected' if config.ipi_cst_saida == '53' else '' }}>53 - Saida nao-tributada</option>
+                                    <option value="54" {{ 'selected' if config.ipi_cst_saida == '54' else '' }}>54 - Saida imune</option>
+                                    <option value="55" {{ 'selected' if config.ipi_cst_saida == '55' else '' }}>55 - Saida com suspensao</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Dica:</strong> O IPI so e aplicavel para industrias (CNAE de industria) ou equiparados. Comercio atacadista/varejista geralmente nao tributa IPI na saida.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIS/COFINS Tab -->
+                <div class="tab-pane fade" id="pis-cofins-tab">
+                    <div class="config-card">
+                        <h5><i class="bi bi-cash me-2 text-warning"></i>Configuracao PIS/COFINS</h5>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-3 mb-3">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-percent me-2"></i>PIS</h6>
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <label class="form-label">Aliquota (%)</label>
+                                            <input type="number" class="form-control" name="pis_aliquota" value="{{ config.pis_aliquota or 0.65 }}" step="0.0001" min="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">CST PIS</label>
+                                            <select class="form-select" name="pis_cst">
+                                                <option value="01" {{ 'selected' if config.pis_cst == '01' else '' }}>01 - Op. Tributavel</option>
+                                                <option value="04" {{ 'selected' if config.pis_cst == '04' else '' }}>04 - Monofasica Revenda</option>
+                                                <option value="05" {{ 'selected' if config.pis_cst == '05' else '' }}>05 - ST</option>
+                                                <option value="06" {{ 'selected' if config.pis_cst == '06' else '' }}>06 - Aliquota Zero</option>
+                                                <option value="07" {{ 'selected' if config.pis_cst == '07' else '' }}>07 - Isenta</option>
+                                                <option value="08" {{ 'selected' if config.pis_cst == '08' else '' }}>08 - Sem Incidencia</option>
+                                                <option value="09" {{ 'selected' if config.pis_cst == '09' else '' }}>09 - Suspensao</option>
+                                                <option value="49" {{ 'selected' if config.pis_cst == '49' else '' }}>49 - Outras Saidas</option>
+                                                <option value="99" {{ 'selected' if config.pis_cst == '99' else '' }}>99 - Outras Operacoes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-3 mb-3">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-percent me-2"></i>COFINS</h6>
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <label class="form-label">Aliquota (%)</label>
+                                            <input type="number" class="form-control" name="cofins_aliquota" value="{{ config.cofins_aliquota or 3 }}" step="0.0001" min="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">CST COFINS</label>
+                                            <select class="form-select" name="cofins_cst">
+                                                <option value="01" {{ 'selected' if config.cofins_cst == '01' else '' }}>01 - Op. Tributavel</option>
+                                                <option value="04" {{ 'selected' if config.cofins_cst == '04' else '' }}>04 - Monofasica Revenda</option>
+                                                <option value="05" {{ 'selected' if config.cofins_cst == '05' else '' }}>05 - ST</option>
+                                                <option value="06" {{ 'selected' if config.cofins_cst == '06' else '' }}>06 - Aliquota Zero</option>
+                                                <option value="07" {{ 'selected' if config.cofins_cst == '07' else '' }}>07 - Isenta</option>
+                                                <option value="08" {{ 'selected' if config.cofins_cst == '08' else '' }}>08 - Sem Incidencia</option>
+                                                <option value="09" {{ 'selected' if config.cofins_cst == '09' else '' }}>09 - Suspensao</option>
+                                                <option value="49" {{ 'selected' if config.cofins_cst == '49' else '' }}>49 - Outras Saidas</option>
+                                                <option value="99" {{ 'selected' if config.cofins_cst == '99' else '' }}>99 - Outras Operacoes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Regime Cumulativo vs Nao-Cumulativo:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Cumulativo (Lucro Presumido):</strong> PIS 0,65% | COFINS 3,00%</li>
+                                <li><strong>Nao-Cumulativo (Lucro Real):</strong> PIS 1,65% | COFINS 7,60%</li>
+                                <li><strong>Simples Nacional:</strong> Tributos ja inclusos no DAS</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CST/CSOSN Tab -->
+                <div class="tab-pane fade" id="cst-tab">
+                    <div class="config-card">
+                        <h5><i class="bi bi-list-ol me-2 text-info"></i>CST/CSOSN Padrao por Operacao</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">CST ICMS (Regime Normal)</h6>
+                                <table class="cst-table">
+                                    <tr>
+                                        <th>Operacao</th>
+                                        <th>CST Padrao</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Venda</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="cst_venda">
+                                                <option value="00" {{ 'selected' if config.cst_venda == '00' else '' }}>00 - Tributada integralmente</option>
+                                                <option value="10" {{ 'selected' if config.cst_venda == '10' else '' }}>10 - Tributada com ICMS-ST</option>
+                                                <option value="20" {{ 'selected' if config.cst_venda == '20' else '' }}>20 - Com reducao BC</option>
+                                                <option value="30" {{ 'selected' if config.cst_venda == '30' else '' }}>30 - Isenta/Nao tributada com ST</option>
+                                                <option value="40" {{ 'selected' if config.cst_venda == '40' else '' }}>40 - Isenta</option>
+                                                <option value="41" {{ 'selected' if config.cst_venda == '41' else '' }}>41 - Nao tributada</option>
+                                                <option value="50" {{ 'selected' if config.cst_venda == '50' else '' }}>50 - Suspensao</option>
+                                                <option value="51" {{ 'selected' if config.cst_venda == '51' else '' }}>51 - Diferimento</option>
+                                                <option value="60" {{ 'selected' if config.cst_venda == '60' else '' }}>60 - ICMS cobrado anteriormente por ST</option>
+                                                <option value="70" {{ 'selected' if config.cst_venda == '70' else '' }}>70 - Reducao BC e ST</option>
+                                                <option value="90" {{ 'selected' if config.cst_venda == '90' else '' }}>90 - Outras</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Devolucao</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="cst_devolucao">
+                                                <option value="00" {{ 'selected' if config.cst_devolucao == '00' else '' }}>00 - Tributada integralmente</option>
+                                                <option value="41" {{ 'selected' if config.cst_devolucao == '41' else '' }}>41 - Nao tributada</option>
+                                                <option value="90" {{ 'selected' if config.cst_devolucao == '90' else '' }}>90 - Outras</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonificacao</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="cst_bonificacao">
+                                                <option value="00" {{ 'selected' if config.cst_bonificacao == '00' else '' }}>00 - Tributada integralmente</option>
+                                                <option value="41" {{ 'selected' if config.cst_bonificacao == '41' else '' }}>41 - Nao tributada</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">CSOSN (Simples Nacional)</h6>
+                                <table class="cst-table">
+                                    <tr>
+                                        <th>Operacao</th>
+                                        <th>CSOSN Padrao</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Venda</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="csosn_venda">
+                                                <option value="101" {{ 'selected' if config.csosn_venda == '101' else '' }}>101 - Tributada com permissao de credito</option>
+                                                <option value="102" {{ 'selected' if config.csosn_venda == '102' else '' }}>102 - Tributada sem permissao de credito</option>
+                                                <option value="103" {{ 'selected' if config.csosn_venda == '103' else '' }}>103 - Isencao ICMS para faixa receita bruta</option>
+                                                <option value="201" {{ 'selected' if config.csosn_venda == '201' else '' }}>201 - Tributada com ST e credito</option>
+                                                <option value="202" {{ 'selected' if config.csosn_venda == '202' else '' }}>202 - Tributada com ST sem credito</option>
+                                                <option value="203" {{ 'selected' if config.csosn_venda == '203' else '' }}>203 - Isencao ICMS com ST</option>
+                                                <option value="300" {{ 'selected' if config.csosn_venda == '300' else '' }}>300 - Imune</option>
+                                                <option value="400" {{ 'selected' if config.csosn_venda == '400' else '' }}>400 - Nao tributada</option>
+                                                <option value="500" {{ 'selected' if config.csosn_venda == '500' else '' }}>500 - ICMS cobrado anteriormente por ST</option>
+                                                <option value="900" {{ 'selected' if config.csosn_venda == '900' else '' }}>900 - Outros</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Devolucao</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="csosn_devolucao">
+                                                <option value="102" {{ 'selected' if config.csosn_devolucao == '102' else '' }}>102 - Tributada sem credito</option>
+                                                <option value="400" {{ 'selected' if config.csosn_devolucao == '400' else '' }}>400 - Nao tributada</option>
+                                                <option value="900" {{ 'selected' if config.csosn_devolucao == '900' else '' }}>900 - Outros</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonificacao</td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="csosn_bonificacao">
+                                                <option value="102" {{ 'selected' if config.csosn_bonificacao == '102' else '' }}>102 - Tributada sem credito</option>
+                                                <option value="400" {{ 'selected' if config.csosn_bonificacao == '400' else '' }}>400 - Nao tributada</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lei da Transparencia -->
+                    <div class="config-card">
+                        <h5><i class="bi bi-info-circle me-2 text-primary"></i>Lei da Transparencia (12.741/2012)</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" name="exibir_tributos_aproximados" id="exibir_tributos" {{ 'checked' if config.exibir_tributos_aproximados else '' }}>
+                                    <label class="form-check-label fw-bold" for="exibir_tributos">
+                                        Exibir tributos aproximados no DANFE/cupom
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block">
+                                    A Lei 12.741/2012 exige que o valor aproximado dos tributos seja informado ao consumidor. Os valores sao calculados com base na tabela IBPT.
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Fonte dos Dados</label>
+                                <select class="form-select" name="fonte_ibpt">
+                                    <option value="ibpt" {{ 'selected' if config.fonte_ibpt == 'ibpt' else '' }}>IBPT (De Olho no Imposto)</option>
+                                    <option value="manual" {{ 'selected' if config.fonte_ibpt == 'manual' else '' }}>Configuracao Manual</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Versao Tabela IBPT</label>
+                                <input type="text" class="form-control" value="{{ config.versao_ibpt or 'Nao carregada' }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Regime card selection
+    const regimeCards = document.querySelectorAll('.regime-card');
+    regimeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            regimeCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Initialize Bootstrap tabs
+    var triggerTabList = [].slice.call(document.querySelectorAll('[data-bs-toggle="pill"]'));
+    triggerTabList.forEach(function(triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl);
+    });
+});
+</script>
+{% endblock %}

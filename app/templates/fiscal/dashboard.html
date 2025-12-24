@@ -1,0 +1,480 @@
+{% extends 'base.html' %}
+
+{% block title %}PDV Fiscal - Dashboard | Terman OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.primary { background: rgba(0, 113, 227, 0.15); color: #0071e3; }
+    .stat-icon.success { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .stat-icon.warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .stat-icon.danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .quick-action {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        text-align: center;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: block;
+    }
+
+    .quick-action:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-4px);
+        border-color: var(--primary);
+    }
+
+    .quick-action i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .quick-action span {
+        font-weight: 600;
+    }
+
+    .alert-card {
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .alert-card.alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alert-card.alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .alert-card.alert-info {
+        background: rgba(0, 113, 227, 0.1);
+        border: 1px solid rgba(0, 113, 227, 0.3);
+    }
+
+    .table-fiscal {
+        background: var(--surface);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .table-fiscal th {
+        background: var(--background);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        padding: 1rem;
+    }
+
+    .table-fiscal td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .badge-status {
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge-autorizada { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .badge-cancelada { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .badge-rejeitada { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .badge-rascunho { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+
+    .sefaz-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .sefaz-online {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+
+    .sefaz-offline {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .fiscal-sidebar {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-nav li a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .sidebar-nav li a:hover,
+    .sidebar-nav li a.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .sidebar-nav li a i {
+        font-size: 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 mb-4">
+                <div class="fiscal-sidebar">
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Menu Fiscal</h6>
+                    <ul class="sidebar-nav">
+                        <li><a href="{{ url_for('fiscal.index') }}" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li><a href="{{ url_for('fiscal.pdv') }}"><i class="bi bi-cart-check"></i> PDV</a></li>
+                        <li><a href="{{ url_for('fiscal.notas') }}"><i class="bi bi-file-earmark-text"></i> Notas Fiscais</a></li>
+                        <li><a href="{{ url_for('fiscal.empresa') }}"><i class="bi bi-building"></i> Empresa</a></li>
+                        <li><a href="{{ url_for('fiscal.certificados') }}"><i class="bi bi-shield-check"></i> Certificados</a></li>
+                        <li><a href="{{ url_for('fiscal.contabilistas') }}"><i class="bi bi-person-badge"></i> Contadores</a></li>
+                        <li><a href="{{ url_for('fiscal.impostos') }}"><i class="bi bi-percent"></i> Impostos</a></li>
+                        <li><a href="{{ url_for('fiscal.inutilizacao') }}"><i class="bi bi-x-circle"></i> Inutilizacao</a></li>
+                        <li><a href="{{ url_for('fiscal.relatorios') }}"><i class="bi bi-bar-chart"></i> Relatorios</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-10">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 fw-bold mb-1">PDV Fiscal</h1>
+                        <p class="text-muted mb-0">Sistema de Ponto de Venda - NF-e/NFC-e</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if status_sefaz %}
+                        <div class="sefaz-status {{ 'sefaz-online' if status_sefaz.online else 'sefaz-offline' }}">
+                            <i class="bi {{ 'bi-check-circle-fill' if status_sefaz.online else 'bi-x-circle-fill' }}"></i>
+                            SEFAZ {{ 'Online' if status_sefaz.online else 'Offline' }}
+                        </div>
+                        {% endif %}
+                        <a href="{{ url_for('fiscal.pdv') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-2"></i>Nova Venda
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alertas -->
+                {% if alertas %}
+                <div class="mb-4">
+                    {% for alerta in alertas %}
+                    <div class="alert-card alert-{{ alerta.tipo }}">
+                        <i class="bi {{ 'bi-exclamation-triangle-fill' if alerta.tipo == 'danger' else 'bi-info-circle-fill' if alerta.tipo == 'info' else 'bi-exclamation-circle-fill' }}"></i>
+                        <div>
+                            <strong>{{ alerta.titulo }}</strong>
+                            <p class="mb-0 small">{{ alerta.mensagem }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Stats -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon primary">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-value">{{ total_notas }}</div>
+                                    <div class="stat-label">Notas no Mes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon success">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-value">{{ notas_autorizadas }}</div>
+                                    <div class="stat-label">Autorizadas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon danger">
+                                    <i class="bi bi-x-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-value">{{ notas_canceladas }}</div>
+                                    <div class="stat-label">Canceladas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stat-icon warning">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div>
+                                    <div class="stat-value">R$ {{ "%.2f"|format(valor_total_mes) }}</div>
+                                    <div class="stat-label">Faturamento Mes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-4">
+                    <h4 class="section-title">Acoes Rapidas</h4>
+                    <div class="row g-3">
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.pdv') }}" class="quick-action">
+                                <i class="bi bi-cart-plus"></i>
+                                <span>Nova Venda</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.notas') }}" class="quick-action">
+                                <i class="bi bi-file-text"></i>
+                                <span>Ver Notas</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.empresa') }}" class="quick-action">
+                                <i class="bi bi-building"></i>
+                                <span>Empresa</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.certificados') }}" class="quick-action">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Certificados</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.impostos') }}" class="quick-action">
+                                <i class="bi bi-percent"></i>
+                                <span>Impostos</span>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <a href="{{ url_for('fiscal.relatorios') }}" class="quick-action">
+                                <i class="bi bi-bar-chart"></i>
+                                <span>Relatorios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ultimas Notas -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">Ultimas Notas Fiscais</h4>
+                        <a href="{{ url_for('fiscal.notas') }}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+                    </div>
+
+                    <div class="table-fiscal">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Numero</th>
+                                    <th>Modelo</th>
+                                    <th>Destinatario</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if ultimas_notas %}
+                                    {% for nota in ultimas_notas %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ nota.numero }}</strong>
+                                            <small class="text-muted d-block">Serie {{ nota.serie }}</small>
+                                        </td>
+                                        <td>
+                                            {% if nota.modelo == '55' %}
+                                            <span class="badge bg-primary">NF-e</span>
+                                            {% else %}
+                                            <span class="badge bg-info">NFC-e</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ nota.destinatario_razao_social or 'Consumidor' }}</td>
+                                        <td><strong>R$ {{ "%.2f"|format(nota.valor_total or 0) }}</strong></td>
+                                        <td>{{ nota.data_emissao.strftime('%d/%m/%Y %H:%M') if nota.data_emissao else '-' }}</td>
+                                        <td>
+                                            {% if nota.cancelada %}
+                                            <span class="badge-status badge-cancelada">Cancelada</span>
+                                            {% elif nota.status == 'autorizada' %}
+                                            <span class="badge-status badge-autorizada">Autorizada</span>
+                                            {% elif nota.status == 'rejeitada' %}
+                                            <span class="badge-status badge-rejeitada">Rejeitada</span>
+                                            {% else %}
+                                            <span class="badge-status badge-rascunho">{{ nota.status|capitalize }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('fiscal.nota_detalhe', id=nota.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="bi bi-file-earmark-x" style="font-size: 3rem;"></i>
+                                            <p class="mt-3 mb-0">Nenhuma nota fiscal emitida ainda</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-building me-2"></i>Empresa Emissora</h5>
+                            {% if empresa %}
+                            <p class="mb-1"><strong>{{ empresa.razao_social }}</strong></p>
+                            <p class="text-muted small mb-1">CNPJ: {{ empresa.cnpj }}</p>
+                            <p class="text-muted small mb-1">IE: {{ empresa.inscricao_estadual }}</p>
+                            <p class="text-muted small mb-0">
+                                Regime: {{ regimes.get(empresa.regime_tributario, 'N/A') }}
+                            </p>
+                            <p class="mt-2 mb-0">
+                                <span class="badge {{ 'bg-warning' if empresa.ambiente_nfe == 2 else 'bg-success' }}">
+                                    {{ 'Homologacao' if empresa.ambiente_nfe == 2 else 'Producao' }}
+                                </span>
+                            </p>
+                            {% else %}
+                            <p class="text-muted">Empresa nao configurada</p>
+                            <a href="{{ url_for('fiscal.empresa') }}" class="btn btn-sm btn-primary">Configurar Empresa</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-shield-check me-2"></i>Certificado Digital</h5>
+                            {% if certificado %}
+                            <p class="mb-1"><strong>{{ certificado.nome }}</strong></p>
+                            <p class="text-muted small mb-1">Tipo: {{ certificado.tipo }}</p>
+                            <p class="text-muted small mb-1">CNPJ: {{ certificado.cnpj_certificado }}</p>
+                            <p class="text-muted small mb-0">
+                                Validade: {{ certificado.data_validade.strftime('%d/%m/%Y') if certificado.data_validade else 'N/A' }}
+                            </p>
+                            {% if certificado.esta_vencido %}
+                            <p class="mt-2 mb-0"><span class="badge bg-danger">Vencido</span></p>
+                            {% elif certificado.esta_proximo_vencer %}
+                            <p class="mt-2 mb-0"><span class="badge bg-warning">Vence em {{ certificado.dias_para_vencer }} dias</span></p>
+                            {% else %}
+                            <p class="mt-2 mb-0"><span class="badge bg-success">Valido</span></p>
+                            {% endif %}
+                            {% else %}
+                            <p class="text-muted">Certificado nao configurado</p>
+                            <a href="{{ url_for('fiscal.certificados') }}" class="btn btn-sm btn-primary">Configurar Certificado</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

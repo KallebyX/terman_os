@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Inutilizacao de Numeracao | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .form-card h5 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .list-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .inut-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .inut-item:last-child {
+        border-bottom: none;
+    }
+
+    .inut-item:hover {
+        background: var(--background);
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.homologado { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+    .status-badge.rejeitado { background: rgba(255, 45, 85, 0.15); color: #ff2d55; }
+    .status-badge.pendente { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
+
+    .numero-range {
+        background: var(--background);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.dashboard') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Inutilizacao de Numeracao</h1>
+                <p class="text-muted mb-0">Inutilize faixas de numeracao nao utilizadas</p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 2rem;"></i>
+                <div>
+                    <h5 class="fw-bold mb-2">Quando Inutilizar?</h5>
+                    <p class="mb-0">A inutilizacao deve ser feita quando houver quebra na sequencia da numeracao, seja por problemas tecnicos, cancelamentos ou outros motivos. A SEFAZ exige que toda numeracao seja justificada ate o dia 10 do mes subsequente.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Formulario -->
+            <div class="col-lg-5">
+                <div class="form-card">
+                    <h5><i class="bi bi-hash me-2 text-primary"></i>Nova Inutilizacao</h5>
+                    <form action="{{ url_for('fiscal.inutilizacao_salvar') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Modelo</label>
+                            <select class="form-select" name="modelo" required>
+                                <option value="55">NFe (Modelo 55)</option>
+                                <option value="65">NFCe (Modelo 65)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Serie</label>
+                            <input type="number" class="form-control" name="serie" value="1" min="1" max="999" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Numero Inicial</label>
+                                <input type="number" class="form-control" name="numero_inicial" min="1" required placeholder="Ex: 100">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Numero Final</label>
+                                <input type="number" class="form-control" name="numero_final" min="1" required placeholder="Ex: 105">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ano de Referencia</label>
+                            <input type="number" class="form-control" name="ano" value="{{ ano_atual }}" min="2000" max="2099" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Justificativa</label>
+                            <textarea class="form-control" name="justificativa" rows="3" required minlength="15" maxlength="255" placeholder="Descreva o motivo da inutilizacao (min 15 caracteres)"></textarea>
+                            <small class="text-muted">Minimo de 15 caracteres</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ambiente</label>
+                            <select class="form-select" name="ambiente" required>
+                                <option value="2">Homologacao (Teste)</option>
+                                <option value="1">Producao</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="bi bi-send me-2"></i>Enviar Inutilizacao para SEFAZ
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Inutilizacoes -->
+            <div class="col-lg-7">
+                <div class="list-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-2"></i>Inutilizacoes Realizadas</h5>
+                        <div>
+                            <select class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="">Todos</option>
+                                <option value="55">NFe (55)</option>
+                                <option value="65">NFCe (65)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {% if inutilizacoes %}
+                        {% for inut in inutilizacoes %}
+                        <div class="inut-item">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="numero-range">
+                                    {{ inut.numero_inicial }} - {{ inut.numero_final }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">
+                                        {% if inut.modelo == 55 %}NFe{% else %}NFCe{% endif %}
+                                        Serie {{ inut.serie }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {{ inut.data_inutilizacao.strftime('%d/%m/%Y %H:%M') if inut.data_inutilizacao else 'Pendente' }}
+                                        | Ano {{ inut.ano }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="status-badge {{ inut.status }}">
+                                    {% if inut.status == 'homologado' %}
+                                        <i class="bi bi-check-circle me-1"></i>Homologado
+                                    {% elif inut.status == 'rejeitado' %}
+                                        <i class="bi bi-x-circle me-1"></i>Rejeitado
+                                    {% else %}
+                                        <i class="bi bi-hourglass-split me-1"></i>Pendente
+                                    {% endif %}
+                                </span>
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="{{ inut.justificativa }}">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                                {% if inut.protocolo %}
+                                <span class="text-muted small" title="Protocolo">{{ inut.protocolo[:15] }}...</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-hash" style="font-size: 3rem;"></i>
+                            <p class="mt-3 mb-0">Nenhuma inutilizacao registrada</p>
+                            <p class="small">Utilize o formulario ao lado para inutilizar faixas de numeracao</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Paginacao -->
+                    {% if inutilizacoes and total_paginas > 1 %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {{ 'disabled' if pagina == 1 else '' }}">
+                                <a class="page-link" href="?pagina={{ pagina - 1 }}">Anterior</a>
+                            </li>
+                            {% for p in range(1, total_paginas + 1) %}
+                            <li class="page-item {{ 'active' if p == pagina else '' }}">
+                                <a class="page-link" href="?pagina={{ p }}">{{ p }}</a>
+                            </li>
+                            {% endfor %}
+                            <li class="page-item {{ 'disabled' if pagina == total_paginas else '' }}">
+                                <a class="page-link" href="?pagina={{ pagina + 1 }}">Proximo</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validar numero final >= numero inicial
+    const numInicial = document.querySelector('input[name="numero_inicial"]');
+    const numFinal = document.querySelector('input[name="numero_final"]');
+
+    numFinal.addEventListener('change', function() {
+        if (parseInt(this.value) < parseInt(numInicial.value)) {
+            alert('Numero final deve ser maior ou igual ao numero inicial');
+            this.value = numInicial.value;
+        }
+    });
+
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

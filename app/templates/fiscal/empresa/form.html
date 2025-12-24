@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuracao da Empresa Emissora | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .config-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .config-card h5 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .config-card h5 i {
+        color: var(--primary);
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+        font-size: 0.9375rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+
+    .form-text {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .btn-save {
+        background: var(--primary);
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-save:hover {
+        background: #0077ED;
+        color: white;
+    }
+
+    .required-field::after {
+        content: "*";
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+
+    .nav-tabs-fiscal {
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs-fiscal .nav-link {
+        border: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-radius: 0;
+        position: relative;
+    }
+
+    .nav-tabs-fiscal .nav-link:hover {
+        color: var(--primary);
+    }
+
+    .nav-tabs-fiscal .nav-link.active {
+        color: var(--primary);
+        background: transparent;
+    }
+
+    .nav-tabs-fiscal .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.index') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Configuracao da Empresa Emissora</h1>
+            </div>
+        </div>
+
+        <form action="{{ url_for('fiscal.empresa_salvar') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Tabs -->
+            <ul class="nav nav-tabs-fiscal" id="empresaTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="dados-tab" data-bs-toggle="tab" data-bs-target="#dados" type="button" role="tab">
+                        <i class="bi bi-building me-2"></i>Dados da Empresa
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="endereco-tab" data-bs-toggle="tab" data-bs-target="#endereco" type="button" role="tab">
+                        <i class="bi bi-geo-alt me-2"></i>Endereco
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fiscal-tab" data-bs-toggle="tab" data-bs-target="#fiscal" type="button" role="tab">
+                        <i class="bi bi-file-earmark-text me-2"></i>Configuracoes NFe
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab">
+                        <i class="bi bi-envelope me-2"></i>Email NFe
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="resp-tab" data-bs-toggle="tab" data-bs-target="#resp" type="button" role="tab">
+                        <i class="bi bi-person-badge me-2"></i>Resp. Tecnico
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="empresaTabContent">
+                <!-- Dados da Empresa -->
+                <div class="tab-pane fade show active" id="dados" role="tabpanel">
+                    <div class="config-card">
+                        <h5><i class="bi bi-building"></i> Identificacao da Empresa</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label required-field">Razao Social</label>
+                                <input type="text" class="form-control" name="razao_social" value="{{ empresa.razao_social if empresa else '' }}" required maxlength="200">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nome Fantasia</label>
+                                <input type="text" class="form-control" name="nome_fantasia" value="{{ empresa.nome_fantasia if empresa else '' }}" maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">CNPJ</label>
+                                <input type="text" class="form-control" name="cnpj" value="{{ empresa.cnpj if empresa else '' }}" required maxlength="18" placeholder="00.000.000/0000-00">
+                                <small class="form-text">Formato: 00.000.000/0000-00</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Inscricao Estadual</label>
+                                <input type="text" class="form-control" name="inscricao_estadual" value="{{ empresa.inscricao_estadual if empresa else '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Inscricao Municipal</label>
+                                <input type="text" class="form-control" name="inscricao_municipal" value="{{ empresa.inscricao_municipal if empresa else '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">SUFRAMA</label>
+                                <input type="text" class="form-control" name="inscricao_suframa" value="{{ empresa.inscricao_suframa if empresa else '' }}" placeholder="Se aplicavel (Zona Franca)">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Regime Tributario</label>
+                                <select class="form-select" name="regime_tributario" required>
+                                    {% for codigo, nome in regimes.items() %}
+                                    <option value="{{ codigo }}" {{ 'selected' if empresa and empresa.regime_tributario == codigo else '' }}>{{ nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">CNAE Principal</label>
+                                <input type="text" class="form-control" name="cnae_principal" value="{{ empresa.cnae_principal if empresa else '' }}" placeholder="0000-0/00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h5><i class="bi bi-telephone"></i> Contato</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control" name="telefone" value="{{ empresa.telefone if empresa else '' }}" placeholder="(00) 0000-0000">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Celular</label>
+                                <input type="text" class="form-control" name="celular" value="{{ empresa.celular if empresa else '' }}" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Website</label>
+                                <input type="url" class="form-control" name="website" value="{{ empresa.website if empresa else '' }}" placeholder="https://www.exemplo.com.br">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required-field">E-mail Geral</label>
+                                <input type="email" class="form-control" name="email" value="{{ empresa.email if empresa else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail para NFe</label>
+                                <input type="email" class="form-control" name="email_nfe" value="{{ empresa.email_nfe if empresa else '' }}" placeholder="Opcional, se diferente do geral">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereco -->
+                <div class="tab-pane fade" id="endereco" role="tabpanel">
+                    <div class="config-card">
+                        <h5><i class="bi bi-geo-alt"></i> Endereco Fiscal</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label required-field">Logradouro</label>
+                                <input type="text" class="form-control" name="logradouro" value="{{ empresa.logradouro if empresa else '' }}" required maxlength="200">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Numero</label>
+                                <input type="text" class="form-control" name="numero" value="{{ empresa.numero if empresa else '' }}" required maxlength="20">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Complemento</label>
+                                <input type="text" class="form-control" name="complemento" value="{{ empresa.complemento if empresa else '' }}" maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Bairro</label>
+                                <input type="text" class="form-control" name="bairro" value="{{ empresa.bairro if empresa else '' }}" required maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">CEP</label>
+                                <input type="text" class="form-control" name="cep" value="{{ empresa.cep if empresa else '' }}" required placeholder="00000-000" maxlength="10">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Cidade</label>
+                                <input type="text" class="form-control" name="cidade" value="{{ empresa.cidade if empresa else '' }}" required maxlength="100">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">UF</label>
+                                <select class="form-select" name="uf" required>
+                                    <option value="">Selecione</option>
+                                    {% for uf in ufs %}
+                                    <option value="{{ uf }}" {{ 'selected' if empresa and empresa.uf == uf else '' }}>{{ uf }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Codigo Municipio IBGE</label>
+                                <input type="text" class="form-control" name="codigo_municipio" value="{{ empresa.codigo_municipio if empresa else '' }}" required placeholder="7 digitos" maxlength="7">
+                                <small class="form-text">Codigo IBGE do municipio (7 digitos)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuracoes NFe -->
+                <div class="tab-pane fade" id="fiscal" role="tabpanel">
+                    <div class="config-card">
+                        <h5><i class="bi bi-gear"></i> Configuracoes de Emissao</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label required-field">Ambiente</label>
+                                <select class="form-select" name="ambiente_nfe" required>
+                                    <option value="2" {{ 'selected' if not empresa or empresa.ambiente_nfe == 2 else '' }}>Homologacao (Testes)</option>
+                                    <option value="1" {{ 'selected' if empresa and empresa.ambiente_nfe == 1 else '' }}>Producao</option>
+                                </select>
+                                <small class="form-text text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Use Homologacao para testes antes de ir para Producao</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Serie NF-e</label>
+                                <input type="number" class="form-control" name="serie_nfe" value="{{ empresa.serie_nfe if empresa else 1 }}" min="1" max="999">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Serie NFC-e</label>
+                                <input type="number" class="form-control" name="serie_nfce" value="{{ empresa.serie_nfce if empresa else 1 }}" min="1" max="999">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h5><i class="bi bi-qr-code"></i> Configuracoes NFC-e</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">CSC ID</label>
+                                <input type="text" class="form-control" name="csc_id" value="{{ empresa.csc_id if empresa else '' }}" placeholder="Codigo de Seguranca do Contribuinte">
+                                <small class="form-text">Obrigatorio para emissao de NFC-e (obtenha na SEFAZ)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CSC Token</label>
+                                <input type="text" class="form-control" name="csc_token" value="{{ empresa.csc_token if empresa else '' }}" placeholder="Token do CSC">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h5><i class="bi bi-printer"></i> Configuracoes DANFE</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Orientacao DANFE</label>
+                                <select class="form-select" name="orientacao_danfe">
+                                    <option value="P" {{ 'selected' if not empresa or empresa.orientacao_danfe == 'P' else '' }}>Retrato</option>
+                                    <option value="L" {{ 'selected' if empresa and empresa.orientacao_danfe == 'L' else '' }}>Paisagem</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" class="form-check-input" name="logo_danfe" id="logo_danfe" {{ 'checked' if not empresa or empresa.logo_danfe else '' }}>
+                                    <label class="form-check-label" for="logo_danfe">Exibir logo no DANFE</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h5><i class="bi bi-info-circle"></i> Textos Padrao</h5>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Informacoes Adicionais Padrao</label>
+                                <textarea class="form-control" name="info_adicional_padrao" rows="3" maxlength="5000">{{ empresa.info_adicional_padrao if empresa else '' }}</textarea>
+                                <small class="form-text">Sera adicionado automaticamente em todas as notas</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Informacoes para o Fisco</label>
+                                <textarea class="form-control" name="info_fisco_padrao" rows="3" maxlength="2000">{{ empresa.info_fisco_padrao if empresa else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email NFe -->
+                <div class="tab-pane fade" id="email" role="tabpanel">
+                    <div class="config-card">
+                        <h5><i class="bi bi-envelope"></i> Servidor de E-mail para NFe</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Servidor SMTP</label>
+                                <input type="text" class="form-control" name="email_host_nfe" value="{{ empresa.email_host_nfe if empresa else '' }}" placeholder="smtp.gmail.com">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Porta</label>
+                                <input type="number" class="form-control" name="email_porta_nfe" value="{{ empresa.email_porta_nfe if empresa else 587 }}">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" class="form-check-input" name="email_tls_nfe" id="email_tls" {{ 'checked' if not empresa or empresa.email_tls_nfe else '' }}>
+                                    <label class="form-check-label" for="email_tls">Usar TLS</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Usuario/E-mail</label>
+                                <input type="text" class="form-control" name="email_usuario_nfe" value="{{ empresa.email_usuario_nfe if empresa else '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Senha</label>
+                                <input type="password" class="form-control" name="email_senha_nfe" placeholder="Deixe em branco para manter a atual">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Assunto Padrao</label>
+                                <input type="text" class="form-control" name="email_assunto_nfe" value="{{ empresa.email_assunto_nfe if empresa else 'NFe - {numero} - {razao_social}' }}">
+                                <small class="form-text">Variaveis: {numero}, {razao_social}, {destinatario}</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Corpo do E-mail</label>
+                                <textarea class="form-control" name="email_corpo_nfe" rows="4">{{ empresa.email_corpo_nfe if empresa else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Responsavel Tecnico -->
+                <div class="tab-pane fade" id="resp" role="tabpanel">
+                    <div class="config-card">
+                        <h5><i class="bi bi-person-badge"></i> Responsavel Tecnico (NFe 4.00)</h5>
+                        <p class="text-muted mb-4">Dados do responsavel tecnico pelo sistema emissor de NFe</p>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">CNPJ</label>
+                                <input type="text" class="form-control" name="resp_tecnico_cnpj" value="{{ empresa.resp_tecnico_cnpj if empresa else '' }}" placeholder="00.000.000/0000-00">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Nome do Contato</label>
+                                <input type="text" class="form-control" name="resp_tecnico_contato" value="{{ empresa.resp_tecnico_contato if empresa else '' }}" maxlength="60">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" class="form-control" name="resp_tecnico_email" value="{{ empresa.resp_tecnico_email if empresa else '' }}" maxlength="60">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control" name="resp_tecnico_telefone" value="{{ empresa.resp_tecnico_telefone if empresa else '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">ID CSRT</label>
+                                <input type="text" class="form-control" name="resp_tecnico_id_csrt" value="{{ empresa.resp_tecnico_id_csrt if empresa else '' }}" maxlength="3">
+                                <small class="form-text">Codigo de Seguranca do Responsavel Tecnico</small>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Hash CSRT</label>
+                                <input type="text" class="form-control" name="resp_tecnico_csrt" value="{{ empresa.resp_tecnico_csrt if empresa else '' }}" maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex justify-content-end gap-3">
+                <a href="{{ url_for('fiscal.index') }}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check-lg me-2"></i>Salvar Configuracoes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mascara para CNPJ
+    document.querySelectorAll('input[name="cnpj"], input[name="resp_tecnico_cnpj"]').forEach(input => {
+        input.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            e.target.value = v.substring(0, 18);
+        });
+    });
+
+    // Mascara para CEP
+    document.querySelector('input[name="cep"]').addEventListener('input', function(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+        e.target.value = v.substring(0, 9);
+    });
+
+    // Mascara para telefone
+    document.querySelectorAll('input[name="telefone"], input[name="celular"], input[name="resp_tecnico_telefone"]').forEach(input => {
+        input.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 10) {
+                v = v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else {
+                v = v.replace(/^(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            }
+            e.target.value = v.substring(0, 15);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatorios Fiscais | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .report-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+    }
+
+    .report-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        border-color: var(--primary);
+    }
+
+    .report-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .report-icon.vendas { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+    .report-icon.impostos { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
+    .report-icon.produtos { background: rgba(0, 113, 227, 0.15); color: #0071e3; }
+    .report-icon.clientes { background: rgba(175, 82, 222, 0.15); color: #af52de; }
+    .report-icon.fiscal { background: rgba(255, 45, 85, 0.15); color: #ff2d55; }
+    .report-icon.xml { background: rgba(90, 200, 250, 0.15); color: #5ac8fa; }
+
+    .filter-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .generated-reports {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .report-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .report-item:last-child {
+        border-bottom: none;
+    }
+
+    .report-item:hover {
+        background: var(--background);
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.pronto { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+    .status-badge.processando { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
+    .status-badge.erro { background: rgba(255, 45, 85, 0.15); color: #ff2d55; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.dashboard') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Relatorios Fiscais</h1>
+                <p class="text-muted mb-0">Gere e exporte relatorios detalhados</p>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Filtros do Relatorio</h5>
+            <form action="{{ url_for('fiscal.relatorio_gerar') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Tipo de Relatorio</label>
+                        <select class="form-select" name="tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="vendas_diarias">Vendas Diarias</option>
+                            <option value="vendas_mensal">Resumo Mensal de Vendas</option>
+                            <option value="impostos_periodo">Impostos por Periodo</option>
+                            <option value="produtos_vendidos">Produtos Mais Vendidos</option>
+                            <option value="clientes_faturamento">Faturamento por Cliente</option>
+                            <option value="nfe_emitidas">NFe Emitidas</option>
+                            <option value="nfce_emitidas">NFCe Emitidas</option>
+                            <option value="notas_canceladas">Notas Canceladas</option>
+                            <option value="inutilizacoes">Inutilizacoes</option>
+                            <option value="sintegra">Arquivo SINTEGRA</option>
+                            <option value="sped_fiscal">SPED Fiscal</option>
+                            <option value="xml_exportacao">Exportacao XML (Zip)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Data Inicial</label>
+                        <input type="date" class="form-control" name="data_inicio" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Data Final</label>
+                        <input type="date" class="form-control" name="data_fim" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Modelo</label>
+                        <select class="form-select" name="modelo">
+                            <option value="">Todos</option>
+                            <option value="55">NFe (55)</option>
+                            <option value="65">NFCe (65)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Formato</label>
+                        <select class="form-select" name="formato">
+                            <option value="pdf">PDF</option>
+                            <option value="xlsx">Excel (XLSX)</option>
+                            <option value="csv">CSV</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tipos de Relatorios -->
+        <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-bar-graph me-2"></i>Tipos de Relatorios</h5>
+        <div class="row g-4 mb-4">
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('vendas_diarias')">
+                    <div class="report-icon vendas">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Vendas</h6>
+                    <p class="text-muted small mb-0">Relatorio de vendas por periodo</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('impostos_periodo')">
+                    <div class="report-icon impostos">
+                        <i class="bi bi-calculator"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Impostos</h6>
+                    <p class="text-muted small mb-0">ICMS, IPI, PIS, COFINS</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('produtos_vendidos')">
+                    <div class="report-icon produtos">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Produtos</h6>
+                    <p class="text-muted small mb-0">Produtos mais vendidos</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('clientes_faturamento')">
+                    <div class="report-icon clientes">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Clientes</h6>
+                    <p class="text-muted small mb-0">Faturamento por cliente</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('sped_fiscal')">
+                    <div class="report-icon fiscal">
+                        <i class="bi bi-file-earmark-code"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">SPED</h6>
+                    <p class="text-muted small mb-0">SPED Fiscal e SINTEGRA</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="report-card" onclick="selectReport('xml_exportacao')">
+                    <div class="report-icon xml">
+                        <i class="bi bi-file-zip"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">XML</h6>
+                    <p class="text-muted small mb-0">Exportar XMLs em ZIP</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatorios Gerados -->
+        <div class="generated-reports">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Relatorios Gerados</h5>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Atualizar
+                </button>
+            </div>
+
+            {% if relatorios %}
+                {% for relatorio in relatorios %}
+                <div class="report-item">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="report-icon {{ relatorio.tipo }}" style="width: 45px; height: 45px; font-size: 1.2rem; margin-bottom: 0;">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ relatorio.nome }}</h6>
+                            <small class="text-muted">{{ relatorio.data_geracao.strftime('%d/%m/%Y %H:%M') }} | {{ relatorio.formato|upper }}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="status-badge {{ relatorio.status }}">
+                            {% if relatorio.status == 'pronto' %}
+                                <i class="bi bi-check-circle me-1"></i>Pronto
+                            {% elif relatorio.status == 'processando' %}
+                                <i class="bi bi-hourglass-split me-1"></i>Processando
+                            {% else %}
+                                <i class="bi bi-x-circle me-1"></i>Erro
+                            {% endif %}
+                        </span>
+                        {% if relatorio.status == 'pronto' %}
+                        <a href="{{ url_for('fiscal.relatorio_download', id=relatorio.id) }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarRelatorio({{ relatorio.id }})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-file-earmark-x" style="font-size: 3rem;"></i>
+                    <p class="mt-3 mb-0">Nenhum relatorio gerado ainda</p>
+                    <p class="small">Selecione um tipo e periodo para gerar seu primeiro relatorio</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectReport(tipo) {
+    document.querySelector('select[name="tipo"]').value = tipo;
+    document.querySelector('select[name="tipo"]').focus();
+}
+
+function deletarRelatorio(id) {
+    if (confirm('Tem certeza que deseja excluir este relatorio?')) {
+        fetch(`/fiscal/relatorios/${id}/deletar`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                location.reload();
+            } else {
+                alert(data.erro || 'Erro ao deletar relatorio');
+            }
+        });
+    }
+}
+
+// Set default dates (last 30 days)
+document.addEventListener('DOMContentLoaded', function() {
+    const hoje = new Date();
+    const mesPassado = new Date();
+    mesPassado.setDate(mesPassado.getDate() - 30);
+
+    document.querySelector('input[name="data_fim"]').valueAsDate = hoje;
+    document.querySelector('input[name="data_inicio"]').valueAsDate = mesPassado;
+});
+</script>
+{% endblock %}

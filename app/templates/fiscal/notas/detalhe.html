@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}NFe {{ nota.numero }} | Detalhes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .detail-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-card h5 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-card h5 i {
+        color: var(--primary);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .info-item span {
+        font-weight: 600;
+    }
+
+    .badge-status {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .badge-autorizada { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .badge-cancelada { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .badge-rejeitada { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .badge-rascunho { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+
+    .chave-acesso {
+        font-family: monospace;
+        font-size: 0.875rem;
+        background: var(--background);
+        padding: 1rem;
+        border-radius: 8px;
+        word-break: break-all;
+    }
+
+    .items-table {
+        width: 100%;
+    }
+
+    .items-table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .items-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.notas') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar
+                </a>
+                <h1 class="h3 fw-bold mb-1">
+                    {% if nota.modelo == '55' %}NF-e{% else %}NFC-e{% endif %} {{ nota.numero }}
+                </h1>
+                <p class="text-muted mb-0">Serie {{ nota.serie }} | Emitida em {{ nota.data_emissao.strftime('%d/%m/%Y as %H:%M') if nota.data_emissao else '-' }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                {% if nota.status == 'autorizada' and nota.xml_nfe %}
+                <a href="{{ url_for('fiscal.nota_xml', id=nota.id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-code-slash me-2"></i>XML
+                </a>
+                <a href="{{ url_for('fiscal.nota_danfe', id=nota.id) }}" class="btn btn-outline-secondary" target="_blank">
+                    <i class="bi bi-file-pdf me-2"></i>DANFE
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Status -->
+                <div class="detail-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Status</h6>
+                            {% if nota.cancelada %}
+                            <span class="badge-status badge-cancelada">Cancelada</span>
+                            {% elif nota.status == 'autorizada' %}
+                            <span class="badge-status badge-autorizada">Autorizada</span>
+                            {% elif nota.status == 'rejeitada' %}
+                            <span class="badge-status badge-rejeitada">Rejeitada</span>
+                            {% else %}
+                            <span class="badge-status badge-rascunho">{{ nota.status|capitalize }}</span>
+                            {% endif %}
+                        </div>
+                        {% if nota.protocolo_autorizacao %}
+                        <div class="text-end">
+                            <h6 class="text-muted mb-1">Protocolo</h6>
+                            <strong>{{ nota.protocolo_autorizacao }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if nota.chave_acesso %}
+                    <div class="mt-3">
+                        <h6 class="text-muted mb-2">Chave de Acesso</h6>
+                        <div class="chave-acesso">{{ nota.chave_acesso }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if nota.motivo_status_sefaz %}
+                    <div class="mt-3">
+                        <h6 class="text-muted mb-2">Mensagem SEFAZ</h6>
+                        <p class="mb-0">{{ nota.motivo_status_sefaz }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Destinatario -->
+                <div class="detail-card">
+                    <h5><i class="bi bi-person"></i> Destinatario</h5>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nome/Razao Social</label>
+                            <span>{{ nota.destinatario_razao_social or 'Consumidor' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>CPF/CNPJ</label>
+                            <span>{{ nota.destinatario_cpf_cnpj or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <span>{{ nota.destinatario_email or '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Itens -->
+                <div class="detail-card">
+                    <h5><i class="bi bi-box"></i> Itens ({{ itens|length }})</h5>
+                    <div class="table-responsive">
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Descricao</th>
+                                    <th>NCM</th>
+                                    <th>CFOP</th>
+                                    <th class="text-end">Qtd</th>
+                                    <th class="text-end">Vl. Unit.</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in itens %}
+                                <tr>
+                                    <td>{{ item.numero_item }}</td>
+                                    <td>
+                                        <strong>{{ item.descricao }}</strong><br>
+                                        <small class="text-muted">{{ item.codigo }}</small>
+                                    </td>
+                                    <td>{{ item.ncm }}</td>
+                                    <td>{{ item.cfop }}</td>
+                                    <td class="text-end">{{ item.quantidade }} {{ item.unidade }}</td>
+                                    <td class="text-end">R$ {{ "%.2f"|format(item.valor_unitario or 0) }}</td>
+                                    <td class="text-end"><strong>R$ {{ "%.2f"|format(item.valor_total or 0) }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Cartas de Correcao -->
+                {% if cartas_correcao %}
+                <div class="detail-card">
+                    <h5><i class="bi bi-pencil"></i> Cartas de Correcao</h5>
+                    {% for carta in cartas_correcao %}
+                    <div class="p-3 bg-light rounded mb-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>CC-e #{{ carta.sequencia }}</strong>
+                                <span class="badge {{ 'bg-success' if carta.status == 'autorizada' else 'bg-warning' }} ms-2">{{ carta.status }}</span>
+                            </div>
+                            <small class="text-muted">{{ carta.data_evento.strftime('%d/%m/%Y %H:%M') if carta.data_evento else '-' }}</small>
+                        </div>
+                        <p class="mb-0 mt-2">{{ carta.correcao }}</p>
+                        {% if carta.protocolo %}
+                        <small class="text-muted">Protocolo: {{ carta.protocolo }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Totais -->
+                <div class="detail-card">
+                    <h5><i class="bi bi-calculator"></i> Valores</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Produtos</span>
+                        <strong>R$ {{ "%.2f"|format(nota.valor_produtos or 0) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Frete</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_frete or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Desconto</span>
+                        <span class="text-danger">- R$ {{ "%.2f"|format(nota.valor_desconto or 0) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong style="font-size: 1.25rem;">Total</strong>
+                        <strong style="font-size: 1.25rem;">R$ {{ "%.2f"|format(nota.valor_total or 0) }}</strong>
+                    </div>
+                </div>
+
+                <!-- Impostos -->
+                <div class="detail-card">
+                    <h5><i class="bi bi-percent"></i> Impostos</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>ICMS</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_icms or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>IPI</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_ipi or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>PIS</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_pis or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>COFINS</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_cofins or 0) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between text-muted">
+                        <span>Tributos Aprox.</span>
+                        <span>R$ {{ "%.2f"|format(nota.valor_aproximado_tributos or 0) }}</span>
+                    </div>
+                </div>
+
+                <!-- Acoes -->
+                {% if nota.status == 'autorizada' and not nota.cancelada %}
+                <div class="detail-card">
+                    <h5><i class="bi bi-lightning"></i> Acoes</h5>
+
+                    <!-- Cancelar -->
+                    <button class="btn btn-outline-danger w-100 mb-2" data-bs-toggle="collapse" data-bs-target="#cancelarForm">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar NFe
+                    </button>
+                    <div class="collapse" id="cancelarForm">
+                        <form action="{{ url_for('fiscal.nota_cancelar', id=nota.id) }}" method="POST" class="p-3 bg-light rounded">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label class="form-label">Justificativa (min. 15 caracteres)</label>
+                                <textarea name="justificativa" class="form-control" rows="3" minlength="15" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Tem certeza que deseja cancelar esta nota?');">
+                                Confirmar Cancelamento
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Carta de Correcao -->
+                    <button class="btn btn-outline-primary w-100" data-bs-toggle="collapse" data-bs-target="#cceForm">
+                        <i class="bi bi-pencil me-2"></i>Carta de Correcao
+                    </button>
+                    <div class="collapse" id="cceForm">
+                        <form action="{{ url_for('fiscal.nota_carta_correcao', id=nota.id) }}" method="POST" class="p-3 bg-light rounded mt-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label class="form-label">Texto da Correcao (15-1000 caracteres)</label>
+                                <textarea name="correcao" class="form-control" rows="4" minlength="15" maxlength="1000" required></textarea>
+                                <small class="text-muted">Nao e possivel corrigir: valores, dados do emitente/destinatario, data de emissao</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                Enviar Carta de Correcao
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Info Emitente -->
+                <div class="detail-card">
+                    <h5><i class="bi bi-building"></i> Emitente</h5>
+                    <p class="mb-1"><strong>{{ nota.emitente_razao_social }}</strong></p>
+                    <p class="text-muted mb-0">CNPJ: {{ nota.emitente_cnpj }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
