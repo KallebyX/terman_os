@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Certificados Digitais ICP-Brasil | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .cert-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+
+    .cert-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .cert-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .cert-icon.a1 {
+        background: rgba(0, 113, 227, 0.15);
+        color: #0071e3;
+    }
+
+    .cert-icon.a3 {
+        background: rgba(139, 92, 246, 0.15);
+        color: #8b5cf6;
+    }
+
+    .cert-name {
+        font-weight: 700;
+        font-size: 1.125rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .cert-info {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .cert-validity {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-top: 1rem;
+    }
+
+    .cert-validity.valid {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+
+    .cert-validity.warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+    }
+
+    .cert-validity.expired {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .badge-padrao {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('fiscal.index') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+                </a>
+                <h1 class="h3 fw-bold mb-0">Certificados Digitais ICP-Brasil</h1>
+                <p class="text-muted mb-0">Gerenciamento de certificados para assinatura de documentos fiscais</p>
+            </div>
+            <a href="{{ url_for('fiscal.certificado_novo') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Novo Certificado
+            </a>
+        </div>
+
+        {% if not empresa %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Configure os dados da empresa antes de importar certificados.
+            <a href="{{ url_for('fiscal.empresa') }}" class="alert-link">Configurar agora</a>
+        </div>
+        {% endif %}
+
+        {% if certificados %}
+        <div class="row g-4">
+            {% for cert in certificados %}
+            <div class="col-md-6 col-lg-4">
+                <div class="cert-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="cert-icon {{ 'a1' if cert.tipo == 'A1' else 'a3' }}">
+                            <i class="bi {{ 'bi-file-earmark-lock' if cert.tipo == 'A1' else 'bi-usb-symbol' }}"></i>
+                        </div>
+                        {% if cert.padrao %}
+                        <span class="badge-padrao">Padrao</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="cert-name">{{ cert.nome or 'Certificado ' + cert.tipo }}</div>
+                    <div class="cert-info">Tipo: {{ cert.tipo }}</div>
+                    <div class="cert-info">CNPJ: {{ cert.cnpj_certificado or 'N/A' }}</div>
+                    <div class="cert-info">Serial: {{ cert.serial_number[:20] + '...' if cert.serial_number and cert.serial_number|length > 20 else cert.serial_number or 'N/A' }}</div>
+                    <div class="cert-info">Validade: {{ cert.data_validade.strftime('%d/%m/%Y') if cert.data_validade else 'N/A' }}</div>
+
+                    {% if cert.esta_vencido %}
+                    <div class="cert-validity expired">
+                        <i class="bi bi-x-circle-fill"></i>
+                        Vencido
+                    </div>
+                    {% elif cert.esta_proximo_vencer %}
+                    <div class="cert-validity warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Vence em {{ cert.dias_para_vencer }} dias
+                    </div>
+                    {% else %}
+                    <div class="cert-validity valid">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Valido ({{ cert.dias_para_vencer }} dias)
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-3">
+                        {% if not cert.padrao %}
+                        <form action="{{ url_for('fiscal.certificado_definir_padrao', id=cert.id) }}" method="POST" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-star"></i> Definir Padrao
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form action="{{ url_for('fiscal.certificado_excluir', id=cert.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este certificado?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="cert-card">
+            <div class="empty-state">
+                <i class="bi bi-shield-x"></i>
+                <h4>Nenhum certificado cadastrado</h4>
+                <p class="text-muted">Importe um certificado digital ICP-Brasil para assinar documentos fiscais</p>
+                <a href="{{ url_for('fiscal.certificado_novo') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-lg me-2"></i>Importar Certificado
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Info -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="cert-card">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-lock text-primary me-2"></i>Certificado A1</h5>
+                    <p class="text-muted mb-2">Arquivo digital (.pfx) armazenado no computador</p>
+                    <ul class="text-muted small mb-0">
+                        <li>Validade: 1 ano</li>
+                        <li>Mais pratico para sistemas em nuvem</li>
+                        <li>Requer backup seguro do arquivo</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="cert-card">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-usb-symbol text-purple me-2"></i>Certificado A3</h5>
+                    <p class="text-muted mb-2">Token USB ou SmartCard fisico</p>
+                    <ul class="text-muted small mb-0">
+                        <li>Validade: 3 anos</li>
+                        <li>Maior seguranca (chave nao exportavel)</li>
+                        <li>Requer driver do dispositivo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

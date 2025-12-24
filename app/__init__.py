@@ -60,6 +60,7 @@ def create_app():
     from .routes.crm import crm_bp
     from .routes.erp import erp_bp
     from .routes.super_admin import super_admin_bp
+    from .routes.fiscal import fiscal_bp
 
     app.register_blueprint(cliente_bp, url_prefix='/painel')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -71,6 +72,7 @@ def create_app():
     app.register_blueprint(crm_bp, url_prefix='/crm')
     app.register_blueprint(erp_bp, url_prefix='/erp')
     app.register_blueprint(super_admin_bp, url_prefix='/super-admin')
+    app.register_blueprint(fiscal_bp, url_prefix='/fiscal')
 
     from .models.user import User
     from .models.configuracao import Configuracao

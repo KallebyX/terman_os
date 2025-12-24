@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Certificado Digital | PDV Fiscal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fiscal-container {
+        padding: 2rem;
+        background: var(--background);
+        min-height: calc(100vh - 52px);
+    }
+
+    .upload-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--primary);
+        background: rgba(0, 113, 227, 0.05);
+    }
+
+    .upload-zone i {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .upload-zone p {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .upload-zone small {
+        color: var(--text-secondary);
+    }
+
+    .file-selected {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: #22c55e;
+    }
+
+    .file-selected i {
+        color: #22c55e;
+    }
+
+    .tipo-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .tipo-option {
+        flex: 1;
+        padding: 1.5rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .tipo-option:hover, .tipo-option.selected {
+        border-color: var(--primary);
+        background: rgba(0, 113, 227, 0.05);
+    }
+
+    .tipo-option i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .tipo-option.selected i {
+        color: var(--primary);
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fiscal-container">
+    <div class="container" style="max-width: 700px;">
+        <!-- Header -->
+        <div class="mb-4">
+            <a href="{{ url_for('fiscal.certificados') }}" class="text-muted text-decoration-none mb-2 d-inline-block">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <h1 class="h3 fw-bold mb-0">Importar Certificado Digital</h1>
+            <p class="text-muted">Certificado ICP-Brasil para assinatura de NFe/NFCe</p>
+        </div>
+
+        <form action="{{ url_for('fiscal.certificado_upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="tipo" id="tipoInput" value="A1">
+
+            <!-- Tipo do Certificado -->
+            <div class="upload-card">
+                <h5 class="fw-bold mb-3">Tipo do Certificado</h5>
+                <div class="tipo-selector">
+                    <div class="tipo-option selected" data-tipo="A1">
+                        <i class="bi bi-file-earmark-lock"></i>
+                        <strong>Certificado A1</strong>
+                        <p class="text-muted small mb-0">Arquivo .pfx</p>
+                    </div>
+                    <div class="tipo-option" data-tipo="A3">
+                        <i class="bi bi-usb-symbol"></i>
+                        <strong>Certificado A3</strong>
+                        <p class="text-muted small mb-0">Token/SmartCard</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload A1 -->
+            <div class="upload-card" id="uploadA1">
+                <h5 class="fw-bold mb-3"><i class="bi bi-upload me-2"></i>Arquivo do Certificado</h5>
+
+                <div class="upload-zone" id="uploadZone">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <p>Arraste o arquivo .pfx aqui</p>
+                    <small>ou clique para selecionar</small>
+                    <input type="file" name="arquivo" id="fileInput" accept=".pfx" style="display: none;">
+                </div>
+
+                <div class="mt-3" id="fileInfo" style="display: none;">
+                    <div class="d-flex align-items-center gap-2 text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span id="fileName"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label fw-bold">Senha do Certificado</label>
+                    <input type="password" class="form-control" name="senha" required placeholder="Digite a senha do certificado">
+                    <small class="form-text text-muted">A senha e necessaria para extrair as chaves do certificado</small>
+                </div>
+            </div>
+
+            <!-- Config A3 -->
+            <div class="upload-card" id="configA3" style="display: none;">
+                <h5 class="fw-bold mb-3"><i class="bi bi-usb-symbol me-2"></i>Configuracao do Token</h5>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Slot do Token</label>
+                    <input type="number" class="form-control" name="slot" value="0" min="0">
+                    <small class="form-text text-muted">Geralmente 0 para o primeiro token conectado</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">PIN do Token</label>
+                    <input type="password" class="form-control" name="pin" placeholder="Digite o PIN">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Biblioteca PKCS#11 (opcional)</label>
+                    <input type="text" class="form-control" name="biblioteca" placeholder="Deixe em branco para deteccao automatica">
+                    <small class="form-text text-muted">Caminho para a biblioteca .dll ou .so do driver do token</small>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('fiscal.certificados') }}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-shield-check me-2"></i>Importar Certificado
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tipo selector
+    document.querySelectorAll('.tipo-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.tipo-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+
+            const tipo = this.dataset.tipo;
+            document.getElementById('tipoInput').value = tipo;
+
+            if (tipo === 'A1') {
+                document.getElementById('uploadA1').style.display = 'block';
+                document.getElementById('configA3').style.display = 'none';
+            } else {
+                document.getElementById('uploadA1').style.display = 'none';
+                document.getElementById('configA3').style.display = 'block';
+            }
+        });
+    });
+
+    // File upload
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length && files[0].name.endsWith('.pfx')) {
+            fileInput.files = files;
+            showFile(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            showFile(fileInput.files[0]);
+        }
+    });
+
+    function showFile(file) {
+        uploadZone.classList.add('file-selected');
+        fileInfo.style.display = 'block';
+        fileName.textContent = file.name;
+    }
+</script>
+{% endblock %}
