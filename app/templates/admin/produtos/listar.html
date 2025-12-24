@@ -2,97 +2,180 @@
 {% block title %}Produtos - Admin{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
-      <li class="breadcrumb-item active">Produtos</li>
-    </ol>
-  </nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item active">Produtos</li>
+        </ol>
+    </nav>
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-      <i class="bi bi-box-seam me-2"></i>
-      Lista de Produtos
-    </h2>
-    <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-primary">
-      <i class="bi bi-plus-circle me-2"></i>Novo Produto
-    </a>
-  </div>
-
-  {% if produtos %}
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>ID</th>
-              <th>Imagem</th>
-              <th>Nome</th>
-              <th>Categoria</th>
-              <th>Preco</th>
-              <th>Estoque</th>
-              <th>Status</th>
-              <th>Acoes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for produto in produtos %}
-            <tr>
-              <td><code>#{{ produto.id }}</code></td>
-              <td>
-                {% if produto.imagem_filename %}
-                <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}" alt="{{ produto.nome }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                {% else %}
-                <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 4px;">
-                  <i class="bi bi-image text-white"></i>
-                </div>
-                {% endif %}
-              </td>
-              <td><strong>{{ produto.nome }}</strong></td>
-              <td>{{ produto.categoria.nome if produto.categoria else '-' }}</td>
-              <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
-              <td>
-                {% if produto.estoque > 10 %}
-                <span class="badge bg-success">{{ produto.estoque }}</span>
-                {% elif produto.estoque > 0 %}
-                <span class="badge bg-warning">{{ produto.estoque }}</span>
-                {% else %}
-                <span class="badge bg-danger">0</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if produto.ativo %}
-                <span class="badge bg-success">Ativo</span>
-                {% else %}
-                <span class="badge bg-secondary">Inativo</span>
-                {% endif %}
-              </td>
-              <td>
-                <div class="btn-group btn-group-sm">
-                  <a href="{{ url_for('admin.editar_produto', id=produto.id) }}" class="btn btn-outline-primary" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                  <form action="{{ url_for('admin.deletar_produto', id=produto.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir este produto?')">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn btn-outline-danger" title="Excluir">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="admin-page-header">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-box-seam text-primary"></i>
+                Lista de Produtos
+            </h1>
+        </div>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Novo Produto
+            </a>
+        </div>
     </div>
-  </div>
-  {% else %}
-  <div class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>
-    Nenhum produto cadastrado. <a href="{{ url_for('admin.novo_produto') }}">Clique aqui para adicionar um novo produto</a>.
-  </div>
-  {% endif %}
+
+    {% if produtos %}
+    <div class="admin-card">
+        <div class="admin-card-body p-0">
+            <!-- Desktop Table -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                        <tr>
+                            <td><code>#{{ produto.id }}</code></td>
+                            <td>
+                                {% if produto.imagem_filename %}
+                                <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}"
+                                     alt="{{ produto.nome }}" class="admin-img-preview">
+                                {% else %}
+                                <div class="admin-img-placeholder">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ produto.nome }}</strong></td>
+                            <td>{{ produto.categoria.nome if produto.categoria else '-' }}</td>
+                            <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
+                            <td>
+                                {% if produto.estoque > 10 %}
+                                <span class="badge bg-success">{{ produto.estoque }}</span>
+                                {% elif produto.estoque > 0 %}
+                                <span class="badge bg-warning text-dark">{{ produto.estoque }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if produto.ativo %}
+                                <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a href="{{ url_for('admin.editar_produto', id=produto.id) }}"
+                                       class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ url_for('admin.deletar_produto', id=produto.id) }}"
+                                          method="POST" style="display: inline;"
+                                          onsubmit="return confirm('Tem certeza que deseja excluir este produto?')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="admin-mobile-cards">
+                {% for produto in produtos %}
+                <div class="admin-mobile-card">
+                    <div class="admin-mobile-card-header">
+                        <div class="admin-mobile-card-title">
+                            {% if produto.imagem_filename %}
+                            <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}"
+                                 alt="{{ produto.nome }}" class="admin-img-preview">
+                            {% else %}
+                            <div class="admin-img-placeholder">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            {% endif %}
+                            <span>{{ produto.nome }}</span>
+                        </div>
+                        <code>#{{ produto.id }}</code>
+                    </div>
+                    <div class="admin-mobile-card-body">
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Categoria</span>
+                            <span class="admin-mobile-value">{{ produto.categoria.nome if produto.categoria else '-' }}</span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Preço</span>
+                            <span class="admin-mobile-value">R$ {{ "%.2f"|format(produto.preco) }}</span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Estoque</span>
+                            <span class="admin-mobile-value">
+                                {% if produto.estoque > 10 %}
+                                <span class="badge bg-success">{{ produto.estoque }}</span>
+                                {% elif produto.estoque > 0 %}
+                                <span class="badge bg-warning text-dark">{{ produto.estoque }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">0</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Status</span>
+                            <span class="admin-mobile-value">
+                                {% if produto.ativo %}
+                                <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-mobile-card-footer">
+                        <a href="{{ url_for('admin.editar_produto', id=produto.id) }}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </a>
+                        <form action="{{ url_for('admin.deletar_produto', id=produto.id) }}"
+                              method="POST" style="flex: 1;"
+                              onsubmit="return confirm('Tem certeza que deseja excluir este produto?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash me-1"></i>Excluir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="admin-card">
+        <div class="admin-empty-state">
+            <i class="bi bi-inbox admin-empty-icon"></i>
+            <h3 class="admin-empty-title">Nenhum produto cadastrado</h3>
+            <p class="admin-empty-desc">Comece adicionando seu primeiro produto ao catálogo.</p>
+            <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Adicionar Produto
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

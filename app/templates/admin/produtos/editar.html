@@ -10,98 +10,140 @@
         </ol>
     </nav>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-warning">
-                    <h4 class="mb-0">
-                        <i class="bi bi-pencil me-2"></i>
-                        Editar Produto
-                    </h4>
+    <div class="admin-page-header">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-pencil-square text-warning"></i>
+                Editar Produto
+            </h1>
+        </div>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <!-- Informações Básicas -->
+                <div class="admin-form-section">
+                    <h5 class="admin-form-section-title">
+                        <i class="bi bi-info-circle text-primary"></i>
+                        Informações Básicas
+                    </h5>
+
+                    <div class="mb-4">
+                        <label for="nome" class="form-label">Nome do Produto *</label>
+                        <input type="text" class="form-control" name="nome" id="nome"
+                               value="{{ produto.nome }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" name="descricao" id="descricao" rows="4">{{ produto.descricao or '' }}</textarea>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label for="nome" class="form-label">Nome do Produto *</label>
-                                    <input type="text" class="form-control" name="nome" id="nome"
-                                           value="{{ produto.nome }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="categoria_id" class="form-label">Categoria</label>
-                                    <select class="form-select" name="categoria_id" id="categoria_id">
-                                        <option value="">Sem categoria</option>
-                                        {% for categoria in categorias %}
-                                        <option value="{{ categoria.id }}"
-                                                {% if produto.categoria_id == categoria.id %}selected{% endif %}>
-                                            {{ categoria.nome }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
+                <!-- Preço e Estoque -->
+                <div class="admin-form-section">
+                    <h5 class="admin-form-section-title">
+                        <i class="bi bi-currency-dollar text-success"></i>
+                        Preço e Estoque
+                    </h5>
+
+                    <div class="admin-form-row">
+                        <div>
+                            <label for="preco" class="form-label">Preço (R$) *</label>
+                            <input type="number" step="0.01" min="0" class="form-control"
+                                   name="preco" id="preco" value="{{ produto.preco }}" required>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label">Descricao</label>
-                            <textarea class="form-control" name="descricao" id="descricao" rows="4">{{ produto.descricao or '' }}</textarea>
+                        <div>
+                            <label for="estoque" class="form-label">Estoque *</label>
+                            <input type="number" min="0" class="form-control"
+                                   name="estoque" id="estoque" value="{{ produto.estoque }}" required>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="preco" class="form-label">Preco (R$) *</label>
-                                    <input type="number" step="0.01" min="0" class="form-control"
-                                           name="preco" id="preco" value="{{ produto.preco }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="estoque" class="form-label">Estoque *</label>
-                                    <input type="number" min="0" class="form-control"
-                                           name="estoque" id="estoque" value="{{ produto.estoque }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="imagem" class="form-label">Imagem</label>
-                                    <input type="file" class="form-control" name="imagem" id="imagem" accept="image/*">
-                                </div>
-                            </div>
+                        <div>
+                            <label for="categoria_id" class="form-label">Categoria</label>
+                            <select class="form-select" name="categoria_id" id="categoria_id">
+                                <option value="">Sem categoria</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}"
+                                        {% if produto.categoria_id == categoria.id %}selected{% endif %}>
+                                    {{ categoria.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        {% if produto.imagem_filename %}
-                        <div class="mb-3">
-                            <label class="form-label">Imagem Atual</label>
-                            <div>
-                                <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}"
-                                     alt="{{ produto.nome }}"
-                                     style="max-height: 100px; border-radius: 4px;">
-                            </div>
-                        </div>
-                        {% endif %}
+            <div class="col-lg-4">
+                <!-- Imagem -->
+                <div class="admin-form-section">
+                    <h5 class="admin-form-section-title">
+                        <i class="bi bi-image text-info"></i>
+                        Imagem do Produto
+                    </h5>
 
-                        <hr>
+                    {% if produto.imagem_filename %}
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block">Imagem Atual</label>
+                        <img src="{{ url_for('static', filename='produtos/' ~ produto.imagem_filename) }}"
+                             alt="{{ produto.nome }}"
+                             class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                    {% endif %}
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-2"></i>
-                                Salvar Alteracoes
-                            </button>
-                            <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-secondary">
-                                <i class="bi bi-x-lg me-2"></i>
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
+                    <div class="mb-4">
+                        <label for="imagem" class="form-label">
+                            {{ 'Substituir Imagem' if produto.imagem_filename else 'Selecionar Imagem' }}
+                        </label>
+                        <input type="file" class="form-control" name="imagem" id="imagem" accept="image/*">
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Formatos aceitos: PNG, JPG, JPEG, WebP
+                        </small>
+                    </div>
+
+                    <div id="preview-container" class="d-none text-center mb-4">
+                        <label class="form-label d-block">Nova Imagem</label>
+                        <img id="image-preview" src="" alt="Preview"
+                             class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="admin-form-section">
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Salvar Alterações
+                        </button>
+                        <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
+
+<script>
+document.getElementById('imagem').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('preview-container').classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 {% endblock %}

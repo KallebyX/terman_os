@@ -1,21 +1,28 @@
 {% extends 'base.html' %}
 
-{% block title %}Configuracoes | Super Admin - Terman OS{% endblock %}
+{% block title %}Configurações | Super Admin - Terman OS{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
+            <li class="breadcrumb-item active">Configurações</li>
+        </ol>
+    </nav>
+
+    <div class="admin-page-header">
         <div>
-            <h1 class="h2 mb-1">
-                <i class="bi bi-gear-fill text-danger me-2"></i>
-                Configuracoes do Sistema
+            <h1 class="h2">
+                <i class="bi bi-gear-fill text-danger"></i>
+                Configurações do Sistema
             </h1>
-            <p class="text-muted mb-0">Gerencie tokens, APIs e variaveis de ambiente</p>
+            <p>Gerencie tokens, APIs e variáveis de ambiente</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="admin-header-actions">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaConfig">
-                <i class="bi bi-plus-lg me-2"></i>Nova Configuracao
+                <i class="bi bi-plus-lg me-2"></i>Nova Configuração
             </button>
             <a href="{{ url_for('super_admin.dashboard') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Voltar
@@ -23,107 +30,105 @@
         </div>
     </div>
 
-    <!-- Alerta de Seguranca -->
+    <!-- Alerta de Segurança -->
     <div class="alert alert-warning mb-4">
         <i class="bi bi-shield-lock me-2"></i>
-        <strong>Atencao:</strong> Estas configuracoes afetam todo o sistema. Altere com cuidado.
-        Tokens e chaves secretas sao sensiveis - nunca compartilhe.
+        <strong>Atenção:</strong> Estas configurações afetam todo o sistema. Altere com cuidado.
+        Tokens e chaves secretas são sensíveis - nunca compartilhe.
     </div>
 
     <form method="POST" action="{{ url_for('super_admin.salvar_configuracoes') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <!-- Tabs de Categorias -->
-        <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
-            {% set categoria_labels = {
-                'geral': 'Geral',
-                'email': 'Email/SMTP',
-                'api': 'APIs Externas',
-                'pagamento': 'Pagamentos',
-                'comunicacao': 'Comunicacao',
-                'seguranca': 'Seguranca',
-                'loja': 'Loja'
-            } %}
-            {% set categoria_icons = {
-                'geral': 'building',
-                'email': 'envelope',
-                'api': 'cloud',
-                'pagamento': 'credit-card',
-                'comunicacao': 'chat-dots',
-                'seguranca': 'shield-lock',
-                'loja': 'shop'
-            } %}
-            {% for cat in categorias %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ cat }}"
-                        data-bs-toggle="tab" data-bs-target="#content-{{ cat }}" type="button"
-                        role="tab" aria-controls="content-{{ cat }}" aria-selected="{{ 'true' if loop.first else 'false' }}">
-                    <i class="bi bi-{{ categoria_icons.get(cat, 'gear') }} me-1"></i>
-                    {{ categoria_labels.get(cat, cat|title) }}
-                </button>
-            </li>
-            {% endfor %}
-        </ul>
+        {% set categoria_labels = {
+            'geral': 'Geral',
+            'email': 'Email/SMTP',
+            'api': 'APIs Externas',
+            'pagamento': 'Pagamentos',
+            'comunicacao': 'Comunicação',
+            'seguranca': 'Segurança',
+            'loja': 'Loja'
+        } %}
+        {% set categoria_icons = {
+            'geral': 'building',
+            'email': 'envelope',
+            'api': 'cloud',
+            'pagamento': 'credit-card',
+            'comunicacao': 'chat-dots',
+            'seguranca': 'shield-lock',
+            'loja': 'shop'
+        } %}
 
-        <!-- Conteudo das Tabs -->
+        <div class="nav-tabs mb-4" id="configTabs" role="tablist">
+            {% for cat in categorias %}
+            <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ cat }}"
+                    data-bs-toggle="tab" data-bs-target="#content-{{ cat }}" type="button"
+                    role="tab" aria-controls="content-{{ cat }}" aria-selected="{{ 'true' if loop.first else 'false' }}">
+                <i class="bi bi-{{ categoria_icons.get(cat, 'gear') }} me-2"></i>
+                {{ categoria_labels.get(cat, cat|title) }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Conteúdo das Tabs -->
         <div class="tab-content" id="configTabsContent">
             {% for cat in categorias %}
             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="content-{{ cat }}"
                  role="tabpanel" aria-labelledby="tab-{{ cat }}">
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5>
                             <i class="bi bi-{{ categoria_icons.get(cat, 'gear') }} me-2"></i>
                             {{ categoria_labels.get(cat, cat|title) }}
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="admin-card-body">
                         {% if configs_por_categoria.get(cat) %}
-                        <div class="row g-4">
+                        <div class="admin-form-row">
                             {% for config in configs_por_categoria.get(cat, []) %}
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="config_{{ config.chave }}" class="form-label">
-                                        {{ config.descricao or config.chave }}
-                                        {% if config.tipo == 'secret' %}
-                                        <i class="bi bi-lock-fill text-warning ms-1" title="Campo sensivel"></i>
-                                        {% endif %}
-                                    </label>
-                                    <div class="input-group">
-                                        {% if config.tipo == 'boolean' %}
-                                        <select class="form-select" id="config_{{ config.chave }}" name="config_{{ config.chave }}"
-                                                {% if not config.editavel %}disabled{% endif %}>
-                                            <option value="true" {% if config.valor and config.valor.lower() in ('true', '1', 'sim') %}selected{% endif %}>Sim</option>
-                                            <option value="false" {% if not config.valor or config.valor.lower() in ('false', '0', 'nao') %}selected{% endif %}>Nao</option>
-                                        </select>
-                                        {% elif config.tipo == 'secret' %}
-                                        <input type="password" class="form-control" id="config_{{ config.chave }}"
-                                               name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
-                                               {% if not config.editavel %}disabled{% endif %}>
-                                        <button class="btn btn-outline-secondary" type="button"
-                                                onclick="togglePassword('config_{{ config.chave }}')">
-                                            <i class="bi bi-eye" id="icon_config_{{ config.chave }}"></i>
-                                        </button>
-                                        {% elif config.tipo == 'integer' %}
-                                        <input type="number" class="form-control" id="config_{{ config.chave }}"
-                                               name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
-                                               {% if not config.editavel %}disabled{% endif %}>
-                                        {% else %}
-                                        <input type="text" class="form-control" id="config_{{ config.chave }}"
-                                               name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
-                                               {% if not config.editavel %}disabled{% endif %}>
-                                        {% endif %}
-                                    </div>
-                                    <small class="text-muted">{{ config.chave }}</small>
+                            <div>
+                                <label for="config_{{ config.chave }}" class="form-label">
+                                    {{ config.descricao or config.chave }}
+                                    {% if config.tipo == 'secret' %}
+                                    <i class="bi bi-lock-fill text-warning ms-1" title="Campo sensível"></i>
+                                    {% endif %}
+                                </label>
+                                <div class="input-group">
+                                    {% if config.tipo == 'boolean' %}
+                                    <select class="form-select" id="config_{{ config.chave }}" name="config_{{ config.chave }}"
+                                            {% if not config.editavel %}disabled{% endif %}>
+                                        <option value="true" {% if config.valor and config.valor.lower() in ('true', '1', 'sim') %}selected{% endif %}>Sim</option>
+                                        <option value="false" {% if not config.valor or config.valor.lower() in ('false', '0', 'nao') %}selected{% endif %}>Não</option>
+                                    </select>
+                                    {% elif config.tipo == 'secret' %}
+                                    <input type="password" class="form-control" id="config_{{ config.chave }}"
+                                           name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
+                                           {% if not config.editavel %}disabled{% endif %}>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="togglePassword('config_{{ config.chave }}')">
+                                        <i class="bi bi-eye" id="icon_config_{{ config.chave }}"></i>
+                                    </button>
+                                    {% elif config.tipo == 'integer' %}
+                                    <input type="number" class="form-control" id="config_{{ config.chave }}"
+                                           name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
+                                           {% if not config.editavel %}disabled{% endif %}>
+                                    {% else %}
+                                    <input type="text" class="form-control" id="config_{{ config.chave }}"
+                                           name="config_{{ config.chave }}" value="{{ config.valor or '' }}"
+                                           {% if not config.editavel %}disabled{% endif %}>
+                                    {% endif %}
                                 </div>
+                                <small class="text-muted">{{ config.chave }}</small>
                             </div>
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-inbox display-4"></i>
-                            <p class="mt-2">Nenhuma configuracao nesta categoria.</p>
+                        <div class="admin-empty-state">
+                            <i class="bi bi-inbox admin-empty-icon"></i>
+                            <h3 class="admin-empty-title">Nenhuma configuração</h3>
+                            <p class="admin-empty-desc">Nenhuma configuração nesta categoria.</p>
                         </div>
                         {% endif %}
                     </div>
@@ -132,16 +137,16 @@
             {% endfor %}
         </div>
 
-        <!-- Botao Salvar -->
-        <div class="mt-4 d-flex justify-content-end gap-2">
+        <!-- Botão Salvar -->
+        <div class="mt-4 d-flex flex-wrap justify-content-end gap-3">
             <button type="submit" class="btn btn-danger btn-lg">
-                <i class="bi bi-check-lg me-2"></i>Salvar Todas as Configuracoes
+                <i class="bi bi-check-lg me-2"></i>Salvar Todas as Configurações
             </button>
         </div>
     </form>
 </div>
 
-<!-- Modal Nova Configuracao -->
+<!-- Modal Nova Configuração -->
 <div class="modal fade" id="modalNovaConfig" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -149,46 +154,46 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-plus-circle me-2"></i>Nova Configuracao
+                        <i class="bi bi-plus-circle me-2"></i>Nova Configuração
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="chave" class="form-label">Chave <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="chave" name="chave" required
                                placeholder="Ex: MINHA_API_KEY" pattern="[A-Za-z0-9_]+"
-                               title="Apenas letras, numeros e underline">
-                        <small class="text-muted">Sera convertida para maiusculas automaticamente</small>
+                               title="Apenas letras, números e underline">
+                        <small class="text-muted">Será convertida para maiúsculas automaticamente</small>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="valor" class="form-label">Valor</label>
                         <input type="text" class="form-control" id="valor" name="valor">
                     </div>
-                    <div class="mb-3">
-                        <label for="descricao" class="form-label">Descricao</label>
+                    <div class="mb-4">
+                        <label for="descricao" class="form-label">Descrição</label>
                         <input type="text" class="form-control" id="descricao" name="descricao"
-                               placeholder="Descricao amigavel da configuracao">
+                               placeholder="Descrição amigável da configuração">
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-4">
+                        <div class="col-6">
                             <label for="tipo" class="form-label">Tipo</label>
                             <select class="form-select" id="tipo" name="tipo">
                                 <option value="string">Texto</option>
-                                <option value="integer">Numero</option>
-                                <option value="boolean">Sim/Nao</option>
+                                <option value="integer">Número</option>
+                                <option value="boolean">Sim/Não</option>
                                 <option value="secret">Senha/Token</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-6">
                             <label for="categoria" class="form-label">Categoria</label>
                             <select class="form-select" id="categoria" name="categoria">
                                 <option value="geral">Geral</option>
                                 <option value="email">Email</option>
                                 <option value="api">APIs</option>
                                 <option value="pagamento">Pagamentos</option>
-                                <option value="comunicacao">Comunicacao</option>
-                                <option value="seguranca">Seguranca</option>
+                                <option value="comunicacao">Comunicação</option>
+                                <option value="seguranca">Segurança</option>
                                 <option value="loja">Loja</option>
                             </select>
                         </div>
@@ -222,24 +227,20 @@ function togglePassword(inputId) {
     }
 }
 
-// Garantir que o modal esta fechado ao carregar a pagina
 document.addEventListener('DOMContentLoaded', function() {
     var modalElement = document.getElementById('modalNovaConfig');
     if (modalElement) {
-        // Remover classe show se existir
         modalElement.classList.remove('show');
         modalElement.style.display = 'none';
         modalElement.setAttribute('aria-hidden', 'true');
         modalElement.removeAttribute('aria-modal');
         modalElement.removeAttribute('role');
 
-        // Remover backdrop se existir
         var backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(function(backdrop) {
             backdrop.remove();
         });
 
-        // Remover classe do body
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';

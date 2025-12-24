@@ -10,34 +10,71 @@
         </ol>
     </nav>
 
-    <div class="row justify-content-center">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-pencil-square text-warning"></i>
+                Editar Categoria
+            </h1>
+        </div>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-warning">
-                    <h4 class="mb-0">
-                        <i class="bi bi-pencil me-2"></i>
-                        Editar Categoria
-                    </h4>
+            <div class="admin-form-section">
+                <h5 class="admin-form-section-title">
+                    <i class="bi bi-tag text-warning"></i>
+                    Dados da Categoria
+                </h5>
+
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="mb-4">
+                        <label for="nome" class="form-label">Nome da Categoria *</label>
+                        <input type="text" class="form-control" id="nome" name="nome"
+                               value="{{ categoria.nome }}" required>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-check-lg me-2"></i>Salvar Alterações
+                        </button>
+                        <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-lg me-2"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5>
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informações
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="mb-3">
-                            <label for="nome" class="form-label">Nome da Categoria *</label>
-                            <input type="text" class="form-control" id="nome" name="nome"
-                                   value="{{ categoria.nome }}" required>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-2"></i>
-                                Salvar Alteracoes
-                            </button>
-                            <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-secondary">
-                                <i class="bi bi-x-lg me-2"></i>
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
+                <div class="admin-card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">ID</small>
+                        <p class="mb-0"><strong>#{{ categoria.id }}</strong></p>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Produtos Associados</small>
+                        <p class="mb-0">
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-box me-1"></i>
+                                {{ categoria.produtos.count() if categoria.produtos else 0 }} produtos
+                            </span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
