@@ -390,6 +390,41 @@ def api_fix_super_admin():
             "error_type": type(e).__name__
         }), 500
 
+@app.route('/api/create-all-tables')
+def api_create_all_tables():
+    """
+    Cria todas as tabelas do banco de dados.
+    Acesse: https://seu-site.vercel.app/api/create-all-tables
+    """
+    try:
+        db.create_all()
+
+        # Listar tabelas criadas
+        from sqlalchemy import text
+        result = db.session.execute(text("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        """))
+        tables = [row[0] for row in result]
+
+        return jsonify({
+            "status": "success",
+            "message": "Tabelas criadas com sucesso!",
+            "tables": tables,
+            "total_tables": len(tables)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
+
+
 # Exportar app para Vercel (WSGI compatível)
 # Vercel detecta automaticamente o objeto 'app' ou 'application'
 application = app

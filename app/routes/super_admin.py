@@ -24,21 +24,63 @@ super_admin_bp = Blueprint('super_admin', __name__)
 @super_admin_required
 def dashboard():
     """Dashboard principal do Super Admin com visao geral do sistema"""
-    # Estatisticas gerais
-    total_usuarios = User.query.count()
-    total_admins = User.query.filter_by(tipo_usuario='admin').count()
-    total_clientes = User.query.filter_by(tipo_usuario='cliente').count()
-    total_super_admins = User.query.filter_by(tipo_usuario='super_admin').count()
-    usuarios_ativos = User.query.filter_by(ativo=True).count()
-    usuarios_inativos = User.query.filter_by(ativo=False).count()
+    # Inicializar variaveis com valores padrao
+    total_usuarios = 0
+    total_admins = 0
+    total_clientes = 0
+    total_super_admins = 0
+    usuarios_ativos = 0
+    usuarios_inativos = 0
+    total_produtos = 0
+    total_pedidos = 0
+    total_categorias = 0
+    ultimos_usuarios = []
 
-    # Estatisticas de produtos e pedidos
-    total_produtos = Produto.query.count()
-    total_pedidos = Pedido.query.count()
-    total_categorias = Categoria.query.count()
+    try:
+        # Estatisticas de usuarios
+        total_usuarios = User.query.count()
+        total_admins = User.query.filter_by(tipo_usuario='admin').count()
+        total_clientes = User.query.filter_by(tipo_usuario='cliente').count()
+        total_super_admins = User.query.filter_by(tipo_usuario='super_admin').count()
 
-    # Ultimos usuarios cadastrados
-    ultimos_usuarios = User.query.order_by(User.data_criacao.desc()).limit(5).all()
+        try:
+            usuarios_ativos = User.query.filter_by(ativo=True).count()
+            usuarios_inativos = User.query.filter_by(ativo=False).count()
+        except Exception as e:
+            current_app.logger.warning(f'Erro ao contar usuarios ativos/inativos: {e}')
+            usuarios_ativos = total_usuarios
+            usuarios_inativos = 0
+
+        # Ultimos usuarios
+        try:
+            ultimos_usuarios = User.query.order_by(User.data_criacao.desc()).limit(5).all()
+        except Exception as e:
+            current_app.logger.warning(f'Erro ao buscar ultimos usuarios: {e}')
+            try:
+                ultimos_usuarios = User.query.order_by(User.id.desc()).limit(5).all()
+            except Exception:
+                ultimos_usuarios = []
+
+    except Exception as e:
+        current_app.logger.error(f'Erro ao carregar estatisticas de usuarios: {e}')
+
+    # Estatisticas de produtos
+    try:
+        total_produtos = Produto.query.count()
+    except Exception as e:
+        current_app.logger.warning(f'Erro ao contar produtos: {e}')
+
+    # Estatisticas de pedidos
+    try:
+        total_pedidos = Pedido.query.count()
+    except Exception as e:
+        current_app.logger.warning(f'Erro ao contar pedidos: {e}')
+
+    # Estatisticas de categorias
+    try:
+        total_categorias = Categoria.query.count()
+    except Exception as e:
+        current_app.logger.warning(f'Erro ao contar categorias: {e}')
 
     return render_template('super_admin/dashboard.html',
         total_usuarios=total_usuarios,
