@@ -25,7 +25,7 @@ def dashboard():
 @login_required
 @admin_required
 def painel_admin():
-    return render_template('index.html')
+    return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/produtos')
 @login_required
