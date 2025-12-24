@@ -221,6 +221,30 @@ function togglePassword(inputId) {
         icon.classList.add('bi-eye');
     }
 }
+
+// Garantir que o modal esta fechado ao carregar a pagina
+document.addEventListener('DOMContentLoaded', function() {
+    var modalElement = document.getElementById('modalNovaConfig');
+    if (modalElement) {
+        // Remover classe show se existir
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        modalElement.removeAttribute('role');
+
+        // Remover backdrop se existir
+        var backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(function(backdrop) {
+            backdrop.remove();
+        });
+
+        // Remover classe do body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+});
 </script>
 {% endblock %}
 {% endblock %}
