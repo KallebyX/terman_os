@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Lead | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.listar_leads') }}">Leads</a></li>
+            <li class="breadcrumb-item active">Editar</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil me-2"></i>
+                        Editar Lead
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome *</label>
+                                <input type="text" class="form-control" id="nome" name="nome"
+                                       value="{{ lead.nome }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ lead.email or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="telefone" name="telefone"
+                                       value="{{ lead.telefone or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="celular" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular"
+                                       value="{{ lead.celular or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="empresa" class="form-label">Empresa</label>
+                                <input type="text" class="form-control" id="empresa" name="empresa"
+                                       value="{{ lead.empresa or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cargo" class="form-label">Cargo</label>
+                                <input type="text" class="form-control" id="cargo" name="cargo"
+                                       value="{{ lead.cargo or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="origem" class="form-label">Origem</label>
+                                <select class="form-select" id="origem" name="origem">
+                                    <option value="">Selecione...</option>
+                                    <option value="site" {% if lead.origem == 'site' %}selected{% endif %}>Site</option>
+                                    <option value="indicacao" {% if lead.origem == 'indicacao' %}selected{% endif %}>Indicacao</option>
+                                    <option value="telefone" {% if lead.origem == 'telefone' %}selected{% endif %}>Telefone</option>
+                                    <option value="whatsapp" {% if lead.origem == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
+                                    <option value="rede_social" {% if lead.origem == 'rede_social' %}selected{% endif %}>Rede Social</option>
+                                    <option value="outro" {% if lead.origem == 'outro' %}selected{% endif %}>Outro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="novo" {% if lead.status == 'novo' %}selected{% endif %}>Novo</option>
+                                    <option value="contatado" {% if lead.status == 'contatado' %}selected{% endif %}>Contatado</option>
+                                    <option value="qualificado" {% if lead.status == 'qualificado' %}selected{% endif %}>Qualificado</option>
+                                    <option value="proposta_enviada" {% if lead.status == 'proposta_enviada' %}selected{% endif %}>Proposta Enviada</option>
+                                    <option value="negociacao" {% if lead.status == 'negociacao' %}selected{% endif %}>Negociacao</option>
+                                    <option value="ganho" {% if lead.status == 'ganho' %}selected{% endif %}>Ganho</option>
+                                    <option value="perdido" {% if lead.status == 'perdido' %}selected{% endif %}>Perdido</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="qualificacao" class="form-label">Qualificacao</label>
+                                <select class="form-select" id="qualificacao" name="qualificacao">
+                                    <option value="">Selecione...</option>
+                                    <option value="frio" {% if lead.qualificacao == 'frio' %}selected{% endif %}>Frio</option>
+                                    <option value="morno" {% if lead.qualificacao == 'morno' %}selected{% endif %}>Morno</option>
+                                    <option value="quente" {% if lead.qualificacao == 'quente' %}selected{% endif %}>Quente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="vendedor_id" class="form-label">Vendedor Responsavel</label>
+                                <select class="form-select" id="vendedor_id" name="vendedor_id">
+                                    <option value="">Selecione...</option>
+                                    {% for v in vendedores %}
+                                    <option value="{{ v.id }}" {% if lead.vendedor_id == v.id %}selected{% endif %}>{{ v.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="interesse" class="form-label">Interesse</label>
+                                <input type="text" class="form-control" id="interesse" name="interesse"
+                                       value="{{ lead.interesse or '' }}">
+                            </div>
+                            <div class="col-12">
+                                <label for="observacoes" class="form-label">Observacoes</label>
+                                <textarea class="form-control" id="observacoes" name="observacoes" rows="3">{{ lead.observacoes or '' }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>
+                                        Salvar Alteracoes
+                                    </button>
+                                    <a href="{{ url_for('crm.visualizar_lead', lead_id=lead.id) }}" class="btn btn-secondary">
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -425,6 +425,86 @@ def api_create_all_tables():
         }), 500
 
 
+@app.route('/api/migrate-produtos')
+def api_migrate_produtos():
+    """
+    Migra a tabela produtos adicionando colunas faltantes.
+    Acesse: https://seu-site.vercel.app/api/migrate-produtos
+    """
+    from sqlalchemy import text
+    results = {
+        "status": "ok",
+        "migrations": [],
+        "errors": []
+    }
+
+    try:
+        # Verificar e adicionar coluna 'imagem_filename'
+        try:
+            db.session.execute(text("ALTER TABLE produtos ADD COLUMN imagem_filename VARCHAR(255)"))
+            db.session.commit()
+            results["migrations"].append("Coluna 'imagem_filename' adicionada com sucesso")
+        except Exception as e:
+            db.session.rollback()
+            if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                results["migrations"].append("Coluna 'imagem_filename' já existe")
+            else:
+                results["errors"].append(f"Erro ao adicionar 'imagem_filename': {str(e)}")
+
+        # Verificar e adicionar coluna 'estoque'
+        try:
+            db.session.execute(text("ALTER TABLE produtos ADD COLUMN estoque INTEGER DEFAULT 0"))
+            db.session.commit()
+            results["migrations"].append("Coluna 'estoque' adicionada com sucesso")
+        except Exception as e:
+            db.session.rollback()
+            if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                results["migrations"].append("Coluna 'estoque' já existe")
+            else:
+                results["errors"].append(f"Erro ao adicionar 'estoque': {str(e)}")
+
+        # Atualizar estoque dos produtos existentes baseado na tabela de estoque
+        try:
+            db.session.execute(text("""
+                UPDATE produtos p
+                SET estoque = COALESCE((
+                    SELECT SUM(e.quantidade)
+                    FROM estoque e
+                    WHERE e.produto_id = p.id
+                ), 0)
+                WHERE estoque IS NULL OR estoque = 0
+            """))
+            db.session.commit()
+            results["migrations"].append("Estoque dos produtos atualizado com base na tabela estoque")
+        except Exception as e:
+            db.session.rollback()
+            results["errors"].append(f"Erro ao atualizar estoque: {str(e)}")
+
+        # Verificar estrutura final da tabela
+        try:
+            result = db.session.execute(text("""
+                SELECT column_name, data_type, column_default
+                FROM information_schema.columns
+                WHERE table_name = 'produtos'
+                ORDER BY ordinal_position
+            """))
+            columns = [{"name": row[0], "type": row[1], "default": row[2]} for row in result]
+            results["table_structure"] = columns
+        except Exception as e:
+            results["errors"].append(f"Erro ao verificar estrutura: {str(e)}")
+
+        results["message"] = "Migração de produtos concluída!"
+        return jsonify(results)
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
+
+
 # Exportar app para Vercel (WSGI compatível)
 # Vercel detecta automaticamente o objeto 'app' ou 'application'
 application = app

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Oportunidade | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.listar_oportunidades') }}">Pipeline</a></li>
+            <li class="breadcrumb-item active">Nova Oportunidade</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-bullseye me-2"></i>
+                        Nova Oportunidade
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="nome" class="form-label">Nome da Oportunidade *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lead_id" class="form-label">Lead</label>
+                                <select class="form-select" id="lead_id" name="lead_id">
+                                    <option value="">Selecione um lead...</option>
+                                    {% for lead in leads %}
+                                    <option value="{{ lead.id }}">{{ lead.nome }} - {{ lead.empresa or 'Sem empresa' }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cliente_id" class="form-label">Cliente</label>
+                                <select class="form-select" id="cliente_id" name="cliente_id">
+                                    <option value="">Selecione um cliente...</option>
+                                    {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}">{{ cliente.usuario.nome if cliente.usuario else 'Cliente' }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="valor_estimado" class="form-label">Valor Estimado (R$)</label>
+                                <input type="number" class="form-control" id="valor_estimado" name="valor_estimado" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="probabilidade" class="form-label">Probabilidade (%)</label>
+                                <input type="number" class="form-control" id="probabilidade" name="probabilidade" min="0" max="100" value="10">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="vendedor_id" class="form-label">Vendedor Responsavel</label>
+                                <select class="form-select" id="vendedor_id" name="vendedor_id">
+                                    <option value="">Selecione...</option>
+                                    {% for v in vendedores %}
+                                    <option value="{{ v.id }}">{{ v.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="descricao" class="form-label">Descricao</label>
+                                <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="proximos_passos" class="form-label">Proximos Passos</label>
+                                <textarea class="form-control" id="proximos_passos" name="proximos_passos" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>
+                                        Criar Oportunidade
+                                    </button>
+                                    <a href="{{ url_for('crm.listar_oportunidades') }}" class="btn btn-secondary">
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

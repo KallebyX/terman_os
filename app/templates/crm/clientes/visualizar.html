@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Cliente | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.listar_clientes') }}">Clientes</a></li>
+            <li class="breadcrumb-item active">Detalhes</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person me-2"></i>
+                        {{ cliente.usuario.nome if cliente.usuario else 'Cliente' }}
+                    </h4>
+                    <span class="badge bg-{{ 'success' if cliente.ativo else 'secondary' }}">
+                        {{ 'Ativo' if cliente.ativo else 'Inativo' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Email</label>
+                            <p class="mb-0">{{ cliente.usuario.email if cliente.usuario else '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Tipo</label>
+                            <p class="mb-0">{{ 'Pessoa Juridica' if cliente.tipo == 'pj' else 'Pessoa Fisica' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">CPF/CNPJ</label>
+                            <p class="mb-0">{{ cliente.cpf_cnpj or '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Telefone</label>
+                            <p class="mb-0">{{ cliente.telefone or '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Celular</label>
+                            <p class="mb-0">{{ cliente.celular or '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Data de Cadastro</label>
+                            <p class="mb-0">{{ cliente.data_cadastro.strftime('%d/%m/%Y') if cliente.data_cadastro else '-' }}</p>
+                        </div>
+                        {% if cliente.endereco %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small">Endereco</label>
+                            <p class="mb-0">{{ cliente.endereco }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interacoes -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Ultimas Interacoes</h5>
+                </div>
+                <div class="card-body">
+                    {% if interacoes %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for interacao in interacoes %}
+                        <div class="border-start border-3 border-primary ps-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ interacao.tipo }}</strong>
+                                <small class="text-muted">{{ interacao.data_interacao.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                            <p class="mb-0 text-muted">{{ interacao.descricao or interacao.assunto or 'Sem descricao' }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Nenhuma interacao registrada.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acoes Rapidas</h5>
+                </div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <a href="{{ url_for('crm.listar_clientes') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Voltar para Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
