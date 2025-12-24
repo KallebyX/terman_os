@@ -14,7 +14,9 @@ class Produto(db.Model):
     preco_custo = db.Column(db.Float, nullable=True)  # Para cálculo de margem
     preco_promocional = db.Column(db.Float, nullable=True)
     imagem_url = db.Column(db.String(255), nullable=True)
+    imagem_filename = db.Column(db.String(255), nullable=True)  # Nome do arquivo local
     imagens_adicionais = db.Column(db.Text, nullable=True)  # JSON array de URLs
+    estoque = db.Column(db.Integer, default=0)  # Estoque direto (para compatibilidade)
 
     # Relacionamento com Categoria
     categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'), nullable=True, index=True)

@@ -32,7 +32,7 @@ def painel_admin():
 @admin_required
 def listar_produtos():
     produtos = Produto.query.order_by(Produto.nome.asc()).all()
-    return render_template('produtos/listar.html', produtos=produtos)
+    return render_template('admin/produtos/listar.html', produtos=produtos)
 
 @admin_bp.route('/produtos/novo', methods=['GET', 'POST'])
 @login_required
@@ -66,7 +66,7 @@ def criar_produto():
         return redirect(url_for('admin.listar_produtos'))
 
     categorias = Categoria.query.all()
-    return render_template('produtos/novo.html', categorias=categorias)
+    return render_template('admin/produtos/novo.html', categorias=categorias)
 
 @admin_bp.route('/produtos/editar/<int:produto_id>', methods=['GET', 'POST'])
 @login_required
@@ -93,7 +93,7 @@ def editar_produto(produto_id):
         return redirect(url_for('admin.listar_produtos'))
 
     categorias = Categoria.query.all()
-    return render_template('produtos/editar.html', produto=produto, categorias=categorias)
+    return render_template('admin/produtos/editar.html', produto=produto, categorias=categorias)
 
 @admin_bp.route('/produtos/excluir/<int:produto_id>', methods=['POST'])
 @login_required

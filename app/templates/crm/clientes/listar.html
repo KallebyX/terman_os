@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item active">Clientes</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3"><i class="bi bi-people me-2"></i>Clientes</h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por nome, email ou CPF/CNPJ..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos os tipos</option>
+                        <option value="pf" {% if tipo_filtro == 'pf' %}selected{% endif %}>Pessoa Fisica</option>
+                        <option value="pj" {% if tipo_filtro == 'pj' %}selected{% endif %}>Pessoa Juridica</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search me-1"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Clientes -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>CPF/CNPJ</th>
+                        <th>Cadastro</th>
+                        <th width="100">Acoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td><strong>{{ cliente.usuario.nome if cliente.usuario else 'N/A' }}</strong></td>
+                        <td>{{ cliente.usuario.email if cliente.usuario else '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'primary' if cliente.tipo == 'pj' else 'secondary' }}">
+                                {{ 'PJ' if cliente.tipo == 'pj' else 'PF' }}
+                            </span>
+                        </td>
+                        <td>{{ cliente.cpf_cnpj or '-' }}</td>
+                        <td>{{ cliente.data_cadastro.strftime('%d/%m/%Y') if cliente.data_cadastro else '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('crm.visualizar_cliente', cliente_id=cliente.id) }}" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-3 text-muted mb-0">Nenhum cliente encontrado.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination.pages > 1 %}
+        <div class="card-footer">
+            <nav aria-label="Navegacao">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.prev_page }}&tipo={{ tipo_filtro }}&q={{ search }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    {% for p in range(1, pagination.pages + 1) %}
+                    <li class="page-item {% if p == pagination.current_page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ p }}&tipo={{ tipo_filtro }}&q={{ search }}">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.next_page }}&tipo={{ tipo_filtro }}&q={{ search }}">Proximo</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

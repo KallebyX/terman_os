@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividades | CRM - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+            <li class="breadcrumb-item active">Atividades</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3"><i class="bi bi-list-task me-2"></i>Minhas Atividades</h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="mb-4">
+        <div class="btn-group">
+            <a href="?status=pendente" class="btn btn-{{ 'primary' if status_filtro == 'pendente' else 'outline-primary' }}">Pendentes</a>
+            <a href="?status=concluida" class="btn btn-{{ 'primary' if status_filtro == 'concluida' else 'outline-primary' }}">Concluidas</a>
+            <a href="?status=" class="btn btn-{{ 'primary' if not status_filtro else 'outline-primary' }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Lista de Atividades -->
+    <div class="card">
+        <div class="card-body">
+            {% if atividades %}
+            <div class="d-flex flex-column gap-3">
+                {% for atividade in atividades %}
+                <div class="d-flex justify-content-between align-items-center p-3 border rounded {% if atividade.concluida %}bg-light{% endif %}">
+                    <div class="d-flex align-items-start gap-3">
+                        {% if not atividade.concluida %}
+                        <form action="{{ url_for('crm.concluir_atividade', atividade_id=atividade.id) }}" method="POST">
+                            <button type="submit" class="btn btn-outline-success btn-sm" title="Marcar como concluida">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="btn btn-success btn-sm disabled">
+                            <i class="bi bi-check-lg"></i>
+                        </span>
+                        {% endif %}
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-{{ 'danger' if atividade.prioridade == 'urgente' else 'warning' if atividade.prioridade == 'alta' else 'info' if atividade.prioridade == 'media' else 'secondary' }}">
+                                    {{ atividade.prioridade or 'normal' }}
+                                </span>
+                                <span class="badge bg-{{ 'primary' if atividade.tipo == 'ligacao' else 'success' if atividade.tipo == 'email' else 'warning' if atividade.tipo == 'reuniao' else 'secondary' }}">
+                                    {{ atividade.tipo or 'tarefa' }}
+                                </span>
+                            </div>
+                            <h6 class="mb-1 {% if atividade.concluida %}text-decoration-line-through text-muted{% endif %}">{{ atividade.titulo }}</h6>
+                            {% if atividade.descricao %}
+                            <p class="text-muted small mb-0">{{ atividade.descricao[:100] }}{{ '...' if atividade.descricao|length > 100 else '' }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        {% if atividade.data_vencimento %}
+                        <div class="small {% if not atividade.concluida and atividade.data_vencimento < now() %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                            <i class="bi bi-calendar me-1"></i>
+                            {{ atividade.data_vencimento.strftime('%d/%m/%Y') }}
+                        </div>
+                        {% endif %}
+                        {% if atividade.concluida and atividade.data_conclusao %}
+                        <div class="small text-success">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Concluida em {{ atividade.data_conclusao.strftime('%d/%m/%Y') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if pagination.pages > 1 %}
+            <nav aria-label="Navegacao" class="mt-4">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.prev_page }}&status={{ status_filtro }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    {% for p in range(1, pagination.pages + 1) %}
+                    <li class="page-item {% if p == pagination.current_page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ p }}&status={{ status_filtro }}">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.next_page }}&status={{ status_filtro }}">Proximo</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-check-circle" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="mt-3 text-muted mb-0">
+                    {% if status_filtro == 'pendente' %}
+                    Nenhuma atividade pendente. Bom trabalho!
+                    {% else %}
+                    Nenhuma atividade encontrada.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
