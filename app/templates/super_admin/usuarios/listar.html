@@ -1,79 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Gerenciar Usuarios | Super Admin | Terman OS{% endblock %}
+{% block title %}Gerenciar Usuários | Super Admin | Terman OS{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
+            <li class="breadcrumb-item active">Usuários</li>
+        </ol>
+    </nav>
+
+    <div class="admin-page-header">
         <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ url_for('super_admin.dashboard') }}">Super Admin</a></li>
-                    <li class="breadcrumb-item active">Usuarios</li>
-                </ol>
-            </nav>
-            <h1 class="h2 mb-0">
-                <i class="bi bi-people-fill text-danger me-2"></i>
-                Gerenciar Usuarios
+            <h1 class="h2">
+                <i class="bi bi-people-fill text-danger"></i>
+                Gerenciar Usuários
             </h1>
         </div>
-        <a href="{{ url_for('super_admin.novo_usuario') }}" class="btn btn-danger">
-            <i class="bi bi-person-plus-fill me-2"></i>
-            Novo Usuario
-        </a>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('super_admin.novo_usuario') }}" class="btn btn-danger">
+                <i class="bi bi-person-plus-fill me-2"></i>
+                Novo Usuário
+            </a>
+        </div>
     </div>
 
     <!-- Filters -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Buscar</label>
-                    <input type="text" name="busca" class="form-control" placeholder="Nome ou email..."
-                           value="{{ busca }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Tipo</label>
-                    <select name="tipo" class="form-select">
-                        <option value="">Todos</option>
-                        <option value="super_admin" {% if tipo_filtro == 'super_admin' %}selected{% endif %}>Super Admin</option>
-                        <option value="admin" {% if tipo_filtro == 'admin' %}selected{% endif %}>Admin</option>
-                        <option value="cliente" {% if tipo_filtro == 'cliente' %}selected{% endif %}>Cliente</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">Todos</option>
-                        <option value="ativo" {% if status_filtro == 'ativo' %}selected{% endif %}>Ativos</option>
-                        <option value="inativo" {% if status_filtro == 'inativo' %}selected{% endif %}>Inativos</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-1"></i>
-                        Filtrar
-                    </button>
-                </div>
-            </form>
-        </div>
+    <div class="admin-filters">
+        <form method="GET" class="admin-filters-row">
+            <div>
+                <label class="form-label">Buscar</label>
+                <input type="text" name="busca" class="form-control" placeholder="Nome ou email..."
+                       value="{{ busca }}">
+            </div>
+            <div>
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="super_admin" {% if tipo_filtro == 'super_admin' %}selected{% endif %}>Super Admin</option>
+                    <option value="admin" {% if tipo_filtro == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="cliente" {% if tipo_filtro == 'cliente' %}selected{% endif %}>Cliente</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="ativo" {% if status_filtro == 'ativo' %}selected{% endif %}>Ativos</option>
+                    <option value="inativo" {% if status_filtro == 'inativo' %}selected{% endif %}>Inativos</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-2"></i>Filtrar
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Users Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+    <div class="admin-card">
+        <div class="admin-card-body p-0">
+            <!-- Desktop Table -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Email</th>
                             <th>Tipo</th>
                             <th>Status</th>
-                            <th>Ultimo Acesso</th>
-                            <th>Acoes</th>
+                            <th>Último Acesso</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,38 +85,33 @@
                             <td>
                                 <strong>{{ usuario.nome }}</strong>
                                 {% if usuario.id == current_user.id %}
-                                    <span class="badge bg-info ms-1">Voce</span>
+                                    <span class="badge bg-info ms-1">Você</span>
                                 {% endif %}
                             </td>
                             <td>{{ usuario.email }}</td>
                             <td>
                                 {% if usuario.tipo_usuario == 'super_admin' %}
                                     <span class="badge bg-danger">
-                                        <i class="bi bi-shield-lock-fill me-1"></i>
-                                        Super Admin
+                                        <i class="bi bi-shield-lock-fill me-1"></i>Super Admin
                                     </span>
                                 {% elif usuario.tipo_usuario == 'admin' %}
                                     <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-person-badge-fill me-1"></i>
-                                        Admin
+                                        <i class="bi bi-person-badge-fill me-1"></i>Admin
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary">
-                                        <i class="bi bi-person-fill me-1"></i>
-                                        Cliente
+                                        <i class="bi bi-person-fill me-1"></i>Cliente
                                     </span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if usuario.ativo %}
                                     <span class="badge bg-success">
-                                        <i class="bi bi-check-circle me-1"></i>
-                                        Ativo
+                                        <i class="bi bi-check-circle me-1"></i>Ativo
                                     </span>
                                 {% else %}
                                     <span class="badge bg-secondary">
-                                        <i class="bi bi-x-circle me-1"></i>
-                                        Inativo
+                                        <i class="bi bi-x-circle me-1"></i>Inativo
                                     </span>
                                 {% endif %}
                             </td>
@@ -126,9 +123,9 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm">
+                                <div class="admin-actions">
                                     <a href="{{ url_for('super_admin.editar_usuario', user_id=usuario.id) }}"
-                                       class="btn btn-outline-primary" title="Editar">
+                                       class="btn btn-sm btn-outline-primary" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
@@ -136,13 +133,13 @@
                                         <form method="POST" action="{{ url_for('super_admin.toggle_status_usuario', user_id=usuario.id) }}"
                                               style="display:inline;">
                                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                            <button type="submit" class="btn btn-outline-{{ 'warning' if usuario.ativo else 'success' }}"
+                                            <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if usuario.ativo else 'success' }}"
                                                     title="{{ 'Desativar' if usuario.ativo else 'Ativar' }}">
                                                 <i class="bi bi-{{ 'toggle-on' if usuario.ativo else 'toggle-off' }}"></i>
                                             </button>
                                         </form>
 
-                                        <button type="button" class="btn btn-outline-danger"
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
                                                 onclick="confirmarExclusao({{ usuario.id }}, '{{ usuario.nome }}')"
                                                 title="Excluir">
                                             <i class="bi bi-trash"></i>
@@ -153,21 +150,93 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                Nenhum usuario encontrado.
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                Nenhum usuário encontrado.
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Cards -->
+            <div class="admin-mobile-cards" style="padding: var(--space-4);">
+                {% for usuario in usuarios.items %}
+                <div class="admin-mobile-card">
+                    <div class="admin-mobile-card-header">
+                        <div class="admin-mobile-card-title">
+                            <i class="bi bi-person-circle text-primary"></i>
+                            <span>{{ usuario.nome }}</span>
+                            {% if usuario.id == current_user.id %}
+                                <span class="badge bg-info">Você</span>
+                            {% endif %}
+                        </div>
+                        {% if usuario.tipo_usuario == 'super_admin' %}
+                            <span class="badge bg-danger">Super Admin</span>
+                        {% elif usuario.tipo_usuario == 'admin' %}
+                            <span class="badge bg-warning text-dark">Admin</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Cliente</span>
+                        {% endif %}
+                    </div>
+                    <div class="admin-mobile-card-body">
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">ID</span>
+                            <span class="admin-mobile-value"><code>#{{ usuario.id }}</code></span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Email</span>
+                            <span class="admin-mobile-value">{{ usuario.email }}</span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Status</span>
+                            <span class="admin-mobile-value">
+                                {% if usuario.ativo %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Último Acesso</span>
+                            <span class="admin-mobile-value">
+                                {{ usuario.ultimo_acesso.strftime('%d/%m/%Y') if usuario.ultimo_acesso else 'Nunca' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-mobile-card-footer">
+                        <a href="{{ url_for('super_admin.editar_usuario', user_id=usuario.id) }}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </a>
+                        {% if usuario.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('super_admin.toggle_status_usuario', user_id=usuario.id) }}"
+                              style="flex: 1;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-{{ 'warning' if usuario.ativo else 'success' }} w-100">
+                                <i class="bi bi-{{ 'toggle-on' if usuario.ativo else 'toggle-off' }} me-1"></i>
+                                {{ 'Desativar' if usuario.ativo else 'Ativar' }}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="admin-empty-state">
+                    <i class="bi bi-inbox admin-empty-icon"></i>
+                    <h3 class="admin-empty-title">Nenhum usuário encontrado</h3>
+                    <p class="admin-empty-desc">Tente ajustar os filtros de busca.</p>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <!-- Pagination -->
         {% if usuarios.pages > 1 %}
-        <div class="card-footer bg-white">
-            <nav aria-label="Paginacao">
+        <div class="admin-card-footer">
+            <nav aria-label="Paginação">
                 <ul class="pagination justify-content-center mb-0">
                     {% if usuarios.has_prev %}
                     <li class="page-item">
@@ -201,22 +270,22 @@
     </div>
 </div>
 
-<!-- Modal de Exclusao -->
+<!-- Modal de Exclusão -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="modalExcluirLabel">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    Confirmar Exclusao
+                    Confirmar Exclusão
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir o usuario <strong id="nomeUsuarioExcluir"></strong>?</p>
+                <p>Tem certeza que deseja excluir o usuário <strong id="nomeUsuarioExcluir"></strong>?</p>
                 <p class="text-danger mb-0">
                     <i class="bi bi-exclamation-triangle me-1"></i>
-                    Esta acao nao pode ser desfeita!
+                    Esta ação não pode ser desfeita!
                 </p>
             </div>
             <div class="modal-footer">
@@ -234,7 +303,6 @@
 </div>
 
 <script>
-// Funcao para confirmar exclusao de usuario
 function confirmarExclusao(userId, userName) {
     var nomeElement = document.getElementById('nomeUsuarioExcluir');
     var formElement = document.getElementById('formExcluir');
@@ -244,20 +312,17 @@ function confirmarExclusao(userId, userName) {
         nomeElement.textContent = userName;
         formElement.action = '/super-admin/usuarios/' + userId + '/excluir';
 
-        // Verificar se Bootstrap esta carregado
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             var modal = new bootstrap.Modal(modalElement);
             modal.show();
         } else {
-            // Fallback simples se Bootstrap nao estiver disponivel
-            if (confirm('Tem certeza que deseja excluir o usuario ' + userName + '? Esta acao nao pode ser desfeita!')) {
+            if (confirm('Tem certeza que deseja excluir o usuário ' + userName + '? Esta ação não pode ser desfeita!')) {
                 formElement.submit();
             }
         }
     }
 }
 
-// Garantir que o modal esta fechado ao carregar a pagina
 document.addEventListener('DOMContentLoaded', function() {
     var modalElement = document.getElementById('modalExcluir');
     if (modalElement) {
@@ -265,13 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
         modalElement.style.display = 'none';
         modalElement.setAttribute('aria-hidden', 'true');
 
-        // Remover backdrop se existir
         var backdrop = document.querySelector('.modal-backdrop');
         if (backdrop) {
             backdrop.remove();
         }
 
-        // Remover classe do body
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';

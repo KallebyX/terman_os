@@ -5,12 +5,15 @@
 {% block content %}
 <div class="container py-5">
     <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+    <div class="admin-page-header">
         <div>
-            <h1 class="h2 mb-1">Painel Administrativo</h1>
-            <p class="text-muted mb-0">Gerencie produtos, pedidos e clientes</p>
+            <h1 class="h2">
+                <i class="bi bi-speedometer2 text-primary"></i>
+                Painel Administrativo
+            </h1>
+            <p>Gerencie produtos, pedidos e clientes</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="admin-header-actions">
             <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-2"></i>
                 Novo Produto
@@ -19,201 +22,183 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="dashboard-grid">
-        <a href="{{ url_for('admin.listar_produtos') }}" class="text-decoration-none">
-            <div class="dashboard-card">
-                <div class="dashboard-icon">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-                <div class="dashboard-value">Produtos</div>
-                <div class="dashboard-label">Gerenciar catálogo de produtos</div>
+    <div class="admin-quick-grid">
+        <a href="{{ url_for('admin.listar_produtos') }}" class="admin-quick-card">
+            <div class="admin-quick-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="admin-quick-content">
+                <h5 class="admin-quick-title">Produtos</h5>
+                <p class="admin-quick-desc">Gerenciar catálogo de produtos</p>
             </div>
         </a>
 
-        <a href="{{ url_for('admin.listar_categorias') }}" class="text-decoration-none">
-            <div class="dashboard-card success">
-                <div class="dashboard-icon">
-                    <i class="bi bi-tags"></i>
-                </div>
-                <div class="dashboard-value">Categorias</div>
-                <div class="dashboard-label">Organizar categorias</div>
+        <a href="{{ url_for('admin.listar_categorias') }}" class="admin-quick-card success">
+            <div class="admin-quick-icon">
+                <i class="bi bi-tags"></i>
+            </div>
+            <div class="admin-quick-content">
+                <h5 class="admin-quick-title">Categorias</h5>
+                <p class="admin-quick-desc">Organizar categorias</p>
             </div>
         </a>
 
-        <a href="{{ url_for('admin.listar_pedidos') }}" class="text-decoration-none">
-            <div class="dashboard-card warning">
-                <div class="dashboard-icon">
-                    <i class="bi bi-bag-check"></i>
-                </div>
-                <div class="dashboard-value">Pedidos</div>
-                <div class="dashboard-label">Visualizar e gerenciar pedidos</div>
+        <a href="{{ url_for('admin.listar_pedidos') }}" class="admin-quick-card warning">
+            <div class="admin-quick-icon">
+                <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="admin-quick-content">
+                <h5 class="admin-quick-title">Pedidos</h5>
+                <p class="admin-quick-desc">Visualizar e gerenciar pedidos</p>
             </div>
         </a>
 
-        <a href="/dashboard" class="text-decoration-none">
-            <div class="dashboard-card info">
-                <div class="dashboard-icon">
-                    <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div class="dashboard-value">Analytics</div>
-                <div class="dashboard-label">Ver relatórios e métricas</div>
+        <a href="/dashboard" class="admin-quick-card info">
+            <div class="admin-quick-icon">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="admin-quick-content">
+                <h5 class="admin-quick-title">Analytics</h5>
+                <p class="admin-quick-desc">Ver relatórios e métricas</p>
             </div>
         </a>
     </div>
 
-    <!-- Quick Access Cards -->
-    <div class="row g-4 mt-4">
+    <!-- Feature Cards -->
+    <div class="admin-feature-grid">
         <!-- Produtos -->
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-box-seam me-2 text-primary"></i>
-                        Produtos
-                    </h5>
-                    <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-lg"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Adicione, edite ou remova produtos do catálogo.</p>
-                    <ul class="list-unstyled">
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Cadastrar novos produtos</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Gerenciar imagens</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Definir preços e estoque</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Acessar Produtos
-                    </a>
-                </div>
+        <div class="admin-feature-card">
+            <div class="admin-feature-header">
+                <h5>
+                    <i class="bi bi-box-seam text-primary"></i>
+                    Produtos
+                </h5>
+                <a href="{{ url_for('admin.novo_produto') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                </a>
+            </div>
+            <div class="admin-feature-body">
+                <p>Adicione, edite ou remova produtos do catálogo.</p>
+                <ul class="admin-feature-list">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Cadastrar novos produtos</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Gerenciar imagens</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Definir preços e estoque</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="admin-feature-footer">
+                <a href="{{ url_for('admin.listar_produtos') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-right me-2"></i>
+                    Acessar Produtos
+                </a>
             </div>
         </div>
 
         <!-- Categorias -->
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-tags me-2 text-success"></i>
-                        Categorias
-                    </h5>
-                    <a href="{{ url_for('admin.nova_categoria') }}" class="btn btn-sm btn-success">
-                        <i class="bi bi-plus-lg"></i>
-                    </a>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Organize seus produtos em categorias.</p>
-                    <ul class="list-unstyled">
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Criar categorias</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Hierarquia de categorias</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Ordenar produtos</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-outline-success w-100">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Acessar Categorias
-                    </a>
-                </div>
+        <div class="admin-feature-card">
+            <div class="admin-feature-header">
+                <h5>
+                    <i class="bi bi-tags text-success"></i>
+                    Categorias
+                </h5>
+                <a href="{{ url_for('admin.nova_categoria') }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-lg"></i>
+                </a>
+            </div>
+            <div class="admin-feature-body">
+                <p>Organize seus produtos em categorias.</p>
+                <ul class="admin-feature-list">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Criar categorias</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Hierarquia de categorias</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Ordenar produtos</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="admin-feature-footer">
+                <a href="{{ url_for('admin.listar_categorias') }}" class="btn btn-outline-success">
+                    <i class="bi bi-arrow-right me-2"></i>
+                    Acessar Categorias
+                </a>
             </div>
         </div>
 
         <!-- Pedidos -->
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-bag-check me-2" style="color: var(--warning);"></i>
-                        Pedidos
-                    </h5>
-                    <span class="badge bg-warning text-dark">Novo</span>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Acompanhe e gerencie todos os pedidos.</p>
-                    <ul class="list-unstyled">
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Ver pedidos pendentes</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Atualizar status</span>
-                        </li>
-                        <li class="d-flex align-items-center gap-2">
-                            <i class="bi bi-check-circle text-success"></i>
-                            <span>Histórico completo</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ url_for('admin.listar_pedidos') }}" class="btn btn-outline-warning w-100">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Acessar Pedidos
-                    </a>
-                </div>
+        <div class="admin-feature-card">
+            <div class="admin-feature-header">
+                <h5>
+                    <i class="bi bi-bag-check" style="color: var(--warning);"></i>
+                    Pedidos
+                </h5>
+                <span class="badge bg-warning text-dark">Novo</span>
+            </div>
+            <div class="admin-feature-body">
+                <p>Acompanhe e gerencie todos os pedidos.</p>
+                <ul class="admin-feature-list">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Ver pedidos pendentes</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Atualizar status</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Histórico completo</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="admin-feature-footer">
+                <a href="{{ url_for('admin.listar_pedidos') }}" class="btn btn-outline-warning">
+                    <i class="bi bi-arrow-right me-2"></i>
+                    Acessar Pedidos
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Additional Tools -->
-    <div class="row g-4 mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-lightning me-2"></i>
-                        Acesso Rápido
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-6 col-md-3">
-                            <a href="/crm" class="btn btn-outline-primary w-100 py-3">
-                                <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                CRM
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <a href="/dashboard" class="btn btn-outline-success w-100 py-3">
-                                <i class="bi bi-bar-chart d-block mb-2" style="font-size: 1.5rem;"></i>
-                                Dashboard BI
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <a href="/erp" class="btn btn-outline-warning w-100 py-3">
-                                <i class="bi bi-building d-block mb-2" style="font-size: 1.5rem;"></i>
-                                ERP
-                            </a>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <a href="/" class="btn btn-outline-secondary w-100 py-3">
-                                <i class="bi bi-globe d-block mb-2" style="font-size: 1.5rem;"></i>
-                                Ver Site
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <!-- Quick Tools -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5>
+                <i class="bi bi-lightning-fill text-warning"></i>
+                Acesso Rápido
+            </h5>
+        </div>
+        <div class="admin-card-body">
+            <div class="admin-tools-grid">
+                <a href="/crm" class="admin-tool-btn">
+                    <i class="bi bi-people text-primary"></i>
+                    <span>CRM</span>
+                </a>
+                <a href="/dashboard" class="admin-tool-btn">
+                    <i class="bi bi-bar-chart text-success"></i>
+                    <span>Dashboard BI</span>
+                </a>
+                <a href="/erp" class="admin-tool-btn">
+                    <i class="bi bi-building text-warning"></i>
+                    <span>ERP</span>
+                </a>
+                <a href="/" class="admin-tool-btn">
+                    <i class="bi bi-globe text-secondary"></i>
+                    <span>Ver Site</span>
+                </a>
             </div>
         </div>
     </div>

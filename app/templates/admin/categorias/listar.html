@@ -9,27 +9,32 @@
         </ol>
     </nav>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="bi bi-tags me-2"></i>
-            Lista de Categorias
-        </h2>
-        <a href="{{ url_for('admin.nova_categoria') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>Nova Categoria
-        </a>
+    <div class="admin-page-header">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-tags text-success"></i>
+                Lista de Categorias
+            </h1>
+        </div>
+        <div class="admin-header-actions">
+            <a href="{{ url_for('admin.nova_categoria') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Nova Categoria
+            </a>
+        </div>
     </div>
 
     {% if categorias %}
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+    <div class="admin-card">
+        <div class="admin-card-body p-0">
+            <!-- Desktop Table -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Produtos</th>
-                            <th>Acoes</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,20 +44,21 @@
                             <td><strong>{{ categoria.nome }}</strong></td>
                             <td>
                                 <span class="badge bg-secondary">
+                                    <i class="bi bi-box me-1"></i>
                                     {{ categoria.produtos.count() if categoria.produtos else 0 }} produtos
                                 </span>
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm">
+                                <div class="admin-actions">
                                     <a href="{{ url_for('admin.editar_categoria', id=categoria.id) }}"
-                                       class="btn btn-outline-primary" title="Editar">
+                                       class="btn btn-sm btn-outline-primary" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <form method="POST" action="{{ url_for('admin.deletar_categoria', id=categoria.id) }}"
                                           style="display:inline;"
                                           onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?');">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                        <button type="submit" class="btn btn-outline-danger" title="Excluir">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -63,13 +69,57 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Cards -->
+            <div class="admin-mobile-cards">
+                {% for categoria in categorias %}
+                <div class="admin-mobile-card">
+                    <div class="admin-mobile-card-header">
+                        <div class="admin-mobile-card-title">
+                            <i class="bi bi-tag text-success"></i>
+                            <span>{{ categoria.nome }}</span>
+                        </div>
+                        <code>#{{ categoria.id }}</code>
+                    </div>
+                    <div class="admin-mobile-card-body">
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Produtos</span>
+                            <span class="admin-mobile-value">
+                                <span class="badge bg-secondary">
+                                    {{ categoria.produtos.count() if categoria.produtos else 0 }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-mobile-card-footer">
+                        <a href="{{ url_for('admin.editar_categoria', id=categoria.id) }}"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </a>
+                        <form method="POST" action="{{ url_for('admin.deletar_categoria', id=categoria.id) }}"
+                              style="flex: 1;"
+                              onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash me-1"></i>Excluir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Nenhuma categoria cadastrada.
-        <a href="{{ url_for('admin.nova_categoria') }}">Clique aqui para adicionar uma nova categoria</a>.
+    <div class="admin-card">
+        <div class="admin-empty-state">
+            <i class="bi bi-tags admin-empty-icon"></i>
+            <h3 class="admin-empty-title">Nenhuma categoria cadastrada</h3>
+            <p class="admin-empty-desc">Comece criando sua primeira categoria para organizar os produtos.</p>
+            <a href="{{ url_for('admin.nova_categoria') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Criar Categoria
+            </a>
+        </div>
     </div>
     {% endif %}
 </div>

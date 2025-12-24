@@ -9,27 +9,30 @@
         </ol>
     </nav>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="bi bi-cart-check me-2"></i>
-            Pedidos Recebidos
-        </h2>
+    <div class="admin-page-header">
+        <div>
+            <h1 class="h2">
+                <i class="bi bi-cart-check" style="color: var(--warning);"></i>
+                Pedidos Recebidos
+            </h1>
+        </div>
     </div>
 
     {% if pedidos %}
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+    <div class="admin-card">
+        <div class="admin-card-body p-0">
+            <!-- Desktop Table -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
                         <tr>
-                            <th>Numero</th>
+                            <th>Número</th>
                             <th>Cliente</th>
                             <th>Data</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Pagamento</th>
-                            <th>Acoes</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,14 +44,14 @@
                                     <strong>{{ pedido.usuario.nome }}</strong>
                                     <br><small class="text-muted">{{ pedido.usuario.email }}</small>
                                 {% else %}
-                                    <span class="text-muted">Usuario removido</span>
+                                    <span class="text-muted">Usuário removido</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {{ pedido.data_criacao.strftime('%d/%m/%Y') if pedido.data_criacao else '-' }}
                                 <br><small class="text-muted">{{ pedido.data_criacao.strftime('%H:%M') if pedido.data_criacao else '' }}</small>
                             </td>
-                            <td><strong>R$ {{ "%.2f"|format(pedido.total or 0) }}</strong></td>
+                            <td><strong class="text-success">R$ {{ "%.2f"|format(pedido.total or 0) }}</strong></td>
                             <td>
                                 {% set status_classes = {
                                     'pendente': 'bg-warning text-dark',
@@ -77,24 +80,97 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ url_for('admin.visualizar_pedido', id=pedido.id) }}"
-                                       class="btn btn-outline-primary" title="Visualizar">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
+                                <a href="{{ url_for('admin.visualizar_pedido', id=pedido.id) }}"
+                                   class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Cards -->
+            <div class="admin-mobile-cards">
+                {% for pedido in pedidos %}
+                <div class="admin-mobile-card">
+                    <div class="admin-mobile-card-header">
+                        <div class="admin-mobile-card-title">
+                            <i class="bi bi-receipt" style="color: var(--warning);"></i>
+                            <span>{{ pedido.numero_pedido or '#' ~ pedido.id }}</span>
+                        </div>
+                        {% set status_classes = {
+                            'pendente': 'bg-warning text-dark',
+                            'confirmado': 'bg-info',
+                            'em_separacao': 'bg-primary',
+                            'em_producao': 'bg-primary',
+                            'enviado': 'bg-success',
+                            'entregue': 'bg-success',
+                            'cancelado': 'bg-danger',
+                            'devolvido': 'bg-secondary'
+                        } %}
+                        <span class="badge {{ status_classes.get(pedido.status, 'bg-secondary') }}">
+                            {{ pedido.status_display }}
+                        </span>
+                    </div>
+                    <div class="admin-mobile-card-body">
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Cliente</span>
+                            <span class="admin-mobile-value">
+                                {% if pedido.usuario %}
+                                    {{ pedido.usuario.nome }}
+                                {% else %}
+                                    <span class="text-muted">Removido</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Data</span>
+                            <span class="admin-mobile-value">
+                                {{ pedido.data_criacao.strftime('%d/%m/%Y %H:%M') if pedido.data_criacao else '-' }}
+                            </span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Total</span>
+                            <span class="admin-mobile-value text-success fw-bold">
+                                R$ {{ "%.2f"|format(pedido.total or 0) }}
+                            </span>
+                        </div>
+                        <div class="admin-mobile-row">
+                            <span class="admin-mobile-label">Pagamento</span>
+                            <span class="admin-mobile-value">
+                                {% set pag_classes = {
+                                    'pendente': 'bg-warning text-dark',
+                                    'processando': 'bg-info',
+                                    'aprovado': 'bg-success',
+                                    'recusado': 'bg-danger',
+                                    'estornado': 'bg-secondary'
+                                } %}
+                                <span class="badge {{ pag_classes.get(pedido.status_pagamento, 'bg-secondary') }}">
+                                    {{ pedido.status_pagamento|capitalize if pedido.status_pagamento else 'Pendente' }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-mobile-card-footer">
+                        <a href="{{ url_for('admin.visualizar_pedido', id=pedido.id) }}"
+                           class="btn btn-primary w-100">
+                            <i class="bi bi-eye me-2"></i>Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>
-        Nenhum pedido encontrado.
+    <div class="admin-card">
+        <div class="admin-empty-state">
+            <i class="bi bi-cart-x admin-empty-icon"></i>
+            <h3 class="admin-empty-title">Nenhum pedido encontrado</h3>
+            <p class="admin-empty-desc">Os pedidos realizados pelos clientes aparecerão aqui.</p>
+        </div>
     </div>
     {% endif %}
 </div>
