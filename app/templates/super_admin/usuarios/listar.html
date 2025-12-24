@@ -202,15 +202,15 @@
 </div>
 
 <!-- Modal de Exclusao -->
-<div class="modal fade" id="modalExcluir" tabindex="-1">
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="modalExcluirLabel">
                     <i class="bi bi-exclamation-triangle me-2"></i>
                     Confirmar Exclusao
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <p>Tem certeza que deseja excluir o usuario <strong id="nomeUsuarioExcluir"></strong>?</p>
@@ -233,15 +233,49 @@
     </div>
 </div>
 
-{% block extra_js %}
 <script>
+// Funcao para confirmar exclusao de usuario
 function confirmarExclusao(userId, userName) {
-    document.getElementById('nomeUsuarioExcluir').textContent = userName;
-    document.getElementById('formExcluir').action = '/super-admin/usuarios/' + userId + '/excluir';
+    var nomeElement = document.getElementById('nomeUsuarioExcluir');
+    var formElement = document.getElementById('formExcluir');
+    var modalElement = document.getElementById('modalExcluir');
 
-    var modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
-    modal.show();
+    if (nomeElement && formElement && modalElement) {
+        nomeElement.textContent = userName;
+        formElement.action = '/super-admin/usuarios/' + userId + '/excluir';
+
+        // Verificar se Bootstrap esta carregado
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else {
+            // Fallback simples se Bootstrap nao estiver disponivel
+            if (confirm('Tem certeza que deseja excluir o usuario ' + userName + '? Esta acao nao pode ser desfeita!')) {
+                formElement.submit();
+            }
+        }
+    }
 }
+
+// Garantir que o modal esta fechado ao carregar a pagina
+document.addEventListener('DOMContentLoaded', function() {
+    var modalElement = document.getElementById('modalExcluir');
+    if (modalElement) {
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+
+        // Remover backdrop se existir
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+
+        // Remover classe do body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+});
 </script>
-{% endblock %}
 {% endblock %}
