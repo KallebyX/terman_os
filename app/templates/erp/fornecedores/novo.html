@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Fornecedor | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.listar_fornecedores') }}">Fornecedores</a></li>
+                <li class="breadcrumb-item active">Novo</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-building-add text-primary me-2"></i>
+            Novo Fornecedor
+        </h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('erp.novo_fornecedor') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Dados Principais -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Dados da Empresa</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="razao_social" class="form-label">Razao Social <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="razao_social" name="razao_social" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nome_fantasia" class="form-label">Nome Fantasia</label>
+                                <input type="text" class="form-control" id="nome_fantasia" name="nome_fantasia">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cnpj" class="form-label">CNPJ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cnpj" name="cnpj" required
+                                       placeholder="00.000.000/0000-00">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="inscricao_estadual" class="form-label">Inscricao Estadual</label>
+                                <input type="text" class="form-control" id="inscricao_estadual" name="inscricao_estadual">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <select class="form-select" id="tipo" name="tipo">
+                                    <option value="fabricante">Fabricante</option>
+                                    <option value="distribuidor">Distribuidor</option>
+                                    <option value="atacadista">Atacadista</option>
+                                    <option value="importador">Importador</option>
+                                    <option value="prestador_servico">Prestador de Servico</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-telephone me-2"></i>Contato</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="telefone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="telefone" name="telefone">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="celular" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular">
+                            </div>
+                            <div class="col-12">
+                                <label for="website" class="form-label">Website</label>
+                                <input type="url" class="form-control" id="website" name="website" placeholder="https://">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereco -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Endereco</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="cep" class="form-label">CEP</label>
+                                <input type="text" class="form-control" id="cep" name="cep">
+                            </div>
+                            <div class="col-md-7">
+                                <label for="endereco" class="form-label">Endereco</label>
+                                <input type="text" class="form-control" id="endereco" name="endereco">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="numero" class="form-label">Numero</label>
+                                <input type="text" class="form-control" id="numero" name="numero">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="complemento" class="form-label">Complemento</label>
+                                <input type="text" class="form-control" id="complemento" name="complemento">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="bairro" class="form-label">Bairro</label>
+                                <input type="text" class="form-control" id="bairro" name="bairro">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cidade" class="form-label">Cidade</label>
+                                <input type="text" class="form-control" id="cidade" name="cidade">
+                            </div>
+                            <div class="col-md-1">
+                                <label for="estado" class="form-label">UF</label>
+                                <input type="text" class="form-control" id="estado" name="estado" maxlength="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pessoa de Contato -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Pessoa de Contato</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="contato_nome" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="contato_nome" name="contato_nome">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contato_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="contato_email" name="contato_email">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contato_telefone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="contato_telefone" name="contato_telefone">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="prazo_pagamento_padrao" class="form-label">Prazo Pagamento Padrao</label>
+                                <input type="text" class="form-control" id="prazo_pagamento_padrao" name="prazo_pagamento_padrao"
+                                       placeholder="Ex: 30 dias">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observacoes -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Observacoes</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 80px;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Acoes</h5>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Cadastrar Fornecedor
+                            </button>
+                            <a href="{{ url_for('erp.listar_fornecedores') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

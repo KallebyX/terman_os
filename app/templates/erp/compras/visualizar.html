@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ compra.numero_compra }} | Pedido de Compra - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('erp.listar_compras') }}">Compras</a></li>
+                    <li class="breadcrumb-item active">{{ compra.numero_compra }}</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">
+                <i class="bi bi-bag text-primary me-2"></i>
+                {{ compra.numero_compra }}
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            {% if compra.status == 'pendente' %}
+            <form method="POST" action="{{ url_for('erp.aprovar_compra', compra_id=compra.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg me-2"></i>Aprovar
+                </button>
+            </form>
+            {% endif %}
+            {% if compra.status in ['pendente', 'aprovado'] %}
+            <a href="{{ url_for('erp.editar_compra', compra_id=compra.id) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            {% endif %}
+            <a href="{{ url_for('erp.listar_compras') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Fornecedor -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Fornecedor</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Razao Social</label>
+                            <p class="mb-0 fw-semibold">{{ compra.fornecedor.razao_social }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">CNPJ</label>
+                            <p class="mb-0">{{ compra.fornecedor.cnpj }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itens -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Itens do Pedido</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if compra.itens.all() %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-center">Qtd</th>
+                                    <th class="text-end">Preco Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in compra.itens %}
+                                <tr>
+                                    <td>{{ item.produto.nome }}</td>
+                                    <td class="text-center">{{ item.quantidade_pedida }}</td>
+                                    <td class="text-end">R$ {{ '%.2f'|format(item.preco_unitario or 0) }}</td>
+                                    <td class="text-end">R$ {{ '%.2f'|format((item.quantidade_pedida or 0) * (item.preco_unitario or 0)) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-box-seam display-6"></i>
+                        <p class="mt-2 mb-0">Nenhum item adicionado</p>
+                        {% if compra.status in ['pendente', 'aprovado'] %}
+                        <a href="{{ url_for('erp.editar_compra', compra_id=compra.id) }}" class="btn btn-primary btn-sm mt-3">
+                            <i class="bi bi-plus-lg me-1"></i>Adicionar Itens
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Observacoes -->
+            {% if compra.observacoes %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Observacoes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ compra.observacoes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Status</h5>
+                </div>
+                <div class="card-body">
+                    {% set status_colors = {
+                        'pendente': 'warning',
+                        'aprovado': 'info',
+                        'em_transito': 'primary',
+                        'recebido_parcial': 'secondary',
+                        'recebido': 'success',
+                        'cancelado': 'danger'
+                    } %}
+                    <span class="badge bg-{{ status_colors.get(compra.status, 'secondary') }} fs-6">
+                        {{ compra.status|replace('_', ' ')|title }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Datas -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar me-2"></i>Datas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Data Pedido</span>
+                        <span>{{ compra.data_pedido.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Previsao Entrega</span>
+                        <span>{{ compra.data_prevista_entrega.strftime('%d/%m/%Y') if compra.data_prevista_entrega else '-' }}</span>
+                    </div>
+                    {% if compra.data_entrega_real %}
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Entrega Real</span>
+                        <span>{{ compra.data_entrega_real.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pagamento -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Forma</span>
+                        <span>{{ compra.forma_pagamento or '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Condicao</span>
+                        <span>{{ compra.condicao_pagamento or '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Totais -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Totais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span>R$ {{ '%.2f'|format(compra.subtotal or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Desconto</span>
+                        <span class="text-success">- R$ {{ '%.2f'|format(compra.desconto or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Frete</span>
+                        <span>R$ {{ '%.2f'|format(compra.valor_frete or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Outras Despesas</span>
+                        <span>R$ {{ '%.2f'|format(compra.outras_despesas or 0) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">Total</span>
+                        <span class="fw-bold fs-5">R$ {{ '%.2f'|format(compra.total or 0) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar {{ fornecedor.nome_fantasia or fornecedor.razao_social }} | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.listar_fornecedores') }}">Fornecedores</a></li>
+                <li class="breadcrumb-item active">Editar</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-pencil text-primary me-2"></i>
+            Editar Fornecedor
+        </h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('erp.editar_fornecedor', fornecedor_id=fornecedor.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Dados Principais -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Dados da Empresa</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="razao_social" class="form-label">Razao Social <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="razao_social" name="razao_social"
+                                       value="{{ fornecedor.razao_social }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nome_fantasia" class="form-label">Nome Fantasia</label>
+                                <input type="text" class="form-control" id="nome_fantasia" name="nome_fantasia"
+                                       value="{{ fornecedor.nome_fantasia or '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cnpj" class="form-label">CNPJ</label>
+                                <input type="text" class="form-control" id="cnpj" name="cnpj"
+                                       value="{{ fornecedor.cnpj }}" readonly>
+                                <small class="text-muted">CNPJ nao pode ser alterado</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="inscricao_estadual" class="form-label">Inscricao Estadual</label>
+                                <input type="text" class="form-control" id="inscricao_estadual" name="inscricao_estadual"
+                                       value="{{ fornecedor.inscricao_estadual or '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <select class="form-select" id="tipo" name="tipo">
+                                    <option value="fabricante" {% if fornecedor.tipo == 'fabricante' %}selected{% endif %}>Fabricante</option>
+                                    <option value="distribuidor" {% if fornecedor.tipo == 'distribuidor' %}selected{% endif %}>Distribuidor</option>
+                                    <option value="atacadista" {% if fornecedor.tipo == 'atacadista' %}selected{% endif %}>Atacadista</option>
+                                    <option value="importador" {% if fornecedor.tipo == 'importador' %}selected{% endif %}>Importador</option>
+                                    <option value="prestador_servico" {% if fornecedor.tipo == 'prestador_servico' %}selected{% endif %}>Prestador de Servico</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-telephone me-2"></i>Contato</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ fornecedor.email or '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="telefone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="telefone" name="telefone"
+                                       value="{{ fornecedor.telefone or '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="celular" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="celular" name="celular"
+                                       value="{{ fornecedor.celular or '' }}">
+                            </div>
+                            <div class="col-12">
+                                <label for="website" class="form-label">Website</label>
+                                <input type="url" class="form-control" id="website" name="website"
+                                       value="{{ fornecedor.website or '' }}" placeholder="https://">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereco -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Endereco</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="cep" class="form-label">CEP</label>
+                                <input type="text" class="form-control" id="cep" name="cep"
+                                       value="{{ fornecedor.cep or '' }}">
+                            </div>
+                            <div class="col-md-7">
+                                <label for="endereco" class="form-label">Endereco</label>
+                                <input type="text" class="form-control" id="endereco" name="endereco"
+                                       value="{{ fornecedor.endereco or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="numero" class="form-label">Numero</label>
+                                <input type="text" class="form-control" id="numero" name="numero"
+                                       value="{{ fornecedor.numero or '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="complemento" class="form-label">Complemento</label>
+                                <input type="text" class="form-control" id="complemento" name="complemento"
+                                       value="{{ fornecedor.complemento or '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="bairro" class="form-label">Bairro</label>
+                                <input type="text" class="form-control" id="bairro" name="bairro"
+                                       value="{{ fornecedor.bairro or '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cidade" class="form-label">Cidade</label>
+                                <input type="text" class="form-control" id="cidade" name="cidade"
+                                       value="{{ fornecedor.cidade or '' }}">
+                            </div>
+                            <div class="col-md-1">
+                                <label for="estado" class="form-label">UF</label>
+                                <input type="text" class="form-control" id="estado" name="estado" maxlength="2"
+                                       value="{{ fornecedor.estado or '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pessoa de Contato -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Pessoa de Contato</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="contato_nome" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="contato_nome" name="contato_nome"
+                                       value="{{ fornecedor.contato_nome or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contato_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="contato_email" name="contato_email"
+                                       value="{{ fornecedor.contato_email or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contato_telefone" class="form-label">Telefone</label>
+                                <input type="text" class="form-control" id="contato_telefone" name="contato_telefone"
+                                       value="{{ fornecedor.contato_telefone or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="prazo_pagamento_padrao" class="form-label">Prazo Pagamento Padrao</label>
+                                <input type="text" class="form-control" id="prazo_pagamento_padrao" name="prazo_pagamento_padrao"
+                                       value="{{ fornecedor.prazo_pagamento_padrao or '' }}" placeholder="Ex: 30 dias">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observacoes -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Observacoes</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3">{{ fornecedor.observacoes or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 80px;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Acoes</h5>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Salvar Alteracoes
+                            </button>
+                            <a href="{{ url_for('erp.visualizar_fornecedor', fornecedor_id=fornecedor.id) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

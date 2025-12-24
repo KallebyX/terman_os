@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Contas a Pagar | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                    <li class="breadcrumb-item active">Contas a Pagar</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">
+                <i class="bi bi-cash-stack text-danger me-2"></i>
+                Contas a Pagar
+            </h1>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Todos</option>
+                        <option value="pendente" {% if status_filtro == 'pendente' %}selected{% endif %}>Pendente</option>
+                        <option value="pago_parcial" {% if status_filtro == 'pago_parcial' %}selected{% endif %}>Pago Parcial</option>
+                        <option value="pago" {% if status_filtro == 'pago' %}selected{% endif %}>Pago</option>
+                        <option value="cancelado" {% if status_filtro == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="vencimento" class="form-label">Vencimento</label>
+                    <select class="form-select" id="vencimento" name="vencimento">
+                        <option value="">Todos</option>
+                        <option value="vencidas" {% if vencimento_filtro == 'vencidas' %}selected{% endif %}>Vencidas</option>
+                        <option value="hoje" {% if vencimento_filtro == 'hoje' %}selected{% endif %}>Hoje</option>
+                        <option value="semana" {% if vencimento_filtro == 'semana' %}selected{% endif %}>Proxima Semana</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+                        <a href="{{ url_for('erp.listar_contas_pagar') }}" class="btn btn-outline-secondary">Limpar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Contas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            {% if contas %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Descricao</th>
+                            <th>Fornecedor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th class="text-end">Valor</th>
+                            <th class="text-end">Pago</th>
+                            <th class="text-end">Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for conta in contas %}
+                        <tr class="{% if conta.status != 'pago' and conta.data_vencimento < hoje %}table-danger{% endif %}">
+                            <td>{{ conta.descricao }}</td>
+                            <td>{{ conta.fornecedor.nome_fantasia if conta.fornecedor else '-' }}</td>
+                            <td>
+                                {{ conta.data_vencimento.strftime('%d/%m/%Y') }}
+                                {% if conta.status != 'pago' and conta.data_vencimento < hoje %}
+                                <span class="badge bg-danger ms-1">Vencida</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set status_colors = {
+                                    'pendente': 'warning',
+                                    'pago_parcial': 'info',
+                                    'pago': 'success',
+                                    'cancelado': 'secondary'
+                                } %}
+                                <span class="badge bg-{{ status_colors.get(conta.status, 'secondary') }}">
+                                    {{ conta.status|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td class="text-end">R$ {{ '%.2f'|format(conta.valor_original) }}</td>
+                            <td class="text-end">R$ {{ '%.2f'|format(conta.valor_pago or 0) }}</td>
+                            <td class="text-end">
+                                {% if conta.status != 'pago' %}
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                                        data-bs-target="#modalPagar{{ conta.id }}">
+                                    <i class="bi bi-cash"></i> Pagar
+                                </button>
+
+                                <!-- Modal Pagar -->
+                                <div class="modal fade" id="modalPagar{{ conta.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ url_for('erp.pagar_conta', conta_id=conta.id) }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Registrar Pagamento</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Valor a Pagar</label>
+                                                        <input type="number" class="form-control" name="valor_pago"
+                                                               step="0.01" min="0.01"
+                                                               max="{{ conta.valor_original - (conta.valor_pago or 0) }}"
+                                                               value="{{ conta.valor_original - (conta.valor_pago or 0) }}" required>
+                                                        <small class="text-muted">
+                                                            Restante: R$ {{ '%.2f'|format(conta.valor_original - (conta.valor_pago or 0)) }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Forma de Pagamento</label>
+                                                        <select class="form-select" name="forma_pagamento">
+                                                            <option value="pix">PIX</option>
+                                                            <option value="transferencia">Transferencia</option>
+                                                            <option value="boleto">Boleto</option>
+                                                            <option value="dinheiro">Dinheiro</option>
+                                                            <option value="cartao">Cartao</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="bi bi-check-lg me-1"></i>Confirmar
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-success"><i class="bi bi-check-circle"></i></span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginacao -->
+            {% if pagination.pages > 1 %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginacao">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.page - 1 }}&status={{ status_filtro }}&vencimento={{ vencimento_filtro }}">Anterior</a>
+                        </li>
+                        {% endif %}
+
+                        {% for p in range(1, pagination.pages + 1) %}
+                        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}&status={{ status_filtro }}&vencimento={{ vencimento_filtro }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.page + 1 }}&status={{ status_filtro }}&vencimento={{ vencimento_filtro }}">Proximo</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-cash-stack display-4 text-muted"></i>
+                <p class="text-muted mt-3">Nenhuma conta a pagar encontrada.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% set hoje = now().date() if now is defined else none %}
+{% endblock %}

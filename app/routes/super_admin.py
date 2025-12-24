@@ -8,9 +8,11 @@ from app.models.user import User
 from app.models.produto import Produto
 from app.models.pedido import Pedido
 from app.models.categoria import Categoria
+from app.models.configuracao import Configuracao
 from app import db
 from app.decorators import super_admin_required
 from datetime import datetime
+import os
 
 super_admin_bp = Blueprint('super_admin', __name__)
 
@@ -348,7 +350,122 @@ def reset_senha_usuario(user_id):
 @super_admin_required
 def configuracoes():
     """Pagina de configuracoes do sistema"""
-    return render_template('super_admin/configuracoes.html')
+    categorias = ['geral', 'email', 'api', 'pagamento', 'comunicacao', 'seguranca', 'loja']
+    configs_por_categoria = {cat: [] for cat in categorias}
+
+    try:
+        # Tentar criar tabela se nao existir (Vercel/serverless)
+        from app import db
+        db.create_all()
+
+        # Inicializar configuracoes padrao se necessario
+        Configuracao.init_defaults()
+
+        # Agrupar configuracoes por categoria
+        for cat in categorias:
+            configs_por_categoria[cat] = Configuracao.get_by_categoria(cat)
+
+    except Exception as e:
+        current_app.logger.warning(f'Erro ao carregar configs: {e}')
+        flash('Erro ao carregar configuracoes. Tente novamente.', 'warning')
+
+    return render_template('super_admin/configuracoes.html',
+        configs_por_categoria=configs_por_categoria,
+        categorias=categorias
+    )
+
+
+@super_admin_bp.route('/configuracoes/salvar', methods=['POST'])
+@login_required
+@super_admin_required
+def salvar_configuracoes():
+    """Salvar configuracoes do sistema"""
+    try:
+        # Iterar por todos os campos do formulario
+        for chave, valor in request.form.items():
+            if chave.startswith('config_'):
+                config_chave = chave.replace('config_', '')
+                config = Configuracao.query.filter_by(chave=config_chave).first()
+
+                if config and config.editavel:
+                    config.valor = valor
+                    config.atualizado_por = current_user.id
+
+        db.session.commit()
+        current_app.logger.info(f'Super Admin {current_user.email} atualizou configuracoes')
+        flash('Configuracoes salvas com sucesso!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Erro ao salvar configuracoes: {e}')
+        flash('Erro ao salvar configuracoes. Tente novamente.', 'danger')
+
+    return redirect(url_for('super_admin.configuracoes'))
+
+
+@super_admin_bp.route('/configuracoes/nova', methods=['POST'])
+@login_required
+@super_admin_required
+def nova_configuracao():
+    """Criar nova configuracao"""
+    chave = request.form.get('chave', '').strip().upper().replace(' ', '_')
+    valor = request.form.get('valor', '').strip()
+    descricao = request.form.get('descricao', '').strip()
+    tipo = request.form.get('tipo', 'string')
+    categoria = request.form.get('categoria', 'geral')
+
+    if not chave:
+        flash('A chave e obrigatoria.', 'warning')
+        return redirect(url_for('super_admin.configuracoes'))
+
+    if Configuracao.query.filter_by(chave=chave).first():
+        flash('Ja existe uma configuracao com essa chave.', 'warning')
+        return redirect(url_for('super_admin.configuracoes'))
+
+    try:
+        nova = Configuracao(
+            chave=chave,
+            valor=valor,
+            descricao=descricao,
+            tipo=tipo,
+            categoria=categoria,
+            atualizado_por=current_user.id
+        )
+        db.session.add(nova)
+        db.session.commit()
+
+        current_app.logger.info(f'Super Admin {current_user.email} criou configuracao: {chave}')
+        flash(f'Configuracao {chave} criada com sucesso!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Erro ao criar configuracao: {e}')
+        flash('Erro ao criar configuracao.', 'danger')
+
+    return redirect(url_for('super_admin.configuracoes'))
+
+
+@super_admin_bp.route('/configuracoes/<int:config_id>/excluir', methods=['POST'])
+@login_required
+@super_admin_required
+def excluir_configuracao(config_id):
+    """Excluir configuracao"""
+    config = Configuracao.query.get_or_404(config_id)
+
+    try:
+        chave = config.chave
+        db.session.delete(config)
+        db.session.commit()
+
+        current_app.logger.info(f'Super Admin {current_user.email} excluiu configuracao: {chave}')
+        flash(f'Configuracao {chave} excluida!', 'info')
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Erro ao excluir configuracao: {e}')
+        flash('Erro ao excluir configuracao.', 'danger')
+
+    return redirect(url_for('super_admin.configuracoes'))
 
 
 # =============================================
