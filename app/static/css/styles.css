@@ -1108,40 +1108,52 @@ a:hover {
   white-space: nowrap;
 }
 
+/* Garantir que ícones dentro dos badges tenham o tamanho correto */
+.badge i,
+.badge .bi {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
 .badge.bg-primary,
 .badge-primary {
-  background: var(--primary-subtle);
-  color: var(--primary);
+  background: var(--primary) !important;
+  color: var(--white) !important;
 }
 
 .badge.bg-success,
 .badge-success {
-  background: var(--success-subtle);
-  color: var(--success-dark);
+  background: var(--success) !important;
+  color: var(--white) !important;
 }
 
 .badge.bg-warning,
 .badge-warning {
-  background: var(--warning-subtle);
-  color: var(--warning-dark);
+  background: var(--warning) !important;
+  color: var(--black) !important;
 }
 
 .badge.bg-danger,
 .badge-danger {
-  background: var(--danger-subtle);
-  color: var(--danger);
+  background: var(--danger) !important;
+  color: var(--white) !important;
 }
 
 .badge.bg-info,
 .badge-info {
-  background: rgba(100, 210, 255, 0.15);
-  color: var(--info-dark);
+  background: var(--info) !important;
+  color: var(--black) !important;
 }
 
 .badge.bg-secondary,
 .badge-secondary {
-  background: var(--gray-200);
-  color: var(--text-secondary);
+  background: var(--gray-500) !important;
+  color: var(--white) !important;
+}
+
+/* Override para text-dark em badges */
+.badge.text-dark {
+  color: var(--black) !important;
 }
 
 /* ==================== ALERTS ==================== */
@@ -1617,14 +1629,17 @@ a:hover {
   z-index: var(--z-modal-backdrop);
 }
 
+/* Respeitar comportamento do Bootstrap - modal escondido por padrão */
 .modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
+  z-index: var(--z-modal);
+}
+
+/* Estilos quando modal está visível */
+.modal.show {
+  display: flex !important;
   align-items: center;
   justify-content: center;
   padding: var(--space-6);
-  z-index: var(--z-modal);
 }
 
 .modal-content {
