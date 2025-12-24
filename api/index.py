@@ -230,6 +230,166 @@ def api_db_status():
             "error": str(e)
         }), 500
 
+
+@app.route('/api/migrate-users')
+def api_migrate_users():
+    """
+    Migra a tabela users adicionando colunas faltantes.
+    Acesse: https://seu-site.vercel.app/api/migrate-users
+    """
+    from sqlalchemy import text
+    results = {
+        "status": "ok",
+        "migrations": [],
+        "errors": []
+    }
+
+    try:
+        # Verificar e adicionar coluna 'ativo'
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN ativo BOOLEAN DEFAULT TRUE"))
+            db.session.commit()
+            results["migrations"].append("Coluna 'ativo' adicionada com sucesso")
+        except Exception as e:
+            db.session.rollback()
+            if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                results["migrations"].append("Coluna 'ativo' já existe")
+            else:
+                results["errors"].append(f"Erro ao adicionar 'ativo': {str(e)}")
+
+        # Verificar e adicionar coluna 'data_criacao'
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
+            db.session.commit()
+            results["migrations"].append("Coluna 'data_criacao' adicionada com sucesso")
+        except Exception as e:
+            db.session.rollback()
+            if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                results["migrations"].append("Coluna 'data_criacao' já existe")
+            else:
+                results["errors"].append(f"Erro ao adicionar 'data_criacao': {str(e)}")
+
+        # Verificar e adicionar coluna 'ultimo_acesso'
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN ultimo_acesso TIMESTAMP"))
+            db.session.commit()
+            results["migrations"].append("Coluna 'ultimo_acesso' adicionada com sucesso")
+        except Exception as e:
+            db.session.rollback()
+            if "already exists" in str(e).lower() or "duplicate column" in str(e).lower():
+                results["migrations"].append("Coluna 'ultimo_acesso' já existe")
+            else:
+                results["errors"].append(f"Erro ao adicionar 'ultimo_acesso': {str(e)}")
+
+        # Atualizar todos os usuários existentes para ativo=True
+        try:
+            db.session.execute(text("UPDATE users SET ativo = TRUE WHERE ativo IS NULL"))
+            db.session.commit()
+            results["migrations"].append("Usuários existentes atualizados para ativo=TRUE")
+        except Exception as e:
+            db.session.rollback()
+            results["errors"].append(f"Erro ao atualizar usuários: {str(e)}")
+
+        # Verificar estrutura final da tabela
+        try:
+            result = db.session.execute(text("""
+                SELECT column_name, data_type, column_default
+                FROM information_schema.columns
+                WHERE table_name = 'users'
+                ORDER BY ordinal_position
+            """))
+            columns = [{"name": row[0], "type": row[1], "default": row[2]} for row in result]
+            results["table_structure"] = columns
+        except Exception as e:
+            results["errors"].append(f"Erro ao verificar estrutura: {str(e)}")
+
+        results["message"] = "Migração concluída!"
+        return jsonify(results)
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
+
+
+@app.route('/api/fix-super-admin')
+def api_fix_super_admin():
+    """
+    Corrige o super admin após a migração.
+    Acesse: https://seu-site.vercel.app/api/fix-super-admin
+    """
+    from werkzeug.security import generate_password_hash
+    from sqlalchemy import text
+
+    try:
+        email = 'kallebyevangelho03@gmail.com'
+        senha = 'kk030904K.k'
+        nome = 'Kalleby Evangelho'
+
+        # Verificar se usuário existe usando SQL direto (evita problemas de ORM)
+        result = db.session.execute(
+            text("SELECT id, email, tipo_usuario FROM users WHERE email = :email"),
+            {"email": email}
+        )
+        user_row = result.fetchone()
+
+        if user_row:
+            # Atualizar usuário existente
+            senha_hash = generate_password_hash(senha)
+            db.session.execute(
+                text("""
+                    UPDATE users
+                    SET tipo_usuario = 'super_admin',
+                        ativo = TRUE,
+                        senha_hash = :senha_hash
+                    WHERE email = :email
+                """),
+                {"email": email, "senha_hash": senha_hash}
+            )
+            db.session.commit()
+
+            return jsonify({
+                "status": "success",
+                "action": "updated",
+                "message": f"Super admin atualizado: {email}",
+                "credentials": {
+                    "email": email,
+                    "senha": senha
+                }
+            })
+        else:
+            # Criar novo super admin
+            senha_hash = generate_password_hash(senha)
+            db.session.execute(
+                text("""
+                    INSERT INTO users (nome, email, senha_hash, tipo_usuario, ativo)
+                    VALUES (:nome, :email, :senha_hash, 'super_admin', TRUE)
+                """),
+                {"nome": nome, "email": email, "senha_hash": senha_hash}
+            )
+            db.session.commit()
+
+            return jsonify({
+                "status": "success",
+                "action": "created",
+                "message": f"Super admin criado: {email}",
+                "credentials": {
+                    "email": email,
+                    "senha": senha
+                }
+            })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
+
 # Exportar app para Vercel (WSGI compatível)
 # Vercel detecta automaticamente o objeto 'app' ou 'application'
 application = app
