@@ -319,6 +319,18 @@
                                         CRM
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="/erp">
+                                        <i class="bi bi-building"></i>
+                                        ERP
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/super-admin/configuracoes">
+                                        <i class="bi bi-gear"></i>
+                                        Configuracoes
+                                    </a>
+                                </li>
                                 {% elif current_user.tipo_usuario == 'admin' %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -337,6 +349,12 @@
                                     <a class="dropdown-item" href="/crm">
                                         <i class="bi bi-people"></i>
                                         CRM
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/erp">
+                                        <i class="bi bi-building"></i>
+                                        ERP
                                     </a>
                                 </li>
                                 {% endif %}

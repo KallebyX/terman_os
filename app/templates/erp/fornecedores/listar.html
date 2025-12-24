@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Fornecedores | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                    <li class="breadcrumb-item active">Fornecedores</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">
+                <i class="bi bi-building text-primary me-2"></i>
+                Fornecedores
+            </h1>
+        </div>
+        <a href="{{ url_for('erp.novo_fornecedor') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            Novo Fornecedor
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="q" value="{{ search }}"
+                               placeholder="Buscar por razao social, nome fantasia ou CNPJ...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Buscar</button>
+                        <a href="{{ url_for('erp.listar_fornecedores') }}" class="btn btn-outline-secondary">Limpar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Fornecedores -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            {% if fornecedores %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fornecedor</th>
+                            <th>CNPJ</th>
+                            <th>Contato</th>
+                            <th>Cidade/UF</th>
+                            <th class="text-end">Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in fornecedores %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ f.nome_fantasia or f.razao_social }}</div>
+                                <small class="text-muted">{{ f.razao_social }}</small>
+                            </td>
+                            <td>{{ f.cnpj }}</td>
+                            <td>
+                                {% if f.email %}<div><i class="bi bi-envelope me-1"></i>{{ f.email }}</div>{% endif %}
+                                {% if f.telefone %}<div><i class="bi bi-telephone me-1"></i>{{ f.telefone }}</div>{% endif %}
+                            </td>
+                            <td>{{ f.cidade }}/{{ f.estado }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('erp.visualizar_fornecedor', fornecedor_id=f.id) }}"
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('erp.editar_fornecedor', fornecedor_id=f.id) }}"
+                                       class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginacao -->
+            {% if pagination.pages > 1 %}
+            <div class="card-footer bg-white">
+                <nav aria-label="Paginacao">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.page - 1 }}&q={{ search }}">Anterior</a>
+                        </li>
+                        {% endif %}
+
+                        {% for p in range(1, pagination.pages + 1) %}
+                        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ p }}&q={{ search }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.page + 1 }}&q={{ search }}">Proximo</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-building display-4 text-muted"></i>
+                <p class="text-muted mt-3">Nenhum fornecedor encontrado.</p>
+                <a href="{{ url_for('erp.novo_fornecedor') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>Cadastrar Primeiro Fornecedor
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

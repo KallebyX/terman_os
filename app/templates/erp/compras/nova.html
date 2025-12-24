@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Pedido de Compra | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.listar_compras') }}">Compras</a></li>
+                <li class="breadcrumb-item active">Novo</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-bag-plus text-primary me-2"></i>
+            Novo Pedido de Compra
+        </h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('erp.nova_compra') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Fornecedor -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Fornecedor</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="fornecedor_id" class="form-label">Fornecedor <span class="text-danger">*</span></label>
+                                <select class="form-select" id="fornecedor_id" name="fornecedor_id" required>
+                                    <option value="">Selecione um fornecedor...</option>
+                                    {% for f in fornecedores %}
+                                    <option value="{{ f.id }}" {% if request.args.get('fornecedor_id')|int == f.id %}selected{% endif %}>
+                                        {{ f.nome_fantasia or f.razao_social }} - {{ f.cnpj }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhes da Compra -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-calendar me-2"></i>Detalhes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="data_prevista_entrega" class="form-label">Data Prevista Entrega</label>
+                                <input type="date" class="form-control" id="data_prevista_entrega" name="data_prevista_entrega">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="forma_pagamento" class="form-label">Forma de Pagamento</label>
+                                <select class="form-select" id="forma_pagamento" name="forma_pagamento">
+                                    <option value="">Selecione...</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="cartao">Cartao</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="dinheiro">Dinheiro</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="condicao_pagamento" class="form-label">Condicao de Pagamento</label>
+                                <input type="text" class="form-control" id="condicao_pagamento" name="condicao_pagamento"
+                                       placeholder="Ex: 30/60/90 dias">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observacoes -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Observacoes</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3"
+                                  placeholder="Observacoes sobre o pedido..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 80px;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Acoes</h5>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Criar Pedido
+                            </button>
+                            <a href="{{ url_for('erp.listar_compras') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Cancelar
+                            </a>
+                        </div>
+
+                        <hr>
+
+                        <div class="alert alert-info mb-0 small">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Apos criar o pedido, voce podera adicionar os itens.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

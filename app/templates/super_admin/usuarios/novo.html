@@ -24,6 +24,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('super_admin.novo_usuario') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="row g-4">
                             <!-- Nome -->
                             <div class="col-md-6">

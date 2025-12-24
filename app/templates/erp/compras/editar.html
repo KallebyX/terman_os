@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar {{ compra.numero_compra }} | ERP - Terman OS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.dashboard') }}">ERP</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('erp.listar_compras') }}">Compras</a></li>
+                <li class="breadcrumb-item active">{{ compra.numero_compra }}</li>
+            </ol>
+        </nav>
+        <h1 class="h2 mb-0">
+            <i class="bi bi-pencil text-primary me-2"></i>
+            Editar {{ compra.numero_compra }}
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Adicionar Item -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Adicionar Item</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('erp.editar_compra', compra_id=compra.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="adicionar_item" value="1">
+
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label for="produto_id" class="form-label">Produto <span class="text-danger">*</span></label>
+                                <select class="form-select" id="produto_id" name="produto_id" required>
+                                    <option value="">Selecione...</option>
+                                    {% for p in produtos %}
+                                    <option value="{{ p.id }}" data-preco="{{ p.preco_custo or p.preco }}">
+                                        {{ p.codigo or '' }} - {{ p.nome }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="quantidade" class="form-label">Qtd <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="quantidade" name="quantidade" min="1" value="1" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="preco_unitario" class="form-label">Preco Unit. <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="preco_unitario" name="preco_unitario" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Itens -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Itens do Pedido</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if compra.itens.all() %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-center">Qtd</th>
+                                    <th class="text-end">Preco Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in compra.itens %}
+                                <tr>
+                                    <td>{{ item.produto.nome }}</td>
+                                    <td class="text-center">{{ item.quantidade_pedida }}</td>
+                                    <td class="text-end">R$ {{ '%.2f'|format(item.preco_unitario or 0) }}</td>
+                                    <td class="text-end">R$ {{ '%.2f'|format((item.quantidade_pedida or 0) * (item.preco_unitario or 0)) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-box-seam display-6"></i>
+                        <p class="mt-2 mb-0">Adicione itens ao pedido</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Valores Adicionais -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Valores Adicionais</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('erp.editar_compra', compra_id=compra.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="salvar" value="1">
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="desconto" class="form-label">Desconto (R$)</label>
+                                <input type="number" class="form-control" id="desconto" name="desconto"
+                                       step="0.01" min="0" value="{{ compra.desconto or 0 }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="valor_frete" class="form-label">Frete (R$)</label>
+                                <input type="number" class="form-control" id="valor_frete" name="valor_frete"
+                                       step="0.01" min="0" value="{{ compra.valor_frete or 0 }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="outras_despesas" class="form-label">Outras Despesas (R$)</label>
+                                <input type="number" class="form-control" id="outras_despesas" name="outras_despesas"
+                                       step="0.01" min="0" value="{{ compra.outras_despesas or 0 }}">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-2"></i>Salvar Valores
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Resumo -->
+            <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 80px;">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Resumo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span>R$ {{ '%.2f'|format(compra.subtotal or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Desconto</span>
+                        <span class="text-success">- R$ {{ '%.2f'|format(compra.desconto or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Frete</span>
+                        <span>R$ {{ '%.2f'|format(compra.valor_frete or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Outras Despesas</span>
+                        <span>R$ {{ '%.2f'|format(compra.outras_despesas or 0) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">Total</span>
+                        <span class="fw-bold fs-5">R$ {{ '%.2f'|format(compra.total or 0) }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('erp.visualizar_compra', compra_id=compra.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-2"></i>Ver Pedido
+                        </a>
+                        <a href="{{ url_for('erp.listar_compras') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Auto-preencher preco ao selecionar produto
+document.getElementById('produto_id').addEventListener('change', function() {
+    const option = this.options[this.selectedIndex];
+    const preco = option.dataset.preco || 0;
+    document.getElementById('preco_unitario').value = parseFloat(preco).toFixed(2);
+});
+</script>
+{% endblock %}
+{% endblock %}
