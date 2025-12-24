@@ -135,6 +135,7 @@
                                     {% if usuario.id != current_user.id %}
                                         <form method="POST" action="{{ url_for('super_admin.toggle_status_usuario', user_id=usuario.id) }}"
                                               style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                             <button type="submit" class="btn btn-outline-{{ 'warning' if usuario.ativo else 'success' }}"
                                                     title="{{ 'Desativar' if usuario.ativo else 'Ativar' }}">
                                                 <i class="bi bi-{{ 'toggle-on' if usuario.ativo else 'toggle-off' }}"></i>
@@ -221,6 +222,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <form id="formExcluir" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-1"></i>
                         Excluir

@@ -58,9 +58,13 @@
                     <div class="col-md-6">
                         <label class="form-label text-muted">Tipo de Conta</label>
                         <p class="mb-0">
-                            <span class="badge {% if usuario.tipo_usuario == 'admin' %}bg-primary{% else %}bg-secondary{% endif %}">
-                                {{ usuario.tipo_usuario|capitalize }}
-                            </span>
+                            {% if usuario.tipo_usuario == 'super_admin' %}
+                                <span class="badge bg-danger">Super Admin</span>
+                            {% elif usuario.tipo_usuario == 'admin' %}
+                                <span class="badge bg-warning text-dark">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Cliente</span>
+                            {% endif %}
                         </p>
                     </div>
                     <div class="col-md-6">
@@ -98,7 +102,8 @@
                 </div>
             </div>
 
-            <!-- Danger Zone -->
+            <!-- Danger Zone - apenas para clientes -->
+            {% if usuario.tipo_usuario == 'cliente' %}
             <div class="card p-4 mt-4" style="border-color: var(--danger);">
                 <h5 class="text-danger mb-3">
                     <i class="bi bi-exclamation-triangle me-2"></i>
@@ -110,6 +115,7 @@
                     Excluir Minha Conta
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

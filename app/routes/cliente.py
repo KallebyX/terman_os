@@ -26,17 +26,13 @@ def visualizar_pedido(pedido_id):
 @cliente_bp.route('/perfil')
 @login_required
 def perfil():
-    if current_user.tipo_usuario != 'cliente':
-        flash("Acesso não autorizado.", "danger")
-        return redirect(url_for('cliente.painel_cliente'))
+    # Permitir acesso para todos os tipos de usuario autenticados
     return render_template('cliente/perfil.html', usuario=current_user)
 
 @cliente_bp.route('/perfil/editar', methods=['GET', 'POST'])
 @login_required
 def editar_perfil():
-    if current_user.tipo_usuario != 'cliente':
-        flash("Acesso não autorizado.", "danger")
-        return redirect(url_for('cliente.painel_cliente'))
+    # Permitir acesso para todos os tipos de usuario autenticados
 
     form = EditarPerfilForm(obj=current_user)
     if form.validate_on_submit():
@@ -74,8 +70,9 @@ def rastrear_pedido(pedido_id):
 @cliente_bp.route('/perfil/excluir', methods=['GET', 'POST'])
 @login_required
 def excluir_conta():
+    # Apenas clientes podem excluir sua propria conta
     if current_user.tipo_usuario != 'cliente':
-        flash("Acesso não autorizado.", "danger")
+        flash("Administradores nao podem excluir sua conta por aqui.", "warning")
         return redirect(url_for('cliente.perfil'))
 
     if request.method == 'POST':
