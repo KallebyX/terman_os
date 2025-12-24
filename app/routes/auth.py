@@ -48,38 +48,66 @@ def send_reset_email(user, token):
 @limiter.limit("10 per minute")
 def login():
     form = LoginForm()
+
     if form.validate_on_submit():
-        usuario = User.query.filter_by(email=form.email.data.lower().strip()).first()
-        if usuario and usuario.verificar_senha(form.senha.data):
-            # Verificar se usuario esta ativo
-            if hasattr(usuario, 'ativo') and not usuario.ativo:
-                flash('Sua conta esta desativada. Entre em contato com o administrador.', 'danger')
-                return render_template('login.html', form=form)
+        email_input = form.email.data.lower().strip()
+        current_app.logger.info(f"Tentativa de login para: {email_input}")
 
-            login_user(usuario, remember=form.lembrar.data)
+        usuario = User.query.filter_by(email=email_input).first()
 
-            # Atualizar ultimo acesso
-            if hasattr(usuario, 'ultimo_acesso'):
-                from datetime import datetime
-                usuario.ultimo_acesso = datetime.utcnow()
-                db.session.commit()
-
-            flash('Login realizado com sucesso!', 'success')
-            next_page = request.args.get('next')
-
-            # Redirecionar baseado no tipo de usuario
-            if usuario.tipo_usuario == 'super_admin':
-                return redirect(next_page) if next_page else redirect(url_for('super_admin.dashboard'))
-            elif usuario.tipo_usuario == 'admin':
-                return redirect(next_page) if next_page else redirect(url_for('admin.listar_produtos'))
-            elif usuario.tipo_usuario == 'cliente':
-                return redirect(next_page) if next_page else redirect(url_for('cliente.perfil'))
-            else:
-                logout_user()
-                flash('Tipo de usuario invalido.', 'danger')
-                return redirect(url_for('auth.login'))
-        else:
+        if not usuario:
+            current_app.logger.warning(f"Usuario nao encontrado: {email_input}")
             flash('E-mail ou senha invalidos.', 'danger')
+            return render_template('login.html', form=form)
+
+        # Verificar senha
+        senha_correta = usuario.verificar_senha(form.senha.data)
+        current_app.logger.info(f"Verificacao de senha para {email_input}: {senha_correta}")
+
+        if not senha_correta:
+            current_app.logger.warning(f"Senha incorreta para: {email_input}")
+            flash('E-mail ou senha invalidos.', 'danger')
+            return render_template('login.html', form=form)
+
+        # Verificar se usuario esta ativo
+        if hasattr(usuario, 'ativo') and not usuario.ativo:
+            current_app.logger.warning(f"Usuario desativado tentou logar: {email_input}")
+            flash('Sua conta esta desativada. Entre em contato com o administrador.', 'danger')
+            return render_template('login.html', form=form)
+
+        # Login bem-sucedido
+        login_user(usuario, remember=form.lembrar.data)
+        current_app.logger.info(f"Login bem-sucedido: {email_input} (tipo: {usuario.tipo_usuario})")
+
+        # Atualizar ultimo acesso
+        if hasattr(usuario, 'ultimo_acesso'):
+            usuario.ultimo_acesso = datetime.utcnow()
+            db.session.commit()
+
+        flash('Login realizado com sucesso!', 'success')
+        next_page = request.args.get('next')
+
+        # Redirecionar baseado no tipo de usuario
+        if usuario.tipo_usuario == 'super_admin':
+            return redirect(next_page) if next_page else redirect(url_for('super_admin.dashboard'))
+        elif usuario.tipo_usuario == 'admin':
+            return redirect(next_page) if next_page else redirect(url_for('admin.listar_produtos'))
+        elif usuario.tipo_usuario == 'cliente':
+            return redirect(next_page) if next_page else redirect(url_for('cliente.perfil'))
+        else:
+            logout_user()
+            current_app.logger.warning(f"Tipo de usuario invalido: {usuario.tipo_usuario}")
+            flash('Tipo de usuario invalido.', 'danger')
+            return redirect(url_for('auth.login'))
+
+    elif request.method == 'POST':
+        # Formulário não passou na validação
+        current_app.logger.warning(f"Formulario de login invalido. Erros: {form.errors}")
+        if form.errors:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f'{error}', 'danger')
+
     return render_template('login.html', form=form)
 
 @auth_bp.route('/cadastro', methods=['GET', 'POST'])
@@ -171,6 +199,124 @@ def esqueci_senha():
         return redirect(url_for('auth.login'))
 
     return render_template('esqueci_senha.html')
+
+
+@auth_bp.route('/debug-login')
+def debug_login():
+    """Endpoint de debug para verificar problema de login"""
+    from werkzeug.security import generate_password_hash, check_password_hash
+
+    results = {
+        "status": "debug",
+        "users": [],
+        "super_admin_check": None,
+        "password_test": None
+    }
+
+    try:
+        # Listar todos os usuários
+        all_users = User.query.all()
+        results["total_users"] = len(all_users)
+
+        for user in all_users:
+            results["users"].append({
+                "id": user.id,
+                "email": user.email,
+                "nome": user.nome,
+                "tipo_usuario": user.tipo_usuario,
+                "ativo": user.ativo,
+                "senha_hash_length": len(user.senha_hash) if user.senha_hash else 0
+            })
+
+        # Verificar super admin específico
+        super_admin = User.query.filter_by(email='kallebyevangelho03@gmail.com').first()
+        if super_admin:
+            # Testar senha
+            test_password = "kk030904K.k"
+            password_valid = check_password_hash(super_admin.senha_hash, test_password)
+
+            results["super_admin_check"] = {
+                "found": True,
+                "email": super_admin.email,
+                "tipo_usuario": super_admin.tipo_usuario,
+                "ativo": super_admin.ativo,
+                "senha_hash_prefix": super_admin.senha_hash[:30] + "..." if super_admin.senha_hash else None,
+                "password_test_valid": password_valid
+            }
+
+            # Se a senha não for válida, tentar resetar
+            if not password_valid:
+                results["action_needed"] = "Senha incorreta - use /reset-super-admin para corrigir"
+        else:
+            results["super_admin_check"] = {
+                "found": False,
+                "action_needed": "Super admin não existe - use /reset-super-admin para criar"
+            }
+
+    except Exception as e:
+        results["error"] = str(e)
+        results["error_type"] = type(e).__name__
+
+    return jsonify(results)
+
+
+@auth_bp.route('/reset-super-admin')
+def reset_super_admin():
+    """Reseta/cria o super admin com senha conhecida"""
+    from werkzeug.security import generate_password_hash
+
+    try:
+        email = 'kallebyevangelho03@gmail.com'
+        senha = 'kk030904K.k'
+        nome = 'Kalleby Evangelho'
+
+        super_admin = User.query.filter_by(email=email).first()
+
+        if super_admin:
+            # Atualizar usuário existente
+            super_admin.tipo_usuario = 'super_admin'
+            super_admin.ativo = True
+            super_admin.set_senha(senha)
+            db.session.commit()
+
+            return jsonify({
+                "status": "success",
+                "action": "updated",
+                "message": f"Super admin atualizado: {email}",
+                "credentials": {
+                    "email": email,
+                    "senha": senha
+                }
+            })
+        else:
+            # Criar novo super admin
+            new_admin = User(
+                nome=nome,
+                email=email,
+                tipo_usuario='super_admin',
+                ativo=True
+            )
+            new_admin.set_senha(senha)
+            db.session.add(new_admin)
+            db.session.commit()
+
+            return jsonify({
+                "status": "success",
+                "action": "created",
+                "message": f"Super admin criado: {email}",
+                "credentials": {
+                    "email": email,
+                    "senha": senha
+                }
+            })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
 
 
 @auth_bp.route('/reset-senha/<token>', methods=['GET', 'POST'])
