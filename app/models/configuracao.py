@@ -20,7 +20,7 @@ class Configuracao(db.Model):
     visivel = db.Column(db.Boolean, default=True)
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    atualizado_por = db.Column(db.Integer, db.ForeignKey('user.id'))
+    atualizado_por = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return f'<Configuracao {self.chave}>'
