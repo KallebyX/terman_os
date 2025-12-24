@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Pedidos | Admin{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item active">Pedidos</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-cart-check me-2"></i>
+            Pedidos Recebidos
+        </h2>
+    </div>
+
+    {% if pedidos %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Numero</th>
+                            <th>Cliente</th>
+                            <th>Data</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Pagamento</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td><code>{{ pedido.numero_pedido or '#' ~ pedido.id }}</code></td>
+                            <td>
+                                {% if pedido.usuario %}
+                                    <strong>{{ pedido.usuario.nome }}</strong>
+                                    <br><small class="text-muted">{{ pedido.usuario.email }}</small>
+                                {% else %}
+                                    <span class="text-muted">Usuario removido</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ pedido.data_criacao.strftime('%d/%m/%Y') if pedido.data_criacao else '-' }}
+                                <br><small class="text-muted">{{ pedido.data_criacao.strftime('%H:%M') if pedido.data_criacao else '' }}</small>
+                            </td>
+                            <td><strong>R$ {{ "%.2f"|format(pedido.total or 0) }}</strong></td>
+                            <td>
+                                {% set status_classes = {
+                                    'pendente': 'bg-warning text-dark',
+                                    'confirmado': 'bg-info',
+                                    'em_separacao': 'bg-primary',
+                                    'em_producao': 'bg-primary',
+                                    'enviado': 'bg-success',
+                                    'entregue': 'bg-success',
+                                    'cancelado': 'bg-danger',
+                                    'devolvido': 'bg-secondary'
+                                } %}
+                                <span class="badge {{ status_classes.get(pedido.status, 'bg-secondary') }}">
+                                    {{ pedido.status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% set pag_classes = {
+                                    'pendente': 'bg-warning text-dark',
+                                    'processando': 'bg-info',
+                                    'aprovado': 'bg-success',
+                                    'recusado': 'bg-danger',
+                                    'estornado': 'bg-secondary'
+                                } %}
+                                <span class="badge {{ pag_classes.get(pedido.status_pagamento, 'bg-secondary') }}">
+                                    {{ pedido.status_pagamento|capitalize if pedido.status_pagamento else 'Pendente' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('admin.visualizar_pedido', id=pedido.id) }}"
+                                       class="btn btn-outline-primary" title="Visualizar">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Nenhum pedido encontrado.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

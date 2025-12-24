@@ -102,19 +102,32 @@ def produto_detalhado(produto_id):
 
 @marketplace_bp.route('/carrinho')
 def carrinho():
-    carrinho = session.get('carrinho', {})
+    carrinho_session = session.get('carrinho', {})
     itens = []
     total = 0
-    for pid, item in carrinho.items():
+    produtos_remover = []
+
+    for pid, item in carrinho_session.items():
         produto = Produto.query.get(int(pid))
-        subtotal = produto.preco * item['quantidade']
-        total += subtotal
-        itens.append({
-            'produto': produto,
-            'quantidade': item['quantidade'],
-            'subtotal': subtotal,
-            'produto_id': produto.id
-        })
+        if produto:
+            subtotal = produto.preco * item['quantidade']
+            total += subtotal
+            itens.append({
+                'produto': produto,
+                'quantidade': item['quantidade'],
+                'subtotal': subtotal,
+                'produto_id': produto.id
+            })
+        else:
+            # Produto nao existe mais, marcar para remover
+            produtos_remover.append(pid)
+
+    # Limpar produtos que nao existem mais
+    if produtos_remover:
+        for pid in produtos_remover:
+            carrinho_session.pop(pid, None)
+        session['carrinho'] = carrinho_session
+
     return render_template('carrinho.html', itens=itens, total=total)
 
 @marketplace_bp.route('/adicionar_carrinho/<int:produto_id>', methods=['POST'])
@@ -140,19 +153,40 @@ def remover_item_carrinho(produto_id):
 @marketplace_bp.route('/finalizar_pedido', methods=['POST'])
 @login_required
 def finalizar_pedido():
-    carrinho = session.get('carrinho', {})
-    if not carrinho:
+    from datetime import datetime
+    import random
+
+    carrinho_session = session.get('carrinho', {})
+    if not carrinho_session:
         flash('Seu carrinho está vazio.', 'warning')
         return redirect(url_for('marketplace.loja'))
 
-    pedido = Pedido(usuario_id=current_user.id)
+    # Gerar numero do pedido
+    ano = datetime.now().year
+    ultimo_pedido = Pedido.query.order_by(Pedido.id.desc()).first()
+    proximo_numero = (ultimo_pedido.id + 1) if ultimo_pedido else 1
+    numero_pedido = f"PED-{ano}-{proximo_numero:05d}"
+
+    pedido = Pedido(
+        usuario_id=current_user.id,
+        numero_pedido=numero_pedido,
+        status='pendente',
+        status_pagamento='pendente'
+    )
     db.session.add(pedido)
     db.session.flush()
 
-    for pid, item in carrinho.items():
+    subtotal = 0
+    for pid, item in carrinho_session.items():
         produto = Produto.query.get(int(pid))
+        if not produto:
+            flash(f'Produto nao encontrado no sistema.', 'danger')
+            db.session.rollback()
+            return redirect(url_for('marketplace.carrinho'))
+
         if produto.estoque < item['quantidade']:
             flash(f'Estoque insuficiente para o produto {produto.nome}.', 'danger')
+            db.session.rollback()
             return redirect(url_for('marketplace.carrinho'))
 
         produto.estoque -= item['quantidade']
@@ -160,10 +194,17 @@ def finalizar_pedido():
         item_pedido = ItemPedido(
             pedido_id=pedido.id,
             produto_id=produto.id,
+            produto_nome=produto.nome,
+            produto_codigo=produto.codigo if hasattr(produto, 'codigo') else None,
             quantidade=item['quantidade'],
             preco_unitario=produto.preco
         )
         db.session.add(item_pedido)
+        subtotal += produto.preco * item['quantidade']
+
+    # Atualizar totais do pedido
+    pedido.subtotal = subtotal
+    pedido.total = subtotal
 
     db.session.commit()
     session.pop('carrinho', None)

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Pedido {{ pedido.numero_pedido or '#' ~ pedido.id }} | Admin{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.listar_pedidos') }}">Pedidos</a></li>
+            <li class="breadcrumb-item active">{{ pedido.numero_pedido or '#' ~ pedido.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Detalhes do Pedido -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cart-check me-2"></i>
+                        Pedido {{ pedido.numero_pedido or '#' ~ pedido.id }}
+                    </h5>
+                    {% set status_classes = {
+                        'pendente': 'bg-warning text-dark',
+                        'confirmado': 'bg-info',
+                        'em_separacao': 'bg-primary',
+                        'em_producao': 'bg-primary',
+                        'enviado': 'bg-success',
+                        'entregue': 'bg-success',
+                        'cancelado': 'bg-danger',
+                        'devolvido': 'bg-secondary'
+                    } %}
+                    <span class="badge {{ status_classes.get(pedido.status, 'bg-secondary') }}">
+                        {{ pedido.status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-center">Qtd</th>
+                                    <th class="text-end">Preco Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in pedido.itens %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ item.produto_nome or (item.produto.nome if item.produto else 'Produto removido') }}</strong>
+                                        {% if item.produto_codigo %}
+                                        <br><small class="text-muted">Cod: {{ item.produto_codigo }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">{{ item.quantidade }}</td>
+                                    <td class="text-end">R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
+                                    <td class="text-end">R$ {{ "%.2f"|format(item.subtotal()) }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Nenhum item encontrado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end">R$ {{ "%.2f"|format(pedido.subtotal or 0) }}</td>
+                                </tr>
+                                {% if pedido.desconto > 0 %}
+                                <tr>
+                                    <td colspan="3" class="text-end text-success"><strong>Desconto:</strong></td>
+                                    <td class="text-end text-success">- R$ {{ "%.2f"|format(pedido.desconto) }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if pedido.valor_frete > 0 %}
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Frete:</strong></td>
+                                    <td class="text-end">R$ {{ "%.2f"|format(pedido.valor_frete) }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>R$ {{ "%.2f"|format(pedido.total or 0) }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereco de Entrega -->
+            {% if pedido.endereco_entrega %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        Endereco de Entrega
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">{{ pedido.endereco_entrega }}</p>
+                    {% if pedido.complemento_entrega %}
+                    <p class="mb-1 text-muted">{{ pedido.complemento_entrega }}</p>
+                    {% endif %}
+                    <p class="mb-0">
+                        {{ pedido.cidade_entrega }}/{{ pedido.estado_entrega }}
+                        {% if pedido.cep_entrega %} - CEP: {{ pedido.cep_entrega }}{% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Dados do Cliente -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person me-2"></i>
+                        Cliente
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if pedido.usuario %}
+                    <p class="mb-1"><strong>{{ pedido.usuario.nome }}</strong></p>
+                    <p class="mb-1"><i class="bi bi-envelope me-2"></i>{{ pedido.usuario.email }}</p>
+                    {% if pedido.usuario.telefone %}
+                    <p class="mb-0"><i class="bi bi-telephone me-2"></i>{{ pedido.usuario.telefone }}</p>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted mb-0">Usuario removido do sistema</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informacoes do Pedido -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Informacoes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Data:</strong><br>
+                        {{ pedido.data_criacao.strftime('%d/%m/%Y as %H:%M') if pedido.data_criacao else '-' }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Pagamento:</strong><br>
+                        {{ pedido.forma_pagamento|capitalize if pedido.forma_pagamento else 'Nao informado' }}
+                        {% if pedido.parcelas > 1 %} ({{ pedido.parcelas }}x){% endif %}
+                    </p>
+                    {% if pedido.codigo_rastreio %}
+                    <p class="mb-2">
+                        <strong>Rastreio:</strong><br>
+                        <code>{{ pedido.codigo_rastreio }}</code>
+                        {% if pedido.transportadora %}<br><small class="text-muted">{{ pedido.transportadora }}</small>{% endif %}
+                    </p>
+                    {% endif %}
+                    {% if pedido.observacoes %}
+                    <p class="mb-0">
+                        <strong>Observacoes:</strong><br>
+                        {{ pedido.observacoes }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acoes -->
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('admin.listar_pedidos') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Voltar para Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

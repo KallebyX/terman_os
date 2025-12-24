@@ -37,7 +37,7 @@ def editar_categoria(id):
         return redirect(url_for("admin.listar_categorias"))
     return render_template("admin/categorias/editar.html", categoria=categoria)
 
-@admin_bp.route("/categorias/deletar/<int:id>")
+@admin_bp.route("/categorias/deletar/<int:id>", methods=["GET", "POST"])
 @login_required
 @admin_required
 def deletar_categoria(id):
