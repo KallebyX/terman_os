@@ -56,13 +56,7 @@ services:
       - key: RENDER
         value: true
 
-databases:
-  - name: terman-db
-    databaseName: terman_db
-    user: admin
-    plan: free
-    region: oregon
-
+  # Worker para tarefas em background
   - type: worker
     name: terman-os-worker
     env: python
@@ -84,6 +78,13 @@ databases:
         value: app/static/produtos
       - key: MAX_CONTENT_LENGTH
         value: "16777216"
+
+databases:
+  - name: terman-db
+    databaseName: terman_db
+    user: admin
+    plan: free
+    region: oregon
 
 cronJobs:
   - name: gerar-relatorios-pdf
